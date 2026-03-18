@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_enums.dart';
 import '../theme/app_spacing.dart';
 
 class StatusTag extends StatelessWidget {
@@ -68,14 +69,6 @@ class StatusTag extends StatelessWidget {
         );
     }
   }
-}
-
-enum StatusTagType {
-  neutral,
-  info,
-  success,
-  warning,
-  error,
 }
 
 class _StatusTagColors {
