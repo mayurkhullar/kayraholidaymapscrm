@@ -79,32 +79,50 @@ class _DevTestScreenState extends State<DevTestScreen> {
   }
 
   Future<void> _fetchTravelers() async {
+    final stopwatch = Stopwatch()..start();
     final travelers = await _travelerRepository.fetchTravelers();
+    stopwatch.stop();
+
     _addLog('Travelers Count: ${travelers.length}');
+    _addLog('Fetch Travelers completed in ${stopwatch.elapsedMilliseconds} ms');
   }
 
   Future<void> _fetchLeads() async {
+    final stopwatch = Stopwatch()..start();
     final leads = await _leadRepository.fetchLeads();
+    stopwatch.stop();
+
     _addLog('Leads Count: ${leads.length}');
+    _addLog('Fetch Leads completed in ${stopwatch.elapsedMilliseconds} ms');
   }
 
   Future<void> _archiveLastLead() async {
     _addLog('Archive button tapped');
+    final stopwatch = Stopwatch()..start();
 
     try {
       final leads = await _leadRepository.fetchLeads();
       _addLog('Fetched leads count: ${leads.length}');
 
       if (leads.isEmpty) {
+        stopwatch.stop();
         _addLog('No leads available to archive');
+        _addLog(
+          'Archive Last Lead completed in ${stopwatch.elapsedMilliseconds} ms',
+        );
         return;
       }
 
       final lead = leads.last;
       _addLog('Archiving lead: ${lead.id}');
       await _leadRepository.archiveLead(lead.id);
+      stopwatch.stop();
       _addLog('Last Lead Archived');
+      _addLog(
+        'Archive Last Lead completed in ${stopwatch.elapsedMilliseconds} ms',
+      );
     } catch (error) {
+      stopwatch.stop();
       _addLog('Archive failed: $error');
     }
   }

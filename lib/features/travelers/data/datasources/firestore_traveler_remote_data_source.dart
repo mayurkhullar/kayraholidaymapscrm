@@ -17,6 +17,7 @@ class FirestoreTravelerRemoteDataSource implements TravelerRemoteDataSource {
   Future<List<TravelerModel>> fetchTravelers() async {
     final querySnapshot = await _travelersCollection
         .where('isArchived', isEqualTo: false)
+        .limit(20)
         .get();
 
     return querySnapshot.docs

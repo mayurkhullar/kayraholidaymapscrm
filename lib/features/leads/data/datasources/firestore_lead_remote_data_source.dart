@@ -17,6 +17,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
   Future<List<LeadModel>> fetchLeads() async {
     final querySnapshot = await _leadsCollection
         .where('isArchived', isEqualTo: false)
+        .limit(20)
         .get();
 
     return querySnapshot.docs
