@@ -223,41 +223,10 @@ DateTime? _dateTimeFromDynamic(dynamic value) {
   if (value is String) return DateTime.tryParse(value);
   return null;
 }
-
-List<String> _stringListFromDynamic(dynamic value) {
-  if (value is Iterable) {
-    return value.whereType<String>().toList(growable: false);
-  }
-
-  return const <String>[];
-}
-
-Map<String, dynamic>? _mapFromDynamic(dynamic value) {
-  if (value is Map<String, dynamic>) return value;
-  if (value is Map) return value.map((key, dynamic nestedValue) => MapEntry('$key', nestedValue));
-  return null;
-}
-
 PendingApprovalStatus _pendingApprovalStatusFromDynamic(dynamic value) {
   if (value is PendingApprovalStatus) return value;
   if (value is String && value.trim().isNotEmpty) {
     try { return PendingApprovalStatusX.fromString(value); } on ArgumentError { return PendingApprovalStatus.pendingApproval; }
   }
   return PendingApprovalStatus.pendingApproval;
-}
-
-PaymentType _paymentTypeFromDynamic(dynamic value) {
-  if (value is PaymentType) return value;
-  if (value is String && value.trim().isNotEmpty) {
-    try { return PaymentTypeX.fromString(value); } on ArgumentError { return PaymentType.advance; }
-  }
-  return PaymentType.advance;
-}
-
-PaymentStatus _paymentStatusFromDynamic(dynamic value) {
-  if (value is PaymentStatus) return value;
-  if (value is String && value.trim().isNotEmpty) {
-    try { return PaymentStatusX.fromString(value); } on ArgumentError { return PaymentStatus.pendingAuthorization; }
-  }
-  return PaymentStatus.pendingAuthorization;
 }

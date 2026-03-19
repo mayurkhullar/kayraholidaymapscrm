@@ -157,9 +157,3 @@ List<String> _stringListFromDynamic(dynamic value) {
 
   return const <String>[];
 }
-
-Map<String, dynamic>? _mapFromDynamic(dynamic value) {
-  if (value is Map<String, dynamic>) return value;
-  if (value is Map) return value.map((key, dynamic nestedValue) => MapEntry('$key', nestedValue));
-  return null;
-}
