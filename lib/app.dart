@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/constants/app_environment.dart';
 import 'core/theme/app_theme.dart';
-import 'core/utils/app_router.dart';
+import 'dev/dev_test_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -12,8 +12,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppEnvironment.appName,
-      initialRoute: AppRouter.loginRoute,
-      onGenerateRoute: AppRouter.onGenerateRoute,
+      home: const DevTestScreen(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
