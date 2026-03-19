@@ -15,6 +15,25 @@ class GroupAlertsModel {
   final int earlyArrivalRiskCount;
   final int pendingTeamLeaderApprovalCount;
 
+  GroupAlertsModel copyWith({
+    int? missingPassportCount,
+    int? missingFlightCount,
+    int? missingRoomingCount,
+    int? missingTransportCount,
+    int? earlyArrivalRiskCount,
+    int? pendingTeamLeaderApprovalCount,
+  }) {
+    return GroupAlertsModel(
+      missingPassportCount: missingPassportCount ?? this.missingPassportCount,
+      missingFlightCount: missingFlightCount ?? this.missingFlightCount,
+      missingRoomingCount: missingRoomingCount ?? this.missingRoomingCount,
+      missingTransportCount: missingTransportCount ?? this.missingTransportCount,
+      earlyArrivalRiskCount: earlyArrivalRiskCount ?? this.earlyArrivalRiskCount,
+      pendingTeamLeaderApprovalCount:
+          pendingTeamLeaderApprovalCount ?? this.pendingTeamLeaderApprovalCount,
+    );
+  }
+
   factory GroupAlertsModel.fromMap(Map<String, dynamic> map) {
     return GroupAlertsModel(
       missingPassportCount: (map['missingPassportCount'] as num?)?.toInt() ?? 0,
@@ -22,7 +41,8 @@ class GroupAlertsModel {
       missingRoomingCount: (map['missingRoomingCount'] as num?)?.toInt() ?? 0,
       missingTransportCount: (map['missingTransportCount'] as num?)?.toInt() ?? 0,
       earlyArrivalRiskCount: (map['earlyArrivalRiskCount'] as num?)?.toInt() ?? 0,
-      pendingTeamLeaderApprovalCount: (map['pendingTeamLeaderApprovalCount'] as num?)?.toInt() ?? 0,
+      pendingTeamLeaderApprovalCount:
+          (map['pendingTeamLeaderApprovalCount'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -35,23 +55,5 @@ class GroupAlertsModel {
       'earlyArrivalRiskCount': earlyArrivalRiskCount,
       'pendingTeamLeaderApprovalCount': pendingTeamLeaderApprovalCount,
     };
-  }
-
-  {class_name} copyWith({
-    int? missingPassportCount,
-    int? missingFlightCount,
-    int? missingRoomingCount,
-    int? missingTransportCount,
-    int? earlyArrivalRiskCount,
-    int? pendingTeamLeaderApprovalCount,
-  }) {
-    return {class_name}(
-      missingPassportCount: missingPassportCount ?? this.missingPassportCount,
-      missingFlightCount: missingFlightCount ?? this.missingFlightCount,
-      missingRoomingCount: missingRoomingCount ?? this.missingRoomingCount,
-      missingTransportCount: missingTransportCount ?? this.missingTransportCount,
-      earlyArrivalRiskCount: earlyArrivalRiskCount ?? this.earlyArrivalRiskCount,
-      pendingTeamLeaderApprovalCount: pendingTeamLeaderApprovalCount ?? this.pendingTeamLeaderApprovalCount,
-    );
   }
 }

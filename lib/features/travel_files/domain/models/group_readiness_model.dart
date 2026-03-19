@@ -23,6 +23,34 @@ class GroupReadinessModel {
   final int checklistTotal;
   final int overallReadinessPercent;
 
+  GroupReadinessModel copyWith({
+    int? travelersAdded,
+    int? passportCompleted,
+    int? passportReviewPending,
+    int? visaCompleted,
+    int? flightsAssigned,
+    int? roomingAssigned,
+    int? transportAssigned,
+    int? checklistCompleted,
+    int? checklistTotal,
+    int? overallReadinessPercent,
+  }) {
+    return GroupReadinessModel(
+      travelersAdded: travelersAdded ?? this.travelersAdded,
+      passportCompleted: passportCompleted ?? this.passportCompleted,
+      passportReviewPending:
+          passportReviewPending ?? this.passportReviewPending,
+      visaCompleted: visaCompleted ?? this.visaCompleted,
+      flightsAssigned: flightsAssigned ?? this.flightsAssigned,
+      roomingAssigned: roomingAssigned ?? this.roomingAssigned,
+      transportAssigned: transportAssigned ?? this.transportAssigned,
+      checklistCompleted: checklistCompleted ?? this.checklistCompleted,
+      checklistTotal: checklistTotal ?? this.checklistTotal,
+      overallReadinessPercent:
+          overallReadinessPercent ?? this.overallReadinessPercent,
+    );
+  }
+
   factory GroupReadinessModel.fromMap(Map<String, dynamic> map) {
     return GroupReadinessModel(
       travelersAdded: (map['travelersAdded'] as num?)?.toInt() ?? 0,
@@ -34,7 +62,8 @@ class GroupReadinessModel {
       transportAssigned: (map['transportAssigned'] as num?)?.toInt() ?? 0,
       checklistCompleted: (map['checklistCompleted'] as num?)?.toInt() ?? 0,
       checklistTotal: (map['checklistTotal'] as num?)?.toInt() ?? 0,
-      overallReadinessPercent: (map['overallReadinessPercent'] as num?)?.toInt() ?? 0,
+      overallReadinessPercent:
+          (map['overallReadinessPercent'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -51,31 +80,5 @@ class GroupReadinessModel {
       'checklistTotal': checklistTotal,
       'overallReadinessPercent': overallReadinessPercent,
     };
-  }
-
-  {class_name} copyWith({
-    int? travelersAdded,
-    int? passportCompleted,
-    int? passportReviewPending,
-    int? visaCompleted,
-    int? flightsAssigned,
-    int? roomingAssigned,
-    int? transportAssigned,
-    int? checklistCompleted,
-    int? checklistTotal,
-    int? overallReadinessPercent,
-  }) {
-    return {class_name}(
-      travelersAdded: travelersAdded ?? this.travelersAdded,
-      passportCompleted: passportCompleted ?? this.passportCompleted,
-      passportReviewPending: passportReviewPending ?? this.passportReviewPending,
-      visaCompleted: visaCompleted ?? this.visaCompleted,
-      flightsAssigned: flightsAssigned ?? this.flightsAssigned,
-      roomingAssigned: roomingAssigned ?? this.roomingAssigned,
-      transportAssigned: transportAssigned ?? this.transportAssigned,
-      checklistCompleted: checklistCompleted ?? this.checklistCompleted,
-      checklistTotal: checklistTotal ?? this.checklistTotal,
-      overallReadinessPercent: overallReadinessPercent ?? this.overallReadinessPercent,
-    );
   }
 }
