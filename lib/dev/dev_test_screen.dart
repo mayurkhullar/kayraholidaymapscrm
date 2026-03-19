@@ -89,15 +89,24 @@ class _DevTestScreenState extends State<DevTestScreen> {
   }
 
   Future<void> _archiveLastLead() async {
-    final leads = await _leadRepository.fetchLeads();
+    _addLog('Archive button tapped');
 
-    if (leads.isNotEmpty) {
-      await _leadRepository.archiveLead(leads.last.id);
+    try {
+      final leads = await _leadRepository.fetchLeads();
+      _addLog('Fetched leads count: ${leads.length}');
+
+      if (leads.isEmpty) {
+        _addLog('No leads available to archive');
+        return;
+      }
+
+      final lead = leads.last;
+      _addLog('Archiving lead: ${lead.id}');
+      await _leadRepository.archiveLead(lead.id);
       _addLog('Last Lead Archived');
-      return;
+    } catch (error) {
+      _addLog('Archive failed: $error');
     }
-
-    _addLog('No Leads To Archive');
   }
 
   void _addLog(String message) {
