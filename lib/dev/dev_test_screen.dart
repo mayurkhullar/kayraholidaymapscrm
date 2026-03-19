@@ -19,7 +19,9 @@ class DevTestScreen extends StatefulWidget {
 
 class _DevTestScreenState extends State<DevTestScreen> {
   late final FirebaseFirestore _firestore;
+  late final FirestoreTravelerRemoteDataSource _travelerRemoteDataSource;
   late final TravelerRepositoryImpl _travelerRepository;
+  late final FirestoreLeadRemoteDataSource _leadRemoteDataSource;
   late final LeadRepositoryImpl _leadRepository;
   final List<String> _logs = <String>[];
 
@@ -27,26 +29,27 @@ class _DevTestScreenState extends State<DevTestScreen> {
   void initState() {
     super.initState();
     _firestore = FirebaseFirestore.instance;
+    _travelerRemoteDataSource = FirestoreTravelerRemoteDataSource(
+      firestore: _firestore,
+    );
     _travelerRepository = TravelerRepositoryImpl(
-      remoteDataSource: FirestoreTravelerRemoteDataSource(
-        firestore: _firestore,
-      ),
+      remoteDataSource: _travelerRemoteDataSource,
+    );
+    _leadRemoteDataSource = FirestoreLeadRemoteDataSource(
+      firestore: _firestore,
     );
     _leadRepository = LeadRepositoryImpl(
-      remoteDataSource: FirestoreLeadRemoteDataSource(
-        firestore: _firestore,
-      ),
+      remoteDataSource: _leadRemoteDataSource,
     );
   }
 
-  Future<void> _createDummyTraveler() async {
+  Future<void> _createTraveler() async {
     final now = DateTime.now();
-    final suffix = now.millisecondsSinceEpoch.toString();
     final traveler = TravelerModel(
       id: '',
-      travelerCode: 'DEV-TRAV-$suffix',
+      travelerCode: now.millisecondsSinceEpoch.toString(),
       firstName: 'Test',
-      lastName: suffix,
+      lastName: now.toIso8601String(),
       displayName: 'Test User',
       createdAt: now,
       updatedAt: now,
@@ -56,14 +59,13 @@ class _DevTestScreenState extends State<DevTestScreen> {
     _addLog('Traveler Created');
   }
 
-  Future<void> _createDummyLead() async {
+  Future<void> _createLead() async {
     final now = DateTime.now();
-    final suffix = now.millisecondsSinceEpoch.toString();
     final lead = LeadModel(
       id: '',
-      leadCode: 'DEV-LEAD-$suffix',
-      clientId: 'dev-client',
-      leadOwnerId: 'dev-owner',
+      leadCode: now.millisecondsSinceEpoch.toString(),
+      clientId: '',
+      leadOwnerId: '',
       destination: 'Dubai',
       travelType: TravelType.fit,
       tripScope: TripScope.international,
@@ -78,45 +80,30 @@ class _DevTestScreenState extends State<DevTestScreen> {
 
   Future<void> _fetchTravelers() async {
     final travelers = await _travelerRepository.fetchTravelers();
-    _addLog('Fetched Travelers: ${travelers.length}');
+    _addLog('Travelers Count: ${travelers.length}');
   }
 
   Future<void> _fetchLeads() async {
     final leads = await _leadRepository.fetchLeads();
-    _addLog('Fetched Leads: ${leads.length}');
+    _addLog('Leads Count: ${leads.length}');
   }
 
   Future<void> _archiveLastLead() async {
     final leads = await _leadRepository.fetchLeads();
 
-    if (leads.isEmpty) {
-      _addLog('No leads available to archive');
+    if (leads.isNotEmpty) {
+      await _leadRepository.archiveLead(leads.last.id);
+      _addLog('Last Lead Archived');
       return;
     }
 
-    final lastLead = leads.last;
-    await _leadRepository.archiveLead(lastLead.id);
-    _addLog('Lead Archived');
-  }
-
-  Future<void> _runAction(Future<void> Function() action) async {
-    try {
-      await action();
-    } catch (error, stackTrace) {
-      debugPrint('DEV TEST ERROR: $error');
-      debugPrintStack(stackTrace: stackTrace);
-      _addLog('Error: $error');
-    }
+    _addLog('No Leads To Archive');
   }
 
   void _addLog(String message) {
     debugPrint(message);
-    if (!mounted) {
-      return;
-    }
-
     setState(() {
-      _logs.insert(0, '${DateTime.now().toIso8601String()} - $message');
+      _logs.add(message);
     });
   }
 
@@ -130,50 +117,40 @@ class _DevTestScreenState extends State<DevTestScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             ElevatedButton(
-              onPressed: () => _runAction(_createDummyTraveler),
-              child: const Text('Create Dummy Traveler'),
+              onPressed: _createTraveler,
+              child: const Text('Create Traveler'),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () => _runAction(_createDummyLead),
-              child: const Text('Create Dummy Lead'),
+              onPressed: _createLead,
+              child: const Text('Create Lead'),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () => _runAction(_fetchTravelers),
+              onPressed: _fetchTravelers,
               child: const Text('Fetch Travelers'),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () => _runAction(_fetchLeads),
+              onPressed: _fetchLeads,
               child: const Text('Fetch Leads'),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () => _runAction(_archiveLastLead),
+              onPressed: _archiveLastLead,
               child: const Text('Archive Last Lead'),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Logs',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
             Expanded(
               child: Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 color: Colors.black12,
-                child: _logs.isEmpty
-                    ? const Text('No logs yet')
-                    : ListView.builder(
-                        itemCount: _logs.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(_logs[index]),
-                          );
-                        },
-                      ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    _logs.isEmpty ? 'No logs yet' : _logs.join('\n'),
+                  ),
+                ),
               ),
             ),
           ],
