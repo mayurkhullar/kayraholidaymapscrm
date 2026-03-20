@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/leads/presentation/leads_screen.dart';
 import '../widgets/app_shell.dart';
 
 class AppRouter {
@@ -28,7 +29,10 @@ class AppRouter {
           settings: settings,
         );
       case leadsRoute:
-        return _placeholderRoute(settings, title: 'Leads');
+        return MaterialPageRoute<void>(
+          builder: (_) => const LeadsScreen(),
+          settings: settings,
+        );
       case clientsRoute:
         return _placeholderRoute(settings, title: 'Clients');
       case companiesRoute:
