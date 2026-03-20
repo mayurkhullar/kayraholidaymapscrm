@@ -9,7 +9,7 @@ import '../domain/models/lead_model.dart';
 import 'widgets/lead_list_header.dart';
 import 'widgets/lead_table.dart';
 
-class LeadsScreen extends StatelessWidget {
+class LeadsScreen extends StatefulWidget {
   const LeadsScreen({super.key});
 
   static final Stream<List<LeadModel>> _leadsStream = FirebaseFirestore.instance
@@ -29,6 +29,81 @@ class LeadsScreen extends StatelessWidget {
       );
 
   @override
+  State<LeadsScreen> createState() => _LeadsScreenState();
+}
+
+class _LeadsScreenState extends State<LeadsScreen> {
+  bool _isSeedingDummyLeads = false;
+
+  Future<void> _seedDummyLeads() async {
+    setState(() {
+      _isSeedingDummyLeads = true;
+    });
+
+    final leadsCollection = FirebaseFirestore.instance.collection('leads');
+
+    try {
+      await leadsCollection.add(<String, dynamic>{
+        'leadCode': 'LD-001',
+        'clientNameSnapshot': 'John Doe',
+        'destination': 'Dubai',
+        'travelType': 'fit',
+        'tripScope': 'international',
+        'leadStage': 'newLead',
+        'leadOwnerId': 'EMP001',
+        'isArchived': false,
+        'createdAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+      });
+      print('Lead inserted: LD-001');
+
+      await leadsCollection.add(<String, dynamic>{
+        'leadCode': 'LD-002',
+        'clientNameSnapshot': 'Sarah Khan',
+        'destination': 'Singapore',
+        'travelType': 'corporate',
+        'tripScope': 'international',
+        'leadStage': 'contacted',
+        'leadOwnerId': 'EMP002',
+        'isArchived': false,
+        'createdAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+      });
+      print('Lead inserted: LD-002');
+
+      await leadsCollection.add(<String, dynamic>{
+        'leadCode': 'LD-003',
+        'clientNameSnapshot': 'Rahul Mehta',
+        'destination': 'Bali',
+        'travelType': 'fit',
+        'tripScope': 'international',
+        'leadStage': 'quotationSent',
+        'leadOwnerId': 'EMP001',
+        'isArchived': false,
+        'createdAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+      });
+      print('Lead inserted: LD-003');
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dummy leads seeded successfully'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSeedingDummyLeads = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AppShell(
       pageTitle: 'Leads',
@@ -39,9 +114,21 @@ class LeadsScreen extends StatelessWidget {
             LeadListHeader(
               onCreateLead: () {},
             ),
+            const SizedBox(height: AppSpacing.md),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton(
+                onPressed: _isSeedingDummyLeads ? null : _seedDummyLeads,
+                child: Text(
+                  _isSeedingDummyLeads
+                      ? 'Seeding Dummy Leads...'
+                      : 'Seed Dummy Leads',
+                ),
+              ),
+            ),
             const SizedBox(height: AppSpacing.xl),
             StreamBuilder<List<LeadModel>>(
-              stream: _leadsStream,
+              stream: LeadsScreen._leadsStream,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return EmptyStateView(
