@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:kayraholidaymapscrm/core/constants/app_enums.dart';
@@ -79,21 +78,69 @@ class _DevTestScreenState extends State<DevTestScreen> {
   }
 
   Future<void> _fetchTravelers() async {
-    final stopwatch = Stopwatch()..start();
+    final totalStart = DateTime.now();
     final travelers = await _travelerRepository.fetchTravelers();
-    stopwatch.stop();
+    final totalEnd = DateTime.now();
+
+    final fsStart = DateTime.now();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('travelers')
+        .where('isArchived', isEqualTo: false)
+        .limit(20)
+        .get();
+    final fsEnd = DateTime.now();
+
+    final parseStart = DateTime.now();
+    snapshot.docs.map((doc) => doc.data()).toList();
+    final parseEnd = DateTime.now();
+
+    print('----- TRAVELER PERFORMANCE -----');
+    print(
+      'Firestore Query Time: ${fsEnd.difference(fsStart).inMilliseconds} ms',
+    );
+    print(
+      'Parsing Time (raw map only): ${parseEnd.difference(parseStart).inMilliseconds} ms',
+    );
+    print(
+      'Repository Total Time: ${totalEnd.difference(totalStart).inMilliseconds} ms',
+    );
+    print('Traveler Count: ${travelers.length}');
+    print('--------------------------------');
 
     _addLog('Travelers Count: ${travelers.length}');
-    _addLog('Fetch Travelers completed in ${stopwatch.elapsedMilliseconds} ms');
   }
 
   Future<void> _fetchLeads() async {
-    final stopwatch = Stopwatch()..start();
+    final totalStart = DateTime.now();
     final leads = await _leadRepository.fetchLeads();
-    stopwatch.stop();
+    final totalEnd = DateTime.now();
+
+    final fsStart = DateTime.now();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('leads')
+        .where('isArchived', isEqualTo: false)
+        .limit(20)
+        .get();
+    final fsEnd = DateTime.now();
+
+    final parseStart = DateTime.now();
+    snapshot.docs.map((doc) => doc.data()).toList();
+    final parseEnd = DateTime.now();
+
+    print('----- LEAD PERFORMANCE -----');
+    print(
+      'Firestore Query Time: ${fsEnd.difference(fsStart).inMilliseconds} ms',
+    );
+    print(
+      'Parsing Time (raw map only): ${parseEnd.difference(parseStart).inMilliseconds} ms',
+    );
+    print(
+      'Repository Total Time: ${totalEnd.difference(totalStart).inMilliseconds} ms',
+    );
+    print('Lead Count: ${leads.length}');
+    print('----------------------------');
 
     _addLog('Leads Count: ${leads.length}');
-    _addLog('Fetch Leads completed in ${stopwatch.elapsedMilliseconds} ms');
   }
 
   Future<void> _fetchDirectLeadCount() async {
@@ -165,7 +212,7 @@ class _DevTestScreenState extends State<DevTestScreen> {
   }
 
   void _addLog(String message) {
-    debugPrint(message);
+    print(message);
     setState(() {
       _logs.add(message);
     });
