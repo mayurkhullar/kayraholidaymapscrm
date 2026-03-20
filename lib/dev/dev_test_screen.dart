@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -23,6 +25,8 @@ class _DevTestScreenState extends State<DevTestScreen> {
   late final FirestoreLeadRemoteDataSource _leadRemoteDataSource;
   late final LeadRepositoryImpl _leadRepository;
   final List<String> _logs = <String>[];
+  StreamSubscription? _leadSubscription;
+  StreamSubscription? _travelerSubscription;
 
   @override
   void initState() {
@@ -175,6 +179,38 @@ class _DevTestScreenState extends State<DevTestScreen> {
     );
   }
 
+  void _logMessage(String message) {
+    _addLog(message);
+  }
+
+  Future<void> _watchLeadsStream() async {
+    await _leadSubscription?.cancel();
+    _logMessage('Lead stream started');
+    _leadSubscription = _firestore
+        .collection('leads')
+        .where('isArchived', isEqualTo: false)
+        .limit(20)
+        .snapshots()
+        .listen((snapshot) {
+      _logMessage('Lead stream update received in memory');
+      _logMessage('Lead stream docs count: ${snapshot.docs.length}');
+    });
+  }
+
+  Future<void> _watchTravelersStream() async {
+    await _travelerSubscription?.cancel();
+    _logMessage('Traveler stream started');
+    _travelerSubscription = _firestore
+        .collection('travelers')
+        .where('isArchived', isEqualTo: false)
+        .limit(20)
+        .snapshots()
+        .listen((snapshot) {
+      _logMessage('Traveler stream update received in memory');
+      _logMessage('Traveler stream docs count: ${snapshot.docs.length}');
+    });
+  }
+
   void _checkFirebaseInit() {
     _addLog('--- Firebase Initialization Diagnostics ---');
     _addLog('Firebase app name: ${_firestore.app.name}');
@@ -216,6 +252,13 @@ class _DevTestScreenState extends State<DevTestScreen> {
     setState(() {
       _logs.add(message);
     });
+  }
+
+  @override
+  void dispose() {
+    _leadSubscription?.cancel();
+    _travelerSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -265,6 +308,16 @@ class _DevTestScreenState extends State<DevTestScreen> {
             ElevatedButton(
               onPressed: _archiveLastLead,
               child: const Text('Archive Last Lead'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _watchLeadsStream,
+              child: const Text('Watch Leads Stream'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _watchTravelersStream,
+              child: const Text('Watch Travelers Stream'),
             ),
             const SizedBox(height: 16),
             Expanded(
