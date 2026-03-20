@@ -96,6 +96,43 @@ class _DevTestScreenState extends State<DevTestScreen> {
     _addLog('Fetch Leads completed in ${stopwatch.elapsedMilliseconds} ms');
   }
 
+  Future<void> _fetchDirectLeadCount() async {
+    _addLog('--- Direct Firestore Lead Diagnostics ---');
+    final stopwatch = Stopwatch()..start();
+    final snapshot = await _firestore
+        .collection('leads')
+        .where('isArchived', isEqualTo: false)
+        .limit(20)
+        .get();
+    stopwatch.stop();
+
+    _addLog('Direct Lead Count: ${snapshot.docs.length}');
+    _addLog(
+      'Direct Lead Query completed in ${stopwatch.elapsedMilliseconds} ms',
+    );
+  }
+
+  Future<void> _fetchDirectTravelerCount() async {
+    _addLog('--- Direct Firestore Traveler Diagnostics ---');
+    final stopwatch = Stopwatch()..start();
+    final snapshot = await _firestore
+        .collection('travelers')
+        .where('isArchived', isEqualTo: false)
+        .limit(20)
+        .get();
+    stopwatch.stop();
+
+    _addLog('Direct Traveler Count: ${snapshot.docs.length}');
+    _addLog(
+      'Direct Traveler Query completed in ${stopwatch.elapsedMilliseconds} ms',
+    );
+  }
+
+  void _checkFirebaseInit() {
+    _addLog('--- Firebase Initialization Diagnostics ---');
+    _addLog('Firebase app name: ${_firestore.app.name}');
+  }
+
   Future<void> _archiveLastLead() async {
     _addLog('Archive button tapped');
     final stopwatch = Stopwatch()..start();
@@ -161,6 +198,21 @@ class _DevTestScreenState extends State<DevTestScreen> {
             ElevatedButton(
               onPressed: _fetchLeads,
               child: const Text('Fetch Leads'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _fetchDirectLeadCount,
+              child: const Text('Direct Firestore Lead Count'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _fetchDirectTravelerCount,
+              child: const Text('Direct Firestore Traveler Count'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _checkFirebaseInit,
+              child: const Text('Check Firebase Init'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
