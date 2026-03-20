@@ -33,6 +33,7 @@ class CurrentCommercialStateModel {
       profitPercentage: (map['profitPercentage'] as num?)?.toDouble(),
     );
   }
+  //
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
