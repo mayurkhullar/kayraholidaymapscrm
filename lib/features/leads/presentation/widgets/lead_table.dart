@@ -22,7 +22,7 @@ class LeadTable extends StatelessWidget {
     _LeadTableColumn(label: 'Updated', width: leadTableUpdatedWidth),
   ];
 
-  static const double _tableContentWidth =
+  static final double _tableContentWidth =
       leadTableLeadCodeWidth +
       leadTableClientWidth +
       leadTableDestinationWidth +
@@ -41,7 +41,7 @@ class LeadTable extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: _tableContentWidth),
+          constraints: BoxConstraints(minWidth: _tableContentWidth),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
