@@ -15,17 +15,31 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
 
   @override
   Future<List<LeadModel>> fetchLeads() async {
+    final queryStopwatch = Stopwatch()..start();
     final querySnapshot = await _leadsCollection
         .where('isArchived', isEqualTo: false)
         .limit(20)
         .get();
+    queryStopwatch.stop();
 
-    return querySnapshot.docs
+    final mappingStopwatch = Stopwatch()..start();
+    final leads = querySnapshot.docs
         .map((doc) => LeadModel.fromMap(<String, dynamic>{
               ...doc.data(),
               'id': doc.id,
             }))
         .toList(growable: false);
+    mappingStopwatch.stop();
+
+    print('===== LEAD DATASOURCE DIAGNOSTICS =====');
+    print('Lead datasource query time: ${queryStopwatch.elapsedMilliseconds} ms');
+    print(
+      'Lead datasource mapping time: ${mappingStopwatch.elapsedMilliseconds} ms',
+    );
+    print('Lead datasource total docs: ${querySnapshot.docs.length}');
+    print('=======================================');
+
+    return leads;
   }
 
   @override

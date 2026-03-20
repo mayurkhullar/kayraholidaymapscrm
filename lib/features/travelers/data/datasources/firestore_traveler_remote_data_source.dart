@@ -15,17 +15,33 @@ class FirestoreTravelerRemoteDataSource implements TravelerRemoteDataSource {
 
   @override
   Future<List<TravelerModel>> fetchTravelers() async {
+    final queryStopwatch = Stopwatch()..start();
     final querySnapshot = await _travelersCollection
         .where('isArchived', isEqualTo: false)
         .limit(20)
         .get();
+    queryStopwatch.stop();
 
-    return querySnapshot.docs
+    final mappingStopwatch = Stopwatch()..start();
+    final travelers = querySnapshot.docs
         .map((doc) => TravelerModel.fromMap(<String, dynamic>{
               ...doc.data(),
               'id': doc.id,
             }))
         .toList(growable: false);
+    mappingStopwatch.stop();
+
+    print('===== TRAVELER DATASOURCE DIAGNOSTICS =====');
+    print(
+      'Traveler datasource query time: ${queryStopwatch.elapsedMilliseconds} ms',
+    );
+    print(
+      'Traveler datasource mapping time: ${mappingStopwatch.elapsedMilliseconds} ms',
+    );
+    print('Traveler datasource total docs: ${querySnapshot.docs.length}');
+    print('===========================================');
+
+    return travelers;
   }
 
   @override
