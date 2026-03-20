@@ -189,7 +189,7 @@ class LeadModel {
       'createdAt': createdAt,
       'updatedBy': updatedBy,
       'updatedAt': updatedAt,
-      'isArchived': isArchived,
+      'isArchived': isArchived == true ? true : false,
       'archivedBy': archivedBy,
       'archivedAt': archivedAt,
     };

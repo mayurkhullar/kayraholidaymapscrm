@@ -67,8 +67,8 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
         ? _leadsCollection.doc()
         : _leadsCollection.doc(lead.id);
     final leadToCreate = lead.id.isEmpty
-        ? lead.copyWith(id: documentReference.id)
-        : lead;
+        ? lead.copyWith(id: documentReference.id, isArchived: false)
+        : lead.copyWith(isArchived: false);
 
     await documentReference.set(leadToCreate.toMap());
   }
