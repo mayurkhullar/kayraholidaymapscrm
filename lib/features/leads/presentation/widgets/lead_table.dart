@@ -13,14 +13,24 @@ class LeadTable extends StatelessWidget {
   final List<LeadModel> leads;
 
   static const List<_LeadTableColumn> _columns = [
-    _LeadTableColumn(label: 'Lead Code', flex: 2),
-    _LeadTableColumn(label: 'Client', flex: 2),
-    _LeadTableColumn(label: 'Destination', flex: 2),
-    _LeadTableColumn(label: 'Travel Type', flex: 2),
-    _LeadTableColumn(label: 'Stage', flex: 2),
-    _LeadTableColumn(label: 'Owner', flex: 2),
-    _LeadTableColumn(label: 'Updated', flex: 2),
+    _LeadTableColumn(label: 'Lead Code', width: leadTableLeadCodeWidth),
+    _LeadTableColumn(label: 'Client', width: leadTableClientWidth),
+    _LeadTableColumn(label: 'Destination', width: leadTableDestinationWidth),
+    _LeadTableColumn(label: 'Travel Type', width: leadTableTravelTypeWidth),
+    _LeadTableColumn(label: 'Stage', width: leadTableStageWidth),
+    _LeadTableColumn(label: 'Owner', width: leadTableOwnerWidth),
+    _LeadTableColumn(label: 'Updated', width: leadTableUpdatedWidth),
   ];
+
+  static const double _tableContentWidth =
+      leadTableLeadCodeWidth +
+      leadTableClientWidth +
+      leadTableDestinationWidth +
+      leadTableTravelTypeWidth +
+      leadTableStageWidth +
+      leadTableOwnerWidth +
+      leadTableUpdatedWidth +
+      (AppSpacing.md * (_columns.length - 1));
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +41,7 @@ class LeadTable extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 980),
+          constraints: const BoxConstraints(minWidth: _tableContentWidth),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
@@ -45,20 +55,14 @@ class LeadTable extends StatelessWidget {
                     vertical: AppSpacing.lg,
                   ),
                   child: Row(
-                    children: _columns
-                        .map(
-                          (column) => Expanded(
-                            flex: column.flex,
-                            child: Text(
-                              column.label,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(growable: false),
+                    children: [
+                      for (var index = 0; index < _columns.length; index++)
+                        _LeadTableHeaderCell(
+                          label: _columns[index].label,
+                          width: _columns[index].width,
+                          isLast: index == _columns.length - 1,
+                        ),
+                    ],
                   ),
                 ),
                 Divider(
@@ -88,9 +92,41 @@ class LeadTable extends StatelessWidget {
   }
 }
 
-class _LeadTableColumn {
-  const _LeadTableColumn({required this.label, required this.flex});
+class _LeadTableHeaderCell extends StatelessWidget {
+  const _LeadTableHeaderCell({
+    required this.label,
+    required this.width,
+    required this.isLast,
+  });
 
   final String label;
-  final int flex;
+  final double width;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.md),
+      child: SizedBox(
+        width: width,
+        child: Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LeadTableColumn {
+  const _LeadTableColumn({required this.label, required this.width});
+
+  final String label;
+  final double width;
 }

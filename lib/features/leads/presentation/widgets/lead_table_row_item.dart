@@ -5,6 +5,14 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/status_tag.dart';
 import '../../domain/models/lead_model.dart';
 
+const double leadTableLeadCodeWidth = 120;
+const double leadTableClientWidth = 180;
+const double leadTableDestinationWidth = 140;
+const double leadTableTravelTypeWidth = 120;
+const double leadTableStageWidth = 140;
+const double leadTableOwnerWidth = 120;
+const double leadTableUpdatedWidth = 140;
+
 class LeadTableRowItem extends StatelessWidget {
   const LeadTableRowItem({
     required this.lead,
@@ -32,23 +40,24 @@ class LeadTableRowItem extends StatelessWidget {
           child: Row(
             children: [
               _LeadTableCell(
-                flex: 2,
+                width: leadTableLeadCodeWidth,
                 child: Text(
                   _fallback(lead.leadCode, '—'),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               _LeadTableCell(
-                flex: 2,
+                width: leadTableClientWidth,
                 child: _PrimarySecondaryText(
                   primary: _fallback(lead.clientNameSnapshot, 'Unknown client'),
                   secondary: lead.companyNameSnapshot,
                 ),
               ),
               _LeadTableCell(
-                flex: 2,
+                width: leadTableDestinationWidth,
                 child: Text(
                   _fallback(lead.destination, 'Not specified'),
                   style: theme.textTheme.bodyMedium,
@@ -56,14 +65,15 @@ class LeadTableRowItem extends StatelessWidget {
                 ),
               ),
               _LeadTableCell(
-                flex: 2,
+                width: leadTableTravelTypeWidth,
                 child: Text(
                   _travelTypeLabel(lead.travelType),
                   style: theme.textTheme.bodyMedium,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               _LeadTableCell(
-                flex: 2,
+                width: leadTableStageWidth,
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: StatusTag(
@@ -73,7 +83,7 @@ class LeadTableRowItem extends StatelessWidget {
                 ),
               ),
               _LeadTableCell(
-                flex: 2,
+                width: leadTableOwnerWidth,
                 child: Text(
                   _fallback(lead.leadOwnerId, 'Unassigned'),
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -83,12 +93,14 @@ class LeadTableRowItem extends StatelessWidget {
                 ),
               ),
               _LeadTableCell(
-                flex: 2,
+                width: leadTableUpdatedWidth,
+                isLast: true,
                 child: Text(
                   _formatDate(lead.updatedAt),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -101,19 +113,21 @@ class LeadTableRowItem extends StatelessWidget {
 
 class _LeadTableCell extends StatelessWidget {
   const _LeadTableCell({
-    required this.flex,
+    required this.width,
     required this.child,
+    this.isLast = false,
   });
 
-  final int flex;
+  final double width;
   final Widget child;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: Padding(
-        padding: const EdgeInsets.only(right: AppSpacing.md),
+    return Padding(
+      padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.md),
+      child: SizedBox(
+        width: width,
         child: child,
       ),
     );
