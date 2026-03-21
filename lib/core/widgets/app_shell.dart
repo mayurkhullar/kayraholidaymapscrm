@@ -49,7 +49,10 @@ class _AppShellState extends State<AppShell> {
         final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
         final contentPadding = EdgeInsets.fromLTRB(
           AppSpacing.xl,
-          isDesktop ? AppSpacing.lg : AppSpacing.md,
+          // Root-cause fix: the previous shell added a full top inset here,
+          // then PageContainer added another top inset. That stacked padding
+          // pushed every page header noticeably below the top bar.
+          AppSpacing.sm,
           AppSpacing.xl,
           AppSpacing.xl,
         );
@@ -78,8 +81,12 @@ class _AppShellState extends State<AppShell> {
                         child: SingleChildScrollView(
                           padding: contentPadding,
                           child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: constraints.maxHeight,
+                            constraints: const BoxConstraints(
+                              // Root-cause fix: forcing the scroll child to the
+                              // full viewport height ignored the space already
+                              // consumed by the top bar, creating an oversized
+                              // content region. Keeping only maxWidth preserves
+                              // top alignment without injecting extra height.
                               maxWidth: AppShell.contentMaxWidth,
                             ),
                             child: widget.child,

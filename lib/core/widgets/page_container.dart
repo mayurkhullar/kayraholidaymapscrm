@@ -21,9 +21,6 @@ class PageContainer extends StatelessWidget {
             : constraints.maxWidth >= 768
                 ? AppSpacing.xl
                 : AppSpacing.lg;
-        final verticalPadding = constraints.maxWidth >= 768
-            ? AppSpacing.xs
-            : AppSpacing.sm;
 
         return Center(
           child: ConstrainedBox(
@@ -31,7 +28,10 @@ class PageContainer extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                verticalPadding,
+                // Root-cause fix: PageContainer was adding its own top padding
+                // on top of AppShell's top scroll padding, so page headers sat
+                // too low across the shared layout.
+                0,
                 horizontalPadding,
                 AppSpacing.md,
               ),
