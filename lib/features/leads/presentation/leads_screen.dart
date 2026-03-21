@@ -7,6 +7,7 @@ import '../../../core/widgets/empty_state_view.dart';
 import '../../../core/widgets/page_container.dart';
 import '../domain/models/lead_model.dart';
 import 'widgets/create_lead_panel.dart';
+import 'widgets/lead_detail_panel.dart';
 import 'widgets/lead_list_header.dart';
 import 'widgets/lead_table.dart';
 
@@ -34,75 +35,11 @@ class LeadsScreen extends StatefulWidget {
 }
 
 class _LeadsScreenState extends State<LeadsScreen> {
-  bool _isSeedingDummyLeads = false;
-
-  Future<void> _seedDummyLeads() async {
-    setState(() {
-      _isSeedingDummyLeads = true;
-    });
-
-    final leadsCollection = FirebaseFirestore.instance.collection('leads');
-    final leadOne = <String, dynamic>{
-      'leadCode': 'LD-001',
-      'clientNameSnapshot': 'John Doe',
-      'destination': 'Dubai',
-      'travelType': 'fit',
-      'tripScope': 'international',
-      'leadStage': 'newLead',
-      'leadOwnerId': 'EMP001',
-      'isArchived': false,
-      'createdAt': Timestamp.now(),
-      'updatedAt': Timestamp.now(),
-    };
-    final leadTwo = <String, dynamic>{
-      'leadCode': 'LD-002',
-      'clientNameSnapshot': 'Sarah Khan',
-      'destination': 'Singapore',
-      'travelType': 'corporate',
-      'tripScope': 'international',
-      'leadStage': 'contacted',
-      'leadOwnerId': 'EMP002',
-      'isArchived': false,
-      'createdAt': Timestamp.now(),
-      'updatedAt': Timestamp.now(),
-    };
-    final leadThree = <String, dynamic>{
-      'leadCode': 'LD-003',
-      'clientNameSnapshot': 'Rahul Mehta',
-      'destination': 'Bali',
-      'travelType': 'fit',
-      'tripScope': 'international',
-      'leadStage': 'quotationSent',
-      'leadOwnerId': 'EMP001',
-      'isArchived': false,
-      'createdAt': Timestamp.now(),
-      'updatedAt': Timestamp.now(),
-    };
-
-    try {
-      await Future.wait<void>([
-        leadsCollection.doc('seed_ld_001').set(leadOne),
-        leadsCollection.doc('seed_ld_002').set(leadTwo),
-        leadsCollection.doc('seed_ld_003').set(leadThree),
-      ]);
-      print('Dummy leads seeded successfully');
-
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Dummy leads seeded successfully'),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSeedingDummyLeads = false;
-        });
-      }
-    }
+  Future<void> _openLeadDetails(LeadModel lead) {
+    return LeadDetailPanel.show(
+      context,
+      lead: lead,
+    );
   }
 
   @override
@@ -115,18 +52,6 @@ class _LeadsScreenState extends State<LeadsScreen> {
           children: [
             LeadListHeader(
               onCreateLead: () => CreateLeadPanel.show(context),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton(
-                onPressed: _isSeedingDummyLeads ? null : _seedDummyLeads,
-                child: Text(
-                  _isSeedingDummyLeads
-                      ? 'Seeding Dummy Leads...'
-                      : 'Seed Dummy Leads',
-                ),
-              ),
             ),
             const SizedBox(height: AppSpacing.xl),
             StreamBuilder<List<LeadModel>>(
@@ -156,7 +81,10 @@ class _LeadsScreenState extends State<LeadsScreen> {
                   );
                 }
 
-                return LeadTable(leads: leads);
+                return LeadTable(
+                  leads: leads,
+                  onLeadTap: _openLeadDetails,
+                );
               },
             ),
           ],

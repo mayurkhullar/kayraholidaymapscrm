@@ -17,9 +17,11 @@ class LeadTableRowItem extends StatelessWidget {
   const LeadTableRowItem({
     required this.lead,
     super.key,
+    this.onTap,
   });
 
   final LeadModel lead;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class LeadTableRowItem extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         hoverColor: colorScheme.primary.withValues(alpha: 0.04),
         splashColor: colorScheme.primary.withValues(alpha: 0.06),
         child: Padding(

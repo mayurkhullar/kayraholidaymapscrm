@@ -8,9 +8,11 @@ class LeadTable extends StatelessWidget {
   const LeadTable({
     required this.leads,
     super.key,
+    this.onLeadTap,
   });
 
   final List<LeadModel> leads;
+  final ValueChanged<LeadModel>? onLeadTap;
 
   static const List<_LeadTableColumn> _columns = [
     _LeadTableColumn(label: 'Lead Code', width: leadTableLeadCodeWidth),
@@ -75,7 +77,12 @@ class LeadTable extends StatelessWidget {
                 Column(
                   children: [
                     for (var index = 0; index < leads.length; index++) ...[
-                      LeadTableRowItem(lead: leads[index]),
+                      LeadTableRowItem(
+                        lead: leads[index],
+                        onTap: onLeadTap == null
+                            ? null
+                            : () => onLeadTap!(leads[index]),
+                      ),
                       if (index < leads.length - 1)
                         Divider(
                           height: 1,
