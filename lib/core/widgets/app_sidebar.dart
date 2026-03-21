@@ -52,6 +52,7 @@ class AppSidebar extends StatelessWidget {
               SizedBox(height: isCollapsed ? AppSpacing.lg : AppSpacing.xl),
               Expanded(
                 child: ListView.separated(
+                  padding: EdgeInsets.zero,
                   itemCount: AppNavigationItems.items.length,
                   separatorBuilder: (_, _) =>
                       const SizedBox(height: AppSpacing.sm),
@@ -90,31 +91,96 @@ class _SidebarHeader extends StatelessWidget {
 
     return SizedBox(
       height: 48,
-      child: isCollapsed
-          ? IconButton(
-              onPressed: onToggleCollapse,
-              icon: const Icon(Icons.chevron_right_rounded),
-              tooltip: 'Expand sidebar',
-            )
-          : Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Kayra CRM',
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+      child: Row(
+        children: [
+          if (!isCollapsed)
+            Expanded(
+              child: AnimatedOpacity(
+                duration: AppSidebar._animationDuration,
+                curve: Curves.easeOutCubic,
+                opacity: isCollapsed ? 0 : 1,
+                child: Text(
+                  'Kayra CRM',
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                IconButton(
-                  onPressed: onToggleCollapse,
-                  icon: const Icon(Icons.chevron_left_rounded),
-                  tooltip: 'Collapse sidebar',
-                ),
-              ],
+              ),
             ),
+          if (!isCollapsed) const SizedBox(width: AppSpacing.sm),
+          _SidebarToggleButton(
+            isCollapsed: isCollapsed,
+            onPressed: onToggleCollapse,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SidebarToggleButton extends StatefulWidget {
+  const _SidebarToggleButton({
+    required this.isCollapsed,
+    required this.onPressed,
+  });
+
+  final bool isCollapsed;
+  final VoidCallback onPressed;
+
+  @override
+  State<_SidebarToggleButton> createState() => _SidebarToggleButtonState();
+}
+
+class _SidebarToggleButtonState extends State<_SidebarToggleButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final tooltip = widget.isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+
+    return Tooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 250),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          duration: AppSidebar._animationDuration,
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: _isHovered
+                ? colorScheme.primary.withValues(alpha: 0.10)
+                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _isHovered
+                  ? colorScheme.primary.withValues(alpha: 0.22)
+                  : colorScheme.outlineVariant,
+            ),
+          ),
+          child: IconButton(
+            onPressed: widget.onPressed,
+            visualDensity: VisualDensity.compact,
+            splashRadius: 18,
+            icon: AnimatedSwitcher(
+              duration: AppSidebar._animationDuration,
+              transitionBuilder: (child, animation) => RotationTransition(
+                turns: Tween<double>(begin: 0.9, end: 1).animate(animation),
+                child: FadeTransition(opacity: animation, child: child),
+              ),
+              child: Icon(
+                widget.isCollapsed
+                    ? Icons.chevron_right_rounded
+                    : Icons.chevron_left_rounded,
+                key: ValueKey(widget.isCollapsed),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -142,6 +208,7 @@ class _SidebarItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
+        hoverColor: colorScheme.primary.withValues(alpha: 0.06),
         onTap: () {
           if (!isActive) {
             Navigator.of(context).pushReplacementNamed(item.route);
@@ -194,6 +261,7 @@ class _SidebarItem extends StatelessWidget {
     return Tooltip(
       message: item.label,
       waitDuration: const Duration(milliseconds: 300),
+      preferBelow: false,
       child: itemContent,
     );
   }

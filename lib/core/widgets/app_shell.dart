@@ -22,12 +22,22 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  bool _isSidebarCollapsed = false;
+  bool _isSidebarCollapsed = _AppShellSessionState.sidebarCollapsed;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSidebarCollapsed = _AppShellSessionState.sidebarCollapsed;
+  }
 
   void _toggleSidebar() {
+    final nextValue = !_isSidebarCollapsed;
+
     setState(() {
-      _isSidebarCollapsed = !_isSidebarCollapsed;
+      _isSidebarCollapsed = nextValue;
     });
+
+    _AppShellSessionState.sidebarCollapsed = nextValue;
   }
 
   @override
@@ -57,11 +67,13 @@ class _AppShellState extends State<AppShell> {
                       onMenuPressed: () {},
                     ),
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(AppSpacing.xl),
-                        child: Center(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(AppSpacing.xl),
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
                               maxWidth: AppShell.contentMaxWidth,
                             ),
                             child: widget.child,
@@ -78,4 +90,8 @@ class _AppShellState extends State<AppShell> {
       },
     );
   }
+}
+
+class _AppShellSessionState {
+  static bool sidebarCollapsed = false;
 }
