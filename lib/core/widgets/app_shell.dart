@@ -47,6 +47,12 @@ class _AppShellState extends State<AppShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
+        final contentPadding = EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          isDesktop ? AppSpacing.lg : AppSpacing.md,
+          AppSpacing.xl,
+          AppSpacing.xl,
+        );
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -70,7 +76,7 @@ class _AppShellState extends State<AppShell> {
                       child: Align(
                         alignment: Alignment.topCenter,
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          padding: contentPadding,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
                               minHeight: constraints.maxHeight,

@@ -21,14 +21,19 @@ class PageContainer extends StatelessWidget {
             : constraints.maxWidth >= 768
                 ? AppSpacing.xl
                 : AppSpacing.lg;
+        final verticalPadding = constraints.maxWidth >= 768
+            ? AppSpacing.xs
+            : AppSpacing.sm;
 
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _maxWidth),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-                vertical: AppSpacing.xs,
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                AppSpacing.md,
               ),
               child: child,
             ),

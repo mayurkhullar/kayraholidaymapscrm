@@ -17,7 +17,7 @@ class LeadListHeader extends StatelessWidget {
 
     return Wrap(
       spacing: AppSpacing.lg,
-      runSpacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs,
       crossAxisAlignment: WrapCrossAlignment.center,
       alignment: WrapAlignment.spaceBetween,
       children: [

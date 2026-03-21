@@ -124,7 +124,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
               const SizedBox(height: AppSpacing.md),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
             StreamBuilder<List<LeadModel>>(
               stream: LeadsScreen._leadsStream,
               builder: (context, snapshot) {

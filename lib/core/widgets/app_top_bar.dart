@@ -15,7 +15,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(76);
+  Size get preferredSize => const Size.fromHeight(68);
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xl,
-        vertical: AppSpacing.lg,
+        vertical: AppSpacing.md,
       ),
       child: SafeArea(
         bottom: false,
