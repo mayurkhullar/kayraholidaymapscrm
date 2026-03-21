@@ -6,7 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/models/lead_model.dart';
 import 'lead_table_row_item.dart';
 
-class LeadTable extends StatelessWidget {
+class LeadTable extends StatefulWidget {
   const LeadTable({
     required this.leads,
     super.key,
@@ -40,6 +40,25 @@ class LeadTable extends StatelessWidget {
       (AppSpacing.xl * 2);
 
   @override
+  State<LeadTable> createState() => _LeadTableState();
+}
+
+class _LeadTableState extends State<LeadTable> {
+  late final ScrollController _horizontalScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _horizontalScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _horizontalScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -49,12 +68,14 @@ class LeadTable extends StatelessWidget {
         builder: (context, constraints) {
           final viewportWidth = constraints.maxWidth.isFinite
               ? constraints.maxWidth
-              : _tableContentWidth;
-          final tableWidth = math.max(viewportWidth, _tableContentWidth);
+              : LeadTable._tableContentWidth;
+          final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
 
           return Scrollbar(
+            controller: _horizontalScrollController,
             thumbVisibility: tableWidth > viewportWidth,
             child: SingleChildScrollView(
+              controller: _horizontalScrollController,
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: tableWidth),
@@ -73,11 +94,15 @@ class LeadTable extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            for (var index = 0; index < _columns.length; index++)
+                            for (
+                              var index = 0;
+                              index < LeadTable._columns.length;
+                              index++
+                            )
                               _LeadTableHeaderCell(
-                                label: _columns[index].label,
-                                width: _columns[index].width,
-                                isLast: index == _columns.length - 1,
+                                label: LeadTable._columns[index].label,
+                                width: LeadTable._columns[index].width,
+                                isLast: index == LeadTable._columns.length - 1,
                               ),
                           ],
                         ),
@@ -89,14 +114,14 @@ class LeadTable extends StatelessWidget {
                       ),
                       Column(
                         children: [
-                          for (var index = 0; index < leads.length; index++) ...[
+                          for (var index = 0; index < widget.leads.length; index++) ...[
                             LeadTableRowItem(
-                              lead: leads[index],
-                              onTap: onLeadTap == null
+                              lead: widget.leads[index],
+                              onTap: widget.onLeadTap == null
                                   ? null
-                                  : () => onLeadTap!(leads[index]),
+                                  : () => widget.onLeadTap!(widget.leads[index]),
                             ),
-                            if (index < leads.length - 1)
+                            if (index < widget.leads.length - 1)
                               Divider(
                                 height: 1,
                                 thickness: 1,
