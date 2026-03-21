@@ -88,33 +88,31 @@ class _SidebarHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final toggleButton = _SidebarToggleButton(
+      isCollapsed: isCollapsed,
+      onPressed: onToggleCollapse,
+    );
 
     return SizedBox(
       height: 48,
-      child: Row(
-        children: [
-          if (!isCollapsed)
-            Expanded(
-              child: AnimatedOpacity(
-                duration: AppSidebar._animationDuration,
-                curve: Curves.easeOutCubic,
-                opacity: isCollapsed ? 0 : 1,
-                child: Text(
-                  'Kayra CRM',
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
+      child:
+          isCollapsed
+              ? Center(child: toggleButton)
+              : Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Kayra CRM',
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: AppSpacing.sm),
+                  toggleButton,
+                ],
               ),
-            ),
-          if (!isCollapsed) const SizedBox(width: AppSpacing.sm),
-          _SidebarToggleButton(
-            isCollapsed: isCollapsed,
-            onPressed: onToggleCollapse,
-          ),
-        ],
-      ),
     );
   }
 }
