@@ -4,7 +4,7 @@ import '../theme/app_spacing.dart';
 import 'app_sidebar.dart';
 import 'app_top_bar.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   const AppShell({
     required this.pageTitle,
     required this.child,
@@ -14,8 +14,21 @@ class AppShell extends StatelessWidget {
   final String pageTitle;
   final Widget child;
 
-  static const double _desktopBreakpoint = 1024;
-  static const double _contentMaxWidth = 1280;
+  static const double desktopBreakpoint = 1024;
+  static const double contentMaxWidth = 1280;
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  bool _isSidebarCollapsed = false;
+
+  void _toggleSidebar() {
+    setState(() {
+      _isSidebarCollapsed = !_isSidebarCollapsed;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +36,23 @@ class AppShell extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth >= _desktopBreakpoint;
+        final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: Row(
             children: [
-              if (isDesktop) AppSidebar(currentRoute: routeName),
+              if (isDesktop)
+                AppSidebar(
+                  currentRoute: routeName,
+                  isCollapsed: _isSidebarCollapsed,
+                  onToggleCollapse: _toggleSidebar,
+                ),
               Expanded(
                 child: Column(
                   children: [
                     AppTopBar(
-                      title: pageTitle,
+                      title: widget.pageTitle,
                       showMenuButton: !isDesktop,
                       onMenuPressed: () {},
                     ),
@@ -44,9 +62,9 @@ class AppShell extends StatelessWidget {
                         child: Center(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(
-                              maxWidth: _contentMaxWidth,
+                              maxWidth: AppShell.contentMaxWidth,
                             ),
-                            child: child,
+                            child: widget.child,
                           ),
                         ),
                       ),
