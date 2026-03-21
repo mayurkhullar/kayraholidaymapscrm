@@ -17,9 +17,10 @@ class LeadListHeader extends StatelessWidget {
       subtitle: 'Manage and monitor all active lead inquiries',
       action: Align(
         alignment: Alignment.topRight,
-        child: ElevatedButton(
+        child: ElevatedButton.icon(
           onPressed: onCreateLead,
-          child: const Text('+ New Lead'),
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('+ New Lead'),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../../core/widgets/page_container.dart';
 import '../domain/models/lead_model.dart';
+import 'widgets/create_lead_panel.dart';
 import 'widgets/lead_list_header.dart';
 import 'widgets/lead_table.dart';
 
@@ -113,7 +114,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LeadListHeader(
-              onCreateLead: () {},
+              onCreateLead: () => CreateLeadPanel.show(context),
             ),
             const SizedBox(height: AppSpacing.md),
             Align(
