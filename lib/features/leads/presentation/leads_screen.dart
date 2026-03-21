@@ -8,6 +8,7 @@ import '../../../core/widgets/page_container.dart';
 import '../domain/models/lead_model.dart';
 import 'widgets/create_lead_panel.dart';
 import 'widgets/lead_detail_panel.dart';
+import 'widgets/lead_filters_bar.dart';
 import 'widgets/lead_list_header.dart';
 import 'widgets/lead_table.dart';
 
@@ -35,6 +36,53 @@ class LeadsScreen extends StatefulWidget {
 }
 
 class _LeadsScreenState extends State<LeadsScreen> {
+  late final TextEditingController _searchController;
+  String? _selectedStage;
+  String? _selectedTravelType;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController()..addListener(_onFiltersChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController
+      ..removeListener(_onFiltersChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onFiltersChanged() {
+    setState(() {});
+  }
+
+  void _clearFilters() {
+    _searchController.clear();
+    setState(() {
+      _selectedStage = null;
+      _selectedTravelType = null;
+    });
+  }
+
+  List<LeadModel> _applyFilters(List<LeadModel> leads) {
+    final query = _searchController.text.trim().toLowerCase();
+
+    return leads.where((lead) {
+      final matchesSearch = query.isEmpty ||
+          lead.clientNameSnapshot?.toLowerCase().contains(query) == true ||
+          lead.destination?.toLowerCase().contains(query) == true ||
+          lead.leadCode.toLowerCase().contains(query);
+      final matchesStage =
+          _selectedStage == null || lead.leadStage.firestoreValue == _selectedStage;
+      final matchesTravelType = _selectedTravelType == null ||
+          lead.travelType.firestoreValue == _selectedTravelType;
+
+      return matchesSearch && matchesStage && matchesTravelType;
+    }).toList(growable: false);
+  }
+
   Future<void> _openLeadDetails(LeadModel lead) {
     return LeadDetailPanel.show(
       context,
@@ -81,9 +129,41 @@ class _LeadsScreenState extends State<LeadsScreen> {
                   );
                 }
 
-                return LeadTable(
-                  leads: leads,
-                  onLeadTap: _openLeadDetails,
+                final filteredLeads = _applyFilters(leads);
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    LeadFiltersBar(
+                      searchController: _searchController,
+                      selectedStage: _selectedStage,
+                      selectedTravelType: _selectedTravelType,
+                      onStageChanged: (value) {
+                        setState(() {
+                          _selectedStage = value;
+                        });
+                      },
+                      onTravelTypeChanged: (value) {
+                        setState(() {
+                          _selectedTravelType = value;
+                        });
+                      },
+                      onClearFilters: _clearFilters,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    if (filteredLeads.isEmpty)
+                      const EmptyStateView(
+                        title: 'No matching leads',
+                        message:
+                            'Try adjusting your search, stage, or travel type filters.',
+                        icon: Icons.filter_alt_off_rounded,
+                      )
+                    else
+                      LeadTable(
+                        leads: filteredLeads,
+                        onLeadTap: _openLeadDetails,
+                      ),
+                  ],
                 );
               },
             ),
