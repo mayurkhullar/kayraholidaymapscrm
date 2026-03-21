@@ -20,7 +20,10 @@ class LeadListHeader extends StatelessWidget {
         final isCompact = constraints.maxWidth < 760;
 
         return Container(
-          padding: EdgeInsets.all(isCompact ? AppSpacing.lg : AppSpacing.xl),
+          padding: EdgeInsets.symmetric(
+            horizontal: isCompact ? AppSpacing.lg : AppSpacing.xl,
+            vertical: isCompact ? AppSpacing.lg : AppSpacing.xl,
+          ),
           decoration: BoxDecoration(
             color: const Color(0xFF1B2637),
             borderRadius: BorderRadius.circular(24),
@@ -37,45 +40,24 @@ class LeadListHeader extends StatelessWidget {
                 flex: isCompact ? 0 : 1,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        'Lead workspace',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
                     Text(
                       'Leads',
-                      style: theme.textTheme.displaySmall?.copyWith(
+                      style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -1.1,
-                        height: 0.98,
+                        letterSpacing: -0.8,
+                        height: 1,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 620),
-                      child: Text(
-                        'Manage the active pipeline, triage new inquiries, and keep every opportunity moving with a clear operational view.',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.84,
-                          ),
-                          height: 1.45,
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Track active opportunities and keep the pipeline moving.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.8,
                         ),
+                        height: 1.35,
                       ),
                     ),
                   ],
@@ -92,7 +74,7 @@ class LeadListHeader extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.onPrimary,
-                  minimumSize: const Size(0, 52),
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xl,
                     vertical: AppSpacing.md,
@@ -102,7 +84,7 @@ class LeadListHeader extends StatelessWidget {
                     letterSpacing: 0.1,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   elevation: 0,
                 ),

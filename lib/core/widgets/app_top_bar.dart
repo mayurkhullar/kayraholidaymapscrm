@@ -15,7 +15,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64);
+  Size get preferredSize => const Size.fromHeight(60);
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +34,9 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.md,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
           child: SizedBox(
-            height: 40,
+            height: preferredSize.height,
             child: Row(
               children: [
                 if (showMenuButton) ...[
@@ -50,39 +47,22 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   const SizedBox(width: AppSpacing.md),
                 ],
-                if (title != null)
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
+                Expanded(
+                  child: title == null
+                      ? const SizedBox.shrink()
+                      : Text(
                           title!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.2,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Workspace overview',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.72,
-                            ),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  const Spacer(),
+                ),
+                const SizedBox(width: AppSpacing.md),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest.withValues(
                       alpha: 0.22,
@@ -113,7 +93,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest.withValues(
@@ -138,25 +118,11 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Workspace',
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            'Admin',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant.withValues(
-                                alpha: 0.72,
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Admin',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),

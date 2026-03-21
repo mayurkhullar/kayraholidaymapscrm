@@ -51,22 +51,22 @@ class LeadFiltersBar extends StatelessWidget {
         fillColor: const Color(0xFF0F1723),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
-          vertical: AppSpacing.md,
+          vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
             color: colorScheme.outlineVariant.withValues(alpha: 0.22),
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
             color: colorScheme.outlineVariant.withValues(alpha: 0.22),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
             color: colorScheme.primary.withValues(alpha: 0.48),
           ),
@@ -83,116 +83,96 @@ class LeadFiltersBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF111A27),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: colorScheme.outlineVariant.withValues(alpha: 0.16),
         ),
       ),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Theme(
         data: controlTheme,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.md,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Text(
-              'Refine lead view',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.1,
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: 240,
+                maxWidth: 360,
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Search and narrow the pipeline without changing the current workflow.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.md,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 260,
-                    maxWidth: 380,
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search client, destination, or lead code',
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.76,
+                    ),
                   ),
-                  child: TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search by client, destination, or lead code',
-                      prefixIcon: Icon(
-                        Icons.search_rounded,
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.76,
-                        ),
+                  isDense: true,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 190,
+              child: DropdownButtonFormField<String?>(
+                value: selectedStage,
+                decoration: const InputDecoration(
+                  labelText: 'Stage',
+                  isDense: true,
+                ),
+                items: _stageOptions
+                    .map(
+                      (option) => DropdownMenuItem<String?>(
+                        value: option.value,
+                        child: Text(option.label),
                       ),
-                      isDense: true,
-                    ),
-                  ),
+                    )
+                    .toList(growable: false),
+                onChanged: onStageChanged,
+              ),
+            ),
+            SizedBox(
+              width: 190,
+              child: DropdownButtonFormField<String?>(
+                value: selectedTravelType,
+                decoration: const InputDecoration(
+                  labelText: 'Travel Type',
+                  isDense: true,
                 ),
-                SizedBox(
-                  width: 210,
-                  child: DropdownButtonFormField<String?>(
-                    value: selectedStage,
-                    decoration: const InputDecoration(
-                      labelText: 'Stage',
-                      isDense: true,
-                    ),
-                    items: _stageOptions
-                        .map(
-                          (option) => DropdownMenuItem<String?>(
-                            value: option.value,
-                            child: Text(option.label),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: onStageChanged,
-                  ),
+                items: _travelTypeOptions
+                    .map(
+                      (option) => DropdownMenuItem<String?>(
+                        value: option.value,
+                        child: Text(option.label),
+                      ),
+                    )
+                    .toList(growable: false),
+                onChanged: onTravelTypeChanged,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: onClearFilters,
+              icon: const Icon(Icons.restart_alt_rounded, size: 18),
+              label: const Text('Clear Filters'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.onSurface,
+                visualDensity: VisualDensity.compact,
+                minimumSize: const Size(0, 46),
+                side: BorderSide(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.28),
                 ),
-                SizedBox(
-                  width: 210,
-                  child: DropdownButtonFormField<String?>(
-                    value: selectedTravelType,
-                    decoration: const InputDecoration(
-                      labelText: 'Travel Type',
-                      isDense: true,
-                    ),
-                    items: _travelTypeOptions
-                        .map(
-                          (option) => DropdownMenuItem<String?>(
-                            value: option.value,
-                            child: Text(option.label),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: onTravelTypeChanged,
-                  ),
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
                 ),
-                OutlinedButton.icon(
-                  onPressed: onClearFilters,
-                  icon: const Icon(Icons.restart_alt_rounded, size: 18),
-                  label: const Text('Clear Filters'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colorScheme.onSurface,
-                    visualDensity: VisualDensity.compact,
-                    minimumSize: const Size(0, 48),
-                    side: BorderSide(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.28),
-                    ),
-                    backgroundColor: colorScheme.surface.withValues(alpha: 0.16),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.md,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
+              ),
             ),
           ],
         ),

@@ -127,11 +127,11 @@ class _LeadsScreenState extends State<LeadsScreen> {
               const SizedBox(height: AppSpacing.md),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.lg),
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF182334),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: colorScheme.outlineVariant.withValues(alpha: 0.18),
                 ),
@@ -143,7 +143,12 @@ class _LeadsScreenState extends State<LeadsScreen> {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.md,
+              ),
               child: StreamBuilder<List<LeadModel>>(
                 stream: LeadsScreen._leadsStream,
                 builder: (context, snapshot) {
@@ -192,7 +197,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                         },
                         onClearFilters: _clearFilters,
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.sm),
                       if (filteredLeads.isEmpty)
                         const EmptyStateView(
                           title: 'No matching leads',
