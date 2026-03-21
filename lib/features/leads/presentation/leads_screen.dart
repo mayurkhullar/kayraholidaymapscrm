@@ -40,6 +40,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
   late final TextEditingController _searchController;
   String? _selectedStage;
   String? _selectedTravelType;
+  String? _successMessage;
 
   @override
   void initState() {
@@ -88,7 +89,24 @@ class _LeadsScreenState extends State<LeadsScreen> {
     return LeadDetailPanel.show(
       context,
       lead: lead,
+      onStageUpdated: _showSuccessMessage,
     );
+  }
+
+  void _showSuccessMessage(String message) {
+    setState(() {
+      _successMessage = message;
+    });
+
+    Future<void>.delayed(const Duration(seconds: 3), () {
+      if (!mounted || _successMessage != message) {
+        return;
+      }
+
+      setState(() {
+        _successMessage = null;
+      });
+    });
   }
 
   @override
@@ -102,6 +120,10 @@ class _LeadsScreenState extends State<LeadsScreen> {
             LeadListHeader(
               onCreateLead: () => CreateLeadPanel.show(context),
             ),
+            if (_successMessage != null) ...[
+              const SizedBox(height: AppSpacing.lg),
+              _PageSuccessMessage(message: _successMessage!),
+            ],
             const SizedBox(height: AppSpacing.xl),
             StreamBuilder<List<LeadModel>>(
               stream: LeadsScreen._leadsStream,
@@ -274,6 +296,50 @@ class _LoadingBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           color: color,
         ),
+      ),
+    );
+  }
+}
+
+class _PageSuccessMessage extends StatelessWidget {
+  const _PageSuccessMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_outline_rounded,
+            color: colorScheme.onSecondaryContainer,
+            size: 18,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSecondaryContainer,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

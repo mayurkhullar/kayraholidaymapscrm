@@ -10,15 +10,18 @@ class LeadDetailPanel extends StatefulWidget {
     required this.lead,
     super.key,
     this.onArchived,
+    this.onStageUpdated,
   });
 
   final LeadModel lead;
   final VoidCallback? onArchived;
+  final ValueChanged<String>? onStageUpdated;
 
   static Future<void> show(
     BuildContext context, {
     required LeadModel lead,
     VoidCallback? onArchived,
+    ValueChanged<String>? onStageUpdated,
   }) {
     return showGeneralDialog<void>(
       context: context,
@@ -30,6 +33,7 @@ class LeadDetailPanel extends StatefulWidget {
         return _LeadDetailPanelDialog(
           lead: lead,
           onArchived: onArchived,
+          onStageUpdated: onStageUpdated,
         );
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
@@ -55,10 +59,12 @@ class _LeadDetailPanelDialog extends StatelessWidget {
   const _LeadDetailPanelDialog({
     required this.lead,
     this.onArchived,
+    this.onStageUpdated,
   });
 
   final LeadModel lead;
   final VoidCallback? onArchived;
+  final ValueChanged<String>? onStageUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +101,7 @@ class _LeadDetailPanelDialog extends StatelessWidget {
               child: LeadDetailPanel(
                 lead: lead,
                 onArchived: onArchived,
+                onStageUpdated: onStageUpdated,
               ),
             ),
           ),
@@ -109,6 +116,7 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
 
   bool _isArchiving = false;
   bool _isUpdatingStage = false;
+  _PanelStatus? _status;
   late LeadStage _selectedLeadStage;
 
   @override
@@ -132,19 +140,16 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
-
     if (_selectedLeadStage == widget.lead.leadStage) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('No changes to update'),
-        ),
-      );
+      setState(() {
+        _status = const _PanelStatus.message('No changes to update');
+      });
       return;
     }
 
     setState(() {
       _isUpdatingStage = true;
+      _status = null;
     });
 
     try {
@@ -160,21 +165,18 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
         return;
       }
 
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Lead stage updated'),
-        ),
-      );
+      widget.onStageUpdated?.call('Lead stage updated successfully');
+      Navigator.of(context).pop();
     } catch (_) {
       if (!mounted) {
         return;
       }
 
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Unable to update lead stage right now'),
-        ),
-      );
+      setState(() {
+        _status = const _PanelStatus.error(
+          'Unable to update lead stage right now',
+        );
+      });
     } finally {
       if (mounted) {
         setState(() {
@@ -190,10 +192,10 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
     }
 
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
 
     setState(() {
       _isArchiving = true;
+      _status = null;
     });
 
     try {
@@ -212,21 +214,16 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
 
       navigator.pop();
       widget.onArchived?.call();
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Lead archived successfully'),
-        ),
-      );
     } catch (_) {
       if (!mounted) {
         return;
       }
 
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Unable to archive lead right now'),
-        ),
-      );
+      setState(() {
+        _status = const _PanelStatus.error(
+          'Unable to archive lead right now',
+        );
+      });
     } finally {
       if (mounted) {
         setState(() {
@@ -385,9 +382,14 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
 
                                       setState(() {
                                         _selectedLeadStage = value;
+                                        _status = null;
                                       });
                                     },
                             ),
+                            if (_status != null) ...[
+                              const SizedBox(height: AppSpacing.md),
+                              _InlineStatusMessage(status: _status!),
+                            ],
                             const SizedBox(height: AppSpacing.lg),
                             SizedBox(
                               width: double.infinity,
@@ -443,6 +445,66 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
       ),
     );
   }
+}
+
+class _InlineStatusMessage extends StatelessWidget {
+  const _InlineStatusMessage({required this.status});
+
+  final _PanelStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isError = status.isError;
+    final foregroundColor =
+        isError ? colorScheme.onErrorContainer : colorScheme.onSurfaceVariant;
+    final backgroundColor =
+        isError ? colorScheme.errorContainer : colorScheme.surfaceContainerHigh;
+    final icon =
+        isError ? Icons.error_outline_rounded : Icons.info_outline_rounded;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: foregroundColor),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              status.message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: foregroundColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PanelStatus {
+  const _PanelStatus._({
+    required this.message,
+    required this.isError,
+  });
+
+  const _PanelStatus.message(String message)
+      : this._(message: message, isError: false);
+
+  const _PanelStatus.error(String message)
+      : this._(message: message, isError: true);
+
+  final String message;
+  final bool isError;
 }
 
 class _LeadDetailCard extends StatelessWidget {
