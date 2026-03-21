@@ -49,10 +49,7 @@ class _AppShellState extends State<AppShell> {
         final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
         final contentPadding = EdgeInsets.fromLTRB(
           AppSpacing.xl,
-          // Root cause: after the top bar renders at the top of the column,
-          // this extra scroll padding becomes the first gap before page content.
-          // Keep only a minimal inset here so pages start closer to the app bar.
-          AppSpacing.xs,
+          AppSpacing.sm,
           AppSpacing.xl,
           AppSpacing.xl,
         );
@@ -82,9 +79,6 @@ class _AppShellState extends State<AppShell> {
                           padding: contentPadding,
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(
-                              // Root cause: the content should size to its own
-                              // height here; only constrain width so it stays
-                              // pinned to the top instead of stretching taller.
                               maxWidth: AppShell.contentMaxWidth,
                             ),
                             child: widget.child,

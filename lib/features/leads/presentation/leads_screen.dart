@@ -124,9 +124,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
               const SizedBox(height: AppSpacing.md),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            // Root cause: this page also stacked an additional full
-            // medium gap between the header and the filters/table block.
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             StreamBuilder<List<LeadModel>>(
               stream: LeadsScreen._leadsStream,
               builder: (context, snapshot) {
@@ -175,8 +173,6 @@ class _LeadsScreenState extends State<LeadsScreen> {
                       },
                       onClearFilters: _clearFilters,
                     ),
-                    // Keep the filter-to-table spacing tight so the
-                    // CRM workspace feels dense instead of airy.
                     const SizedBox(height: AppSpacing.sm),
                     if (filteredLeads.isEmpty)
                       const EmptyStateView(
@@ -284,7 +280,10 @@ class _LoadingRow extends StatelessWidget {
 }
 
 class _LoadingBar extends StatelessWidget {
-  const _LoadingBar({required this.widthFactor, required this.color});
+  const _LoadingBar({
+    required this.widthFactor,
+    required this.color,
+  });
 
   final double widthFactor;
   final Color color;
@@ -292,13 +291,13 @@ class _LoadingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      alignment: Alignment.centerLeft,
       widthFactor: widthFactor,
+      alignment: Alignment.centerLeft,
       child: Container(
-        height: 12,
+        height: 14,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
           color: color,
+          borderRadius: BorderRadius.circular(999),
         ),
       ),
     );
@@ -312,8 +311,7 @@ class _PageSuccessMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       width: double.infinity,
@@ -322,25 +320,21 @@ class _PageSuccessMessage extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
+        color: colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.18)),
       ),
       child: Row(
         children: [
           Icon(
             Icons.check_circle_outline_rounded,
-            color: colorScheme.onSecondaryContainer,
-            size: 18,
+            color: colorScheme.primary,
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               message,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSecondaryContainer,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
         ],

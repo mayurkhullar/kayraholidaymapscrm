@@ -4,81 +4,107 @@ import '../theme/app_spacing.dart';
 
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({
-    required this.title,
+    this.title,
     super.key,
     this.showMenuButton = false,
     this.onMenuPressed,
   });
 
-  final String title;
+  final String? title;
   final bool showMenuButton;
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize => const Size.fromHeight(52);
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
-          bottom: BorderSide(color: colorScheme.outlineVariant),
+          bottom: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          ),
         ),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
-        // Root cause: the toolbar height is mostly the 48px IconButton row plus
-        // this container padding, so trimming the vertical inset reduces the
-        // global chrome height without changing page-level widgets.
-        vertical: AppSpacing.xs,
       ),
       child: SafeArea(
         bottom: false,
-        child: Row(
-          children: [
-            if (showMenuButton) ...[
-              IconButton(
-                onPressed: onMenuPressed,
-                icon: const Icon(Icons.menu_rounded),
-                tooltip: 'Open navigation',
-              ),
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            Expanded(
-              child: Text(
-                title,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.xs,
+          ),
+          child: SizedBox(
+            height: 36,
+            child: Row(
+              children: [
+                if (showMenuButton) ...[
+                  _TopBarIconButton(
+                    onPressed: onMenuPressed,
+                    icon: Icons.menu_rounded,
+                    tooltip: 'Open navigation',
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                const Spacer(),
+                _TopBarIconButton(
+                  onPressed: () {},
+                  icon: Icons.search_rounded,
+                  tooltip: 'Search',
                 ),
-              ),
+                const SizedBox(width: AppSpacing.xs),
+                _TopBarIconButton(
+                  onPressed: () {},
+                  icon: Icons.notifications_none_rounded,
+                  tooltip: 'Notifications',
+                ),
+                const SizedBox(width: AppSpacing.md),
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.12),
+                  child: Icon(
+                    Icons.person_outline_rounded,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ],
             ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.search_rounded),
-              tooltip: 'Search',
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.notifications_none_rounded),
-              tooltip: 'Notifications',
-            ),
-            const SizedBox(width: AppSpacing.md),
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: colorScheme.primary.withValues(alpha: 0.14),
-              child: Icon(
-                Icons.person_outline_rounded,
-                size: 18,
-                color: colorScheme.primary,
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _TopBarIconButton extends StatelessWidget {
+  const _TopBarIconButton({
+    required this.onPressed,
+    required this.icon,
+    required this.tooltip,
+  });
+
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return IconButton(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+      splashRadius: 18,
+      icon: Icon(
+        icon,
+        size: 20,
+        color: colorScheme.onSurfaceVariant,
       ),
     );
   }

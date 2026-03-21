@@ -10,14 +10,14 @@ class PageContainer extends StatelessWidget {
 
   final Widget child;
 
-  static const double _maxWidth = 1120;
+  static const double _maxWidth = 1180;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final horizontalPadding = constraints.maxWidth >= 1200
-            ? AppSpacing.xxl
+            ? AppSpacing.xl
             : constraints.maxWidth >= 768
                 ? AppSpacing.xl
                 : AppSpacing.lg;
@@ -28,9 +28,6 @@ class PageContainer extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                // Root-cause fix: PageContainer was adding its own top padding
-                // on top of AppShell's top scroll padding, so page headers sat
-                // too low across the shared layout.
                 0,
                 horizontalPadding,
                 AppSpacing.md,
