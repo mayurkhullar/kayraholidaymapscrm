@@ -28,7 +28,7 @@ class PageContainer extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: horizontalPadding,
-                vertical: AppSpacing.sm,
+                vertical: AppSpacing.xs,
               ),
               child: child,
             ),

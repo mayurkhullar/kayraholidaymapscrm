@@ -93,26 +93,31 @@ class _SidebarHeader extends StatelessWidget {
       onPressed: onToggleCollapse,
     );
 
+    if (isCollapsed) {
+      return SizedBox(
+        height: 48,
+        width: double.infinity,
+        child: Center(child: toggleButton),
+      );
+    }
+
     return SizedBox(
       height: 48,
-      child:
-          isCollapsed
-              ? Center(child: toggleButton)
-              : Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Kayra CRM',
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  toggleButton,
-                ],
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Kayra CRM',
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
               ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          toggleButton,
+        ],
+      ),
     );
   }
 }

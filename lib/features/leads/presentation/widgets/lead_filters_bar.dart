@@ -57,7 +57,10 @@ class LeadFiltersBar extends StatelessWidget {
             end: Alignment.bottomRight,
           ),
         ),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
         child: Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.md,

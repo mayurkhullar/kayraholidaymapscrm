@@ -121,10 +121,10 @@ class _LeadsScreenState extends State<LeadsScreen> {
               onCreateLead: () => CreateLeadPanel.show(context),
             ),
             if (_successMessage != null) ...[
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.md),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.lg),
             StreamBuilder<List<LeadModel>>(
               stream: LeadsScreen._leadsStream,
               builder: (context, snapshot) {
@@ -173,7 +173,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                       },
                       onClearFilters: _clearFilters,
                     ),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
                     if (filteredLeads.isEmpty)
                       const EmptyStateView(
                         title: 'No matching leads',

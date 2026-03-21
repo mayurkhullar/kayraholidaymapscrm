@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/section_header.dart';
+import '../../../../core/theme/app_spacing.dart';
 
 class LeadListHeader extends StatelessWidget {
   const LeadListHeader({
@@ -12,17 +12,43 @@ class LeadListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SectionHeader(
-      title: 'Leads',
-      subtitle: 'Manage and monitor all active lead inquiries',
-      action: Align(
-        alignment: Alignment.topRight,
-        child: ElevatedButton.icon(
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Wrap(
+      spacing: AppSpacing.lg,
+      runSpacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      alignment: WrapAlignment.spaceBetween,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Leads',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Manage and monitor all active lead inquiries',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        ElevatedButton.icon(
           onPressed: onCreateLead,
           icon: const Icon(Icons.add_rounded),
           label: const Text('+ New Lead'),
         ),
-      ),
+      ],
     );
   }
 }
