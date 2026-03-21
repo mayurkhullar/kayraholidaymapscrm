@@ -15,18 +15,19 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(48);
+  Size get preferredSize => const Size.fromHeight(64);
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.96),
+        color: const Color(0xFF101827).withValues(alpha: 0.98),
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -35,10 +36,10 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
-            vertical: 6,
+            vertical: AppSpacing.md,
           ),
           child: SizedBox(
-            height: 34,
+            height: 40,
             child: Row(
               children: [
                 if (showMenuButton) ...[
@@ -47,28 +48,117 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                     icon: Icons.menu_rounded,
                     tooltip: 'Open navigation',
                   ),
-                  const SizedBox(width: AppSpacing.sm),
+                  const SizedBox(width: AppSpacing.md),
                 ],
-                const Spacer(),
-                _TopBarIconButton(
-                  onPressed: () {},
-                  icon: Icons.search_rounded,
-                  tooltip: 'Search',
-                ),
-                const SizedBox(width: 2),
-                _TopBarIconButton(
-                  onPressed: () {},
-                  icon: Icons.notifications_none_rounded,
-                  tooltip: 'Notifications',
+                if (title != null)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          title!,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Workspace overview',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.72,
+                            ),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.22,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _TopBarIconButton(
+                        onPressed: () {},
+                        icon: Icons.search_rounded,
+                        tooltip: 'Search',
+                      ),
+                      const SizedBox(width: 2),
+                      _TopBarIconButton(
+                        onPressed: () {},
+                        icon: Icons.notifications_none_rounded,
+                        tooltip: 'Notifications',
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.md),
-                CircleAvatar(
-                  radius: 15,
-                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-                  child: Icon(
-                    Icons.person_outline_rounded,
-                    size: 15,
-                    color: colorScheme.primary,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.18,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor:
+                            colorScheme.primary.withValues(alpha: 0.12),
+                        child: Icon(
+                          Icons.person_outline_rounded,
+                          size: 16,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Workspace',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            'Admin',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.72,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -103,8 +193,12 @@ class _TopBarIconButton extends StatelessWidget {
       splashRadius: 17,
       icon: Icon(
         icon,
-        size: 19,
+        size: 18,
         color: colorScheme.onSurfaceVariant.withValues(alpha: 0.92),
+      ),
+      style: IconButton.styleFrom(
+        backgroundColor: colorScheme.surface.withValues(alpha: 0.22),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

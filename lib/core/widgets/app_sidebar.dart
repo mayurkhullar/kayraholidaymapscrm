@@ -29,9 +29,11 @@ class AppSidebar extends StatelessWidget {
       curve: Curves.easeOutCubic,
       width: isCollapsed ? collapsedWidth : expandedWidth,
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: const Color(0xFF0D1420),
         border: Border(
-          right: BorderSide(color: colorScheme.outlineVariant),
+          right: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.12),
+          ),
         ),
       ),
       child: SafeArea(
@@ -89,6 +91,7 @@ class _SidebarHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final toggleButton = _SidebarToggleButton(
       isCollapsed: isCollapsed,
       onPressed: onToggleCollapse,
@@ -96,25 +99,61 @@ class _SidebarHeader extends StatelessWidget {
 
     if (isCollapsed) {
       return SizedBox(
-        height: 48,
+        height: 56,
         width: double.infinity,
         child: Center(child: toggleButton),
       );
     }
 
-    return SizedBox(
-      height: 48,
-      width: double.infinity,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.14),
+        ),
+      ),
       child: Row(
         children: [
-          Flexible(
-            child: Text(
-              'Kayra CRM',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              Icons.dashboard_customize_rounded,
+              color: colorScheme.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Kayra CRM',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                Text(
+                  'Operations suite',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -158,13 +197,13 @@ class _SidebarToggleButtonState extends State<_SidebarToggleButton> {
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
             color: _isHovered
-                ? colorScheme.primary.withValues(alpha: 0.10)
-                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+                ? colorScheme.primary.withValues(alpha: 0.12)
+                : colorScheme.surface.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _isHovered
-                  ? colorScheme.primary.withValues(alpha: 0.22)
-                  : colorScheme.outlineVariant,
+                  ? colorScheme.primary.withValues(alpha: 0.24)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.16),
             ),
           ),
           child: IconButton(
@@ -209,12 +248,12 @@ class _SidebarItem extends StatelessWidget {
 
     final itemContent = Material(
       color: isActive
-          ? colorScheme.primary.withValues(alpha: 0.12)
+          ? colorScheme.primary.withValues(alpha: 0.14)
           : Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        hoverColor: colorScheme.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(18),
+        hoverColor: colorScheme.surface.withValues(alpha: 0.18),
         onTap: () {
           if (!isActive) {
             Navigator.of(context).pushReplacementNamed(item.route);
@@ -227,6 +266,14 @@ class _SidebarItem extends StatelessWidget {
             horizontal: isCollapsed ? AppSpacing.md : AppSpacing.lg,
             vertical: AppSpacing.md,
           ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isActive
+                  ? colorScheme.primary.withValues(alpha: 0.24)
+                  : Colors.transparent,
+            ),
+          ),
           child: Row(
             mainAxisAlignment:
                 isCollapsed
@@ -236,10 +283,9 @@ class _SidebarItem extends StatelessWidget {
               Icon(
                 item.icon,
                 size: 20,
-                color:
-                    isActive
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
+                color: isActive
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.88),
               ),
               if (!isCollapsed) ...[
                 const SizedBox(width: AppSpacing.md),
@@ -247,8 +293,9 @@ class _SidebarItem extends StatelessWidget {
                   child: Text(
                     item.label,
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color:
-                          isActive ? colorScheme.primary : colorScheme.onSurface,
+                      color: isActive
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurface.withValues(alpha: 0.88),
                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
@@ -266,8 +313,7 @@ class _SidebarItem extends StatelessWidget {
 
     return Tooltip(
       message: item.label,
-      waitDuration: const Duration(milliseconds: 300),
-      preferBelow: false,
+      waitDuration: const Duration(milliseconds: 250),
       child: itemContent,
     );
   }

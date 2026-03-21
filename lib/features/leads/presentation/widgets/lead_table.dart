@@ -53,7 +53,7 @@ class LeadTable extends StatefulWidget {
       leadTableOwnerWidth +
       leadTableUpdatedWidth +
       (AppSpacing.md * (_columns.length - 1)) +
-      (20 * 2);
+      (24 * 2);
 
   @override
   State<LeadTable> createState() => _LeadTableState();
@@ -148,14 +148,21 @@ class _LeadTableState extends State<LeadTable> {
         final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
 
         return ClipRRect(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(22),
           child: Container(
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(18),
+              color: const Color(0xFF0F1723),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.2),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
             ),
             child: Scrollbar(
               controller: _horizontalScrollController,
@@ -169,10 +176,10 @@ class _LeadTableState extends State<LeadTable> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        color: colorScheme.surface.withValues(alpha: 0.28),
+                        color: const Color(0xFF141F2E),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 14,
+                          horizontal: 24,
+                          vertical: 16,
                         ),
                         child: Row(
                           children: [
@@ -200,13 +207,14 @@ class _LeadTableState extends State<LeadTable> {
                       Divider(
                         height: 1,
                         thickness: 1,
-                        color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.18),
                       ),
                       Column(
                         children: [
                           for (var index = 0; index < sortedLeads.length; index++) ...[
                             LeadTableRowItem(
                               lead: sortedLeads[index],
+                              index: index,
                               onTap: widget.onLeadTap == null
                                   ? null
                                   : () => widget.onLeadTap!(sortedLeads[index]),
@@ -216,7 +224,7 @@ class _LeadTableState extends State<LeadTable> {
                                 height: 1,
                                 thickness: 1,
                                 color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.42,
+                                  alpha: 0.12,
                                 ),
                               ),
                           ],
@@ -257,10 +265,10 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final textStyle = theme.textTheme.labelLarge?.copyWith(
       color: isActive
-          ? colorScheme.onSurface.withValues(alpha: 0.96)
-          : colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+          ? colorScheme.onSurface
+          : colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
       fontWeight: FontWeight.w700,
-      letterSpacing: 0.1,
+      letterSpacing: 0.24,
     );
 
     return Padding(
@@ -274,12 +282,12 @@ class _LeadTableHeaderCell extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(10),
-                  hoverColor: colorScheme.primary.withValues(alpha: 0.035),
-                  splashColor: colorScheme.primary.withValues(alpha: 0.05),
+                  hoverColor: colorScheme.primary.withValues(alpha: 0.045),
+                  splashColor: colorScheme.primary.withValues(alpha: 0.06),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm,
-                      vertical: 2,
+                      vertical: 4,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -293,12 +301,12 @@ class _LeadTableHeaderCell extends StatelessWidget {
                         ),
                         if (isActive) ...[
                           const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            isAscending ? '↑' : '↓',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          Icon(
+                            isAscending
+                                ? Icons.arrow_upward_rounded
+                                : Icons.arrow_downward_rounded,
+                            size: 15,
+                            color: colorScheme.primary,
                           ),
                         ],
                       ],

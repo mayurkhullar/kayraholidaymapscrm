@@ -17,7 +17,7 @@ class PageContainer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final horizontalPadding = constraints.maxWidth >= 1200
-            ? AppSpacing.lg
+            ? AppSpacing.xl
             : constraints.maxWidth >= 768
                 ? AppSpacing.lg
                 : AppSpacing.md;
@@ -28,9 +28,9 @@ class PageContainer extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                0,
+                AppSpacing.xl,
                 horizontalPadding,
-                AppSpacing.sm,
+                AppSpacing.xl,
               ),
               child: child,
             ),

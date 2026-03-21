@@ -43,94 +43,156 @@ class LeadFiltersBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final inputDecorationTheme = theme.inputDecorationTheme;
+
+    final controlTheme = theme.copyWith(
+      inputDecorationTheme: inputDecorationTheme.copyWith(
+        filled: true,
+        fillColor: const Color(0xFF0F1723),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: colorScheme.primary.withValues(alpha: 0.48),
+          ),
+        ),
+        labelStyle: theme.textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
+        ),
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.68),
+        ),
+      ),
+    );
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFF111A27),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.16),
         ),
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Theme(
-        data: theme,
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
+        data: controlTheme,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 240, maxWidth: 336),
-              child: TextField(
-                controller: searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Search by client or destination',
-                  prefixIcon: Icon(Icons.search_rounded),
-                  isDense: true,
-                ),
+            Text(
+              'Refine lead view',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.1,
               ),
             ),
-            SizedBox(
-              width: 206,
-              child: DropdownButtonFormField<String?>(
-                value: selectedStage,
-                decoration: const InputDecoration(
-                  labelText: 'Stage',
-                  isDense: true,
-                ),
-                items: _stageOptions
-                    .map(
-                      (option) => DropdownMenuItem<String?>(
-                        value: option.value,
-                        child: Text(option.label),
+            const SizedBox(height: 4),
+            Text(
+              'Search and narrow the pipeline without changing the current workflow.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Wrap(
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.md,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: 260,
+                    maxWidth: 380,
+                  ),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search by client, destination, or lead code',
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.76,
+                        ),
                       ),
-                    )
-                    .toList(growable: false),
-                onChanged: onStageChanged,
-              ),
-            ),
-            SizedBox(
-              width: 206,
-              child: DropdownButtonFormField<String?>(
-                value: selectedTravelType,
-                decoration: const InputDecoration(
-                  labelText: 'Travel Type',
-                  isDense: true,
+                      isDense: true,
+                    ),
+                  ),
                 ),
-                items: _travelTypeOptions
-                    .map(
-                      (option) => DropdownMenuItem<String?>(
-                        value: option.value,
-                        child: Text(option.label),
-                      ),
-                    )
-                    .toList(growable: false),
-                onChanged: onTravelTypeChanged,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: onClearFilters,
-              icon: const Icon(Icons.restart_alt_rounded, size: 18),
-              label: const Text('Clear Filters'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: colorScheme.onSurfaceVariant,
-                visualDensity: VisualDensity.compact,
-                minimumSize: const Size(0, 44),
-                side: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.68),
+                SizedBox(
+                  width: 210,
+                  child: DropdownButtonFormField<String?>(
+                    value: selectedStage,
+                    decoration: const InputDecoration(
+                      labelText: 'Stage',
+                      isDense: true,
+                    ),
+                    items: _stageOptions
+                        .map(
+                          (option) => DropdownMenuItem<String?>(
+                            value: option.value,
+                            child: Text(option.label),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: onStageChanged,
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: 13,
+                SizedBox(
+                  width: 210,
+                  child: DropdownButtonFormField<String?>(
+                    value: selectedTravelType,
+                    decoration: const InputDecoration(
+                      labelText: 'Travel Type',
+                      isDense: true,
+                    ),
+                    items: _travelTypeOptions
+                        .map(
+                          (option) => DropdownMenuItem<String?>(
+                            value: option.value,
+                            child: Text(option.label),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: onTravelTypeChanged,
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                OutlinedButton.icon(
+                  onPressed: onClearFilters,
+                  icon: const Icon(Icons.restart_alt_rounded, size: 18),
+                  label: const Text('Clear Filters'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colorScheme.onSurface,
+                    visualDensity: VisualDensity.compact,
+                    minimumSize: const Size(0, 48),
+                    side: BorderSide(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.28),
+                    ),
+                    backgroundColor: colorScheme.surface.withValues(alpha: 0.16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

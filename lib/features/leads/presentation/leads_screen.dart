@@ -76,8 +76,8 @@ class _LeadsScreenState extends State<LeadsScreen> {
           lead.clientNameSnapshot?.toLowerCase().contains(query) == true ||
           lead.destination?.toLowerCase().contains(query) == true ||
           lead.leadCode.toLowerCase().contains(query);
-      final matchesStage =
-          _selectedStage == null || lead.leadStage.firestoreValue == _selectedStage;
+      final matchesStage = _selectedStage == null ||
+          lead.leadStage.firestoreValue == _selectedStage;
       final matchesTravelType = _selectedTravelType == null ||
           lead.travelType.firestoreValue == _selectedTravelType;
 
@@ -111,6 +111,9 @@ class _LeadsScreenState extends State<LeadsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return AppShell(
       pageTitle: 'Leads',
       child: PageContainer(
@@ -124,71 +127,88 @@ class _LeadsScreenState extends State<LeadsScreen> {
               const SizedBox(height: AppSpacing.md),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            const SizedBox(height: AppSpacing.md),
-            StreamBuilder<List<LeadModel>>(
-              stream: LeadsScreen._leadsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return EmptyStateView(
-                    title: 'Unable to load leads',
-                    message:
-                        'There was a problem loading active leads. Please try again shortly.',
-                    icon: Icons.error_outline_rounded,
-                  );
-                }
+            const SizedBox(height: AppSpacing.xl),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF182334),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 28,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: StreamBuilder<List<LeadModel>>(
+                stream: LeadsScreen._leadsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const EmptyStateView(
+                      title: 'Unable to load leads',
+                      message:
+                          'There was a problem loading active leads. Please try again shortly.',
+                      icon: Icons.error_outline_rounded,
+                    );
+                  }
 
-                if (snapshot.connectionState == ConnectionState.waiting &&
-                    !snapshot.hasData) {
-                  return const _LeadTableLoadingState();
-                }
+                  if (snapshot.connectionState == ConnectionState.waiting &&
+                      !snapshot.hasData) {
+                    return const _LeadTableLoadingState();
+                  }
 
-                final leads = snapshot.data ?? const <LeadModel>[];
+                  final leads = snapshot.data ?? const <LeadModel>[];
 
-                if (leads.isEmpty) {
-                  return const EmptyStateView(
-                    title: 'No leads found',
-                    message: 'Create your first lead to get started.',
-                    icon: Icons.people_outline_rounded,
-                  );
-                }
+                  if (leads.isEmpty) {
+                    return const EmptyStateView(
+                      title: 'No leads found',
+                      message: 'Create your first lead to get started.',
+                      icon: Icons.people_outline_rounded,
+                    );
+                  }
 
-                final filteredLeads = _applyFilters(leads);
+                  final filteredLeads = _applyFilters(leads);
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LeadFiltersBar(
-                      searchController: _searchController,
-                      selectedStage: _selectedStage,
-                      selectedTravelType: _selectedTravelType,
-                      onStageChanged: (value) {
-                        setState(() {
-                          _selectedStage = value;
-                        });
-                      },
-                      onTravelTypeChanged: (value) {
-                        setState(() {
-                          _selectedTravelType = value;
-                        });
-                      },
-                      onClearFilters: _clearFilters,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    if (filteredLeads.isEmpty)
-                      const EmptyStateView(
-                        title: 'No matching leads',
-                        message:
-                            'Try adjusting your search, stage, or travel type filters.',
-                        icon: Icons.filter_alt_off_rounded,
-                      )
-                    else
-                      LeadTable(
-                        leads: filteredLeads,
-                        onLeadTap: _openLeadDetails,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LeadFiltersBar(
+                        searchController: _searchController,
+                        selectedStage: _selectedStage,
+                        selectedTravelType: _selectedTravelType,
+                        onStageChanged: (value) {
+                          setState(() {
+                            _selectedStage = value;
+                          });
+                        },
+                        onTravelTypeChanged: (value) {
+                          setState(() {
+                            _selectedTravelType = value;
+                          });
+                        },
+                        onClearFilters: _clearFilters,
                       ),
-                  ],
-                );
-              },
+                      const SizedBox(height: AppSpacing.md),
+                      if (filteredLeads.isEmpty)
+                        const EmptyStateView(
+                          title: 'No matching leads',
+                          message:
+                              'Try adjusting your search, stage, or travel type filters.',
+                          icon: Icons.filter_alt_off_rounded,
+                        )
+                      else
+                        LeadTable(
+                          leads: filteredLeads,
+                          onLeadTap: _openLeadDetails,
+                        ),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -205,7 +225,14 @@ class _LeadTableLoadingState extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF121B29),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(

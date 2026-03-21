@@ -17,11 +17,13 @@ const double leadTableUpdatedWidth = 140;
 class LeadTableRowItem extends StatefulWidget {
   const LeadTableRowItem({
     required this.lead,
+    required this.index,
     super.key,
     this.onTap,
   });
 
   final LeadModel lead;
+  final int index;
   final VoidCallback? onTap;
 
   @override
@@ -45,7 +47,10 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hoverColor = colorScheme.primary.withValues(alpha: 0.03);
+    final baseColor = widget.index.isEven
+        ? Colors.transparent
+        : colorScheme.surface.withValues(alpha: 0.08);
+    final hoverColor = colorScheme.primary.withValues(alpha: 0.05);
 
     return MouseRegion(
       cursor: widget.onTap == null
@@ -56,18 +61,18 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
-        color: _isHovered ? hoverColor : Colors.transparent,
+        color: _isHovered ? hoverColor : baseColor,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
             hoverColor: Colors.transparent,
-            highlightColor: colorScheme.primary.withValues(alpha: 0.045),
-            splashColor: colorScheme.primary.withValues(alpha: 0.06),
+            highlightColor: colorScheme.primary.withValues(alpha: 0.06),
+            splashColor: colorScheme.primary.withValues(alpha: 0.08),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 14,
+                horizontal: 24,
+                vertical: 16,
               ),
               child: Row(
                 children: [
@@ -77,6 +82,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                       _fallback(widget.lead.leadCode, '—'),
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 0.1,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -103,7 +109,9 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     width: leadTableTravelTypeWidth,
                     child: Text(
                       _travelTypeLabel(widget.lead.travelType),
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.92),
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -111,7 +119,9 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     width: leadTableBudgetWidth,
                     child: Text(
                       _formatBudget(widget.lead.budget),
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -130,7 +140,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _fallback(widget.lead.leadOwnerId, 'Unassigned'),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -141,7 +151,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _formatDate(widget.lead.updatedAt),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.84),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -206,7 +216,7 @@ class _PrimarySecondaryText extends StatelessWidget {
           Text(
             secondaryText,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.82),
             ),
             overflow: TextOverflow.ellipsis,
           ),
