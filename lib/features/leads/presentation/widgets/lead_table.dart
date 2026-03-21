@@ -30,7 +30,8 @@ class LeadTable extends StatelessWidget {
       leadTableStageWidth +
       leadTableOwnerWidth +
       leadTableUpdatedWidth +
-      (AppSpacing.md * (_columns.length - 1));
+      (AppSpacing.md * (_columns.length - 1)) +
+      (AppSpacing.xl * 2);
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +49,7 @@ class LeadTable extends StatelessWidget {
               border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -70,18 +72,18 @@ class LeadTable extends StatelessWidget {
                   thickness: 1,
                   color: colorScheme.outlineVariant,
                 ),
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: leads.length,
-                  separatorBuilder: (context, index) => Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.7),
-                  ),
-                  itemBuilder: (context, index) {
-                    return LeadTableRowItem(lead: leads[index]);
-                  },
+                Column(
+                  children: [
+                    for (var index = 0; index < leads.length; index++) ...[
+                      LeadTableRowItem(lead: leads[index]),
+                      if (index < leads.length - 1)
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+                        ),
+                    ],
+                  ],
                 ),
               ],
             ),
