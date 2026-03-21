@@ -14,7 +14,7 @@ const double leadTableStageWidth = 140;
 const double leadTableOwnerWidth = 120;
 const double leadTableUpdatedWidth = 140;
 
-class LeadTableRowItem extends StatelessWidget {
+class LeadTableRowItem extends StatefulWidget {
   const LeadTableRowItem({
     required this.lead,
     super.key,
@@ -25,96 +25,130 @@ class LeadTableRowItem extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<LeadTableRowItem> createState() => _LeadTableRowItemState();
+}
+
+class _LeadTableRowItemState extends State<LeadTableRowItem> {
+  bool _isHovered = false;
+
+  void _setHovered(bool value) {
+    if (_isHovered == value) {
+      return;
+    }
+
+    setState(() {
+      _isHovered = value;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final hoverColor = colorScheme.primary.withValues(alpha: 0.035);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        hoverColor: colorScheme.primary.withValues(alpha: 0.04),
-        splashColor: colorScheme.primary.withValues(alpha: 0.06),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.lg,
-          ),
-          child: Row(
-            children: [
-              _LeadTableCell(
-                width: leadTableLeadCodeWidth,
-                child: Text(
-                  _fallback(lead.leadCode, '—'),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+    return MouseRegion(
+      cursor: widget.onTap == null
+          ? MouseCursor.defer
+          : SystemMouseCursors.click,
+      onEnter: (_) => _setHovered(true),
+      onExit: (_) => _setHovered(false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        color: _isHovered ? hoverColor : Colors.transparent,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            hoverColor: Colors.transparent,
+            highlightColor: colorScheme.primary.withValues(alpha: 0.05),
+            splashColor: colorScheme.primary.withValues(alpha: 0.07),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.lg,
+              ),
+              child: Row(
+                children: [
+                  _LeadTableCell(
+                    width: leadTableLeadCodeWidth,
+                    child: Text(
+                      _fallback(widget.lead.leadCode, '—'),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _LeadTableCell(
-                width: leadTableClientWidth,
-                child: _PrimarySecondaryText(
-                  primary: _fallback(lead.clientNameSnapshot, 'Unknown client'),
-                  secondary: lead.companyNameSnapshot,
-                ),
-              ),
-              _LeadTableCell(
-                width: leadTableDestinationWidth,
-                child: Text(
-                  _fallback(lead.destination, 'Not specified'),
-                  style: theme.textTheme.bodyMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _LeadTableCell(
-                width: leadTableTravelTypeWidth,
-                child: Text(
-                  _travelTypeLabel(lead.travelType),
-                  style: theme.textTheme.bodyMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _LeadTableCell(
-                width: leadTableBudgetWidth,
-                child: Text(
-                  _formatBudget(lead.budget),
-                  style: theme.textTheme.bodyMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _LeadTableCell(
-                width: leadTableStageWidth,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: StatusTag(
-                    label: _leadStageLabel(lead.leadStage),
-                    type: _leadStageTagType(lead.leadStage),
+                  _LeadTableCell(
+                    width: leadTableClientWidth,
+                    child: _PrimarySecondaryText(
+                      primary: _fallback(
+                        widget.lead.clientNameSnapshot,
+                        'Unknown client',
+                      ),
+                      secondary: widget.lead.companyNameSnapshot,
+                    ),
                   ),
-                ),
-              ),
-              _LeadTableCell(
-                width: leadTableOwnerWidth,
-                child: Text(
-                  _fallback(lead.leadOwnerId, 'Unassigned'),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                  _LeadTableCell(
+                    width: leadTableDestinationWidth,
+                    child: Text(
+                      _fallback(widget.lead.destination, 'Not specified'),
+                      style: theme.textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _LeadTableCell(
-                width: leadTableUpdatedWidth,
-                isLast: true,
-                child: Text(
-                  _formatDate(lead.updatedAt),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                  _LeadTableCell(
+                    width: leadTableTravelTypeWidth,
+                    child: Text(
+                      _travelTypeLabel(widget.lead.travelType),
+                      style: theme.textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                  _LeadTableCell(
+                    width: leadTableBudgetWidth,
+                    child: Text(
+                      _formatBudget(widget.lead.budget),
+                      style: theme.textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  _LeadTableCell(
+                    width: leadTableStageWidth,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: StatusTag(
+                        label: _leadStageLabel(widget.lead.leadStage),
+                        type: _leadStageTagType(widget.lead.leadStage),
+                      ),
+                    ),
+                  ),
+                  _LeadTableCell(
+                    width: leadTableOwnerWidth,
+                    child: Text(
+                      _fallback(widget.lead.leadOwnerId, 'Unassigned'),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  _LeadTableCell(
+                    width: leadTableUpdatedWidth,
+                    isLast: true,
+                    child: Text(
+                      _formatDate(widget.lead.updatedAt),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
