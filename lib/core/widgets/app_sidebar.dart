@@ -36,8 +36,9 @@ class AppSidebar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(
-            isCollapsed ? AppSpacing.md : AppSpacing.xl,
+          padding: EdgeInsets.symmetric(
+            horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.xl,
+            vertical: isCollapsed ? AppSpacing.md : AppSpacing.xl,
           ),
           child: Column(
             crossAxisAlignment:
@@ -103,11 +104,13 @@ class _SidebarHeader extends StatelessWidget {
 
     return SizedBox(
       height: 48,
+      width: double.infinity,
       child: Row(
         children: [
-          Expanded(
+          Flexible(
             child: Text(
               'Kayra CRM',
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
