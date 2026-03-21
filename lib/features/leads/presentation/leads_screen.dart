@@ -41,49 +41,50 @@ class _LeadsScreenState extends State<LeadsScreen> {
     });
 
     final leadsCollection = FirebaseFirestore.instance.collection('leads');
+    final leadOne = <String, dynamic>{
+      'leadCode': 'LD-001',
+      'clientNameSnapshot': 'John Doe',
+      'destination': 'Dubai',
+      'travelType': 'fit',
+      'tripScope': 'international',
+      'leadStage': 'newLead',
+      'leadOwnerId': 'EMP001',
+      'isArchived': false,
+      'createdAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+    };
+    final leadTwo = <String, dynamic>{
+      'leadCode': 'LD-002',
+      'clientNameSnapshot': 'Sarah Khan',
+      'destination': 'Singapore',
+      'travelType': 'corporate',
+      'tripScope': 'international',
+      'leadStage': 'contacted',
+      'leadOwnerId': 'EMP002',
+      'isArchived': false,
+      'createdAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+    };
+    final leadThree = <String, dynamic>{
+      'leadCode': 'LD-003',
+      'clientNameSnapshot': 'Rahul Mehta',
+      'destination': 'Bali',
+      'travelType': 'fit',
+      'tripScope': 'international',
+      'leadStage': 'quotationSent',
+      'leadOwnerId': 'EMP001',
+      'isArchived': false,
+      'createdAt': Timestamp.now(),
+      'updatedAt': Timestamp.now(),
+    };
 
     try {
-      await leadsCollection.add(<String, dynamic>{
-        'leadCode': 'LD-001',
-        'clientNameSnapshot': 'John Doe',
-        'destination': 'Dubai',
-        'travelType': 'fit',
-        'tripScope': 'international',
-        'leadStage': 'newLead',
-        'leadOwnerId': 'EMP001',
-        'isArchived': false,
-        'createdAt': Timestamp.now(),
-        'updatedAt': Timestamp.now(),
-      });
-      print('Lead inserted: LD-001');
-
-      await leadsCollection.add(<String, dynamic>{
-        'leadCode': 'LD-002',
-        'clientNameSnapshot': 'Sarah Khan',
-        'destination': 'Singapore',
-        'travelType': 'corporate',
-        'tripScope': 'international',
-        'leadStage': 'contacted',
-        'leadOwnerId': 'EMP002',
-        'isArchived': false,
-        'createdAt': Timestamp.now(),
-        'updatedAt': Timestamp.now(),
-      });
-      print('Lead inserted: LD-002');
-
-      await leadsCollection.add(<String, dynamic>{
-        'leadCode': 'LD-003',
-        'clientNameSnapshot': 'Rahul Mehta',
-        'destination': 'Bali',
-        'travelType': 'fit',
-        'tripScope': 'international',
-        'leadStage': 'quotationSent',
-        'leadOwnerId': 'EMP001',
-        'isArchived': false,
-        'createdAt': Timestamp.now(),
-        'updatedAt': Timestamp.now(),
-      });
-      print('Lead inserted: LD-003');
+      await Future.wait<void>([
+        leadsCollection.doc('seed_ld_001').set(leadOne),
+        leadsCollection.doc('seed_ld_002').set(leadTwo),
+        leadsCollection.doc('seed_ld_003').set(leadThree),
+      ]);
+      print('Dummy leads seeded successfully');
 
       if (!mounted) {
         return;
