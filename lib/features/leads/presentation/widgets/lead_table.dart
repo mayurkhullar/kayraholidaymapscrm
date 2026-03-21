@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
@@ -43,61 +45,75 @@ class LeadTable extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Card(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: _tableContentWidth),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: colorScheme.outlineVariant),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xl,
-                    vertical: AppSpacing.lg,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final viewportWidth = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : _tableContentWidth;
+          final tableWidth = math.max(viewportWidth, _tableContentWidth);
+
+          return Scrollbar(
+            thumbVisibility: tableWidth > viewportWidth,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: tableWidth),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: colorScheme.outlineVariant),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (var index = 0; index < _columns.length; index++)
-                        _LeadTableHeaderCell(
-                          label: _columns[index].label,
-                          width: _columns[index].width,
-                          isLast: index == _columns.length - 1,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xl,
+                          vertical: AppSpacing.lg,
                         ),
+                        child: Row(
+                          children: [
+                            for (var index = 0; index < _columns.length; index++)
+                              _LeadTableHeaderCell(
+                                label: _columns[index].label,
+                                width: _columns[index].width,
+                                isLast: index == _columns.length - 1,
+                              ),
+                          ],
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: colorScheme.outlineVariant,
+                      ),
+                      Column(
+                        children: [
+                          for (var index = 0; index < leads.length; index++) ...[
+                            LeadTableRowItem(
+                              lead: leads[index],
+                              onTap: onLeadTap == null
+                                  ? null
+                                  : () => onLeadTap!(leads[index]),
+                            ),
+                            if (index < leads.length - 1)
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: colorScheme.outlineVariant.withValues(
+                                  alpha: 0.7,
+                                ),
+                              ),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                 ),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: colorScheme.outlineVariant,
-                ),
-                Column(
-                  children: [
-                    for (var index = 0; index < leads.length; index++) ...[
-                      LeadTableRowItem(
-                        lead: leads[index],
-                        onTap: onLeadTap == null
-                            ? null
-                            : () => onLeadTap!(leads[index]),
-                      ),
-                      if (index < leads.length - 1)
-                        Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
-                        ),
-                    ],
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
