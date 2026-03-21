@@ -105,7 +105,84 @@ class _LeadDetailPanelDialog extends StatelessWidget {
 }
 
 class _LeadDetailPanelState extends State<LeadDetailPanel> {
+  static const List<LeadStage> _stageOptions = LeadStage.values;
+
   bool _isArchiving = false;
+  bool _isUpdatingStage = false;
+  late LeadStage _selectedLeadStage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLeadStage = widget.lead.leadStage;
+  }
+
+  @override
+  void didUpdateWidget(covariant LeadDetailPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.lead.id != widget.lead.id ||
+        oldWidget.lead.leadStage != widget.lead.leadStage) {
+      _selectedLeadStage = widget.lead.leadStage;
+    }
+  }
+
+  Future<void> _updateLeadStage() async {
+    if (_isUpdatingStage || _isArchiving) {
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    if (_selectedLeadStage == widget.lead.leadStage) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('No changes to update'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isUpdatingStage = true;
+    });
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('leads')
+          .doc(widget.lead.id)
+          .update({
+            'leadStage': _selectedLeadStage.firestoreValue,
+            'updatedAt': Timestamp.now(),
+          });
+
+      if (!mounted) {
+        return;
+      }
+
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Lead stage updated'),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Unable to update lead stage right now'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingStage = false;
+        });
+      }
+    }
+  }
 
   Future<void> _archiveLead() async {
     if (_isArchiving) {
@@ -214,7 +291,7 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                     const SizedBox(width: AppSpacing.md),
                     IconButton(
                       tooltip: 'Close',
-                      onPressed: _isArchiving
+                      onPressed: _isArchiving || _isUpdatingStage
                           ? null
                           : () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close_rounded),
@@ -252,10 +329,6 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                               value: _tripScopeLabel(widget.lead.tripScope),
                             ),
                             _LeadDetailItem(
-                              label: 'Stage',
-                              value: _leadStageLabel(widget.lead.leadStage),
-                            ),
-                            _LeadDetailItem(
                               label: 'Owner',
                               value: _fallback(
                                 widget.lead.leadOwnerId,
@@ -281,6 +354,56 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _LeadDetailCard(
+                          children: [
+                            _LeadSectionHeader(
+                              title: 'Lead Stage',
+                              subtitle:
+                                  'Update the stage directly without changing other lead details.',
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            DropdownButtonFormField<LeadStage>(
+                              value: _selectedLeadStage,
+                              decoration: const InputDecoration(
+                                labelText: 'Lead Stage',
+                              ),
+                              items: _stageOptions
+                                  .map(
+                                    (stage) => DropdownMenuItem<LeadStage>(
+                                      value: stage,
+                                      child: Text(_leadStageLabel(stage)),
+                                    ),
+                                  )
+                                  .toList(growable: false),
+                              onChanged: _isUpdatingStage || _isArchiving
+                                  ? null
+                                  : (value) {
+                                      if (value == null) {
+                                        return;
+                                      }
+
+                                      setState(() {
+                                        _selectedLeadStage = value;
+                                      });
+                                    },
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                onPressed: _isUpdatingStage || _isArchiving
+                                    ? null
+                                    : _updateLeadStage,
+                                child: Text(
+                                  _isUpdatingStage
+                                      ? 'Updating Stage...'
+                                      : 'Update Stage',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -290,7 +413,7 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isArchiving
+                        onPressed: _isArchiving || _isUpdatingStage
                             ? null
                             : () => Navigator.of(context).pop(),
                         child: const Text('Close'),
@@ -299,7 +422,9 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: FilledButton(
-                        onPressed: _isArchiving ? null : _archiveLead,
+                        onPressed: _isArchiving || _isUpdatingStage
+                            ? null
+                            : _archiveLead,
                         style: FilledButton.styleFrom(
                           backgroundColor: colorScheme.error,
                           foregroundColor: colorScheme.onError,
@@ -338,8 +463,41 @@ class _LeadDetailCard extends StatelessWidget {
         border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
       ),
+    );
+  }
+}
+
+class _LeadSectionHeader extends StatelessWidget {
+  const _LeadSectionHeader({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          subtitle,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
