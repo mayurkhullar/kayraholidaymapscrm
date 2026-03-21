@@ -267,6 +267,10 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                               value: _formatBudget(widget.lead.budget),
                             ),
                             _LeadDetailItem(
+                              label: 'Budget Type',
+                              value: _formatBudgetType(widget.lead.budgetType),
+                            ),
+                            _LeadDetailItem(
                               label: 'Created',
                               value: _formatDateTime(widget.lead.createdAt),
                             ),
@@ -436,13 +440,23 @@ String _leadStageLabel(LeadStage leadStage) {
   }
 }
 
-String _formatBudget(num? value) {
+String _formatBudget(int? value) {
   if (value == null) {
     return '—';
   }
 
-  final wholeValue = value.toInt() == value;
-  return wholeValue ? '\$${value.toInt()}' : '\$${value.toStringAsFixed(2)}';
+  return '₹ $value';
+}
+
+String _formatBudgetType(String? value) {
+  switch (value) {
+    case 'WITH_FLIGHTS':
+      return 'With Flights';
+    case 'WITHOUT_FLIGHTS':
+      return 'Without Flights';
+    default:
+      return '—';
+  }
 }
 
 String _formatDateTime(DateTime? value) {

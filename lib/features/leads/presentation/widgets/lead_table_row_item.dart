@@ -9,6 +9,7 @@ const double leadTableLeadCodeWidth = 120;
 const double leadTableClientWidth = 180;
 const double leadTableDestinationWidth = 140;
 const double leadTableTravelTypeWidth = 120;
+const double leadTableBudgetWidth = 120;
 const double leadTableStageWidth = 140;
 const double leadTableOwnerWidth = 120;
 const double leadTableUpdatedWidth = 140;
@@ -70,6 +71,14 @@ class LeadTableRowItem extends StatelessWidget {
                 width: leadTableTravelTypeWidth,
                 child: Text(
                   _travelTypeLabel(lead.travelType),
+                  style: theme.textTheme.bodyMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              _LeadTableCell(
+                width: leadTableBudgetWidth,
+                child: Text(
+                  _formatBudget(lead.budget),
                   style: theme.textTheme.bodyMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -256,4 +265,12 @@ String _formatDate(DateTime? value) {
 
   final day = value.day.toString().padLeft(2, '0');
   return '$day $month ${value.year}';
+}
+
+String _formatBudget(int? value) {
+  if (value == null) {
+    return '—';
+  }
+
+  return '₹ $value';
 }

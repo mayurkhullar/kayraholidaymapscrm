@@ -21,6 +21,7 @@ class LeadModel {
     this.travelDates,
     this.passengerCount,
     this.budget,
+    this.budgetType,
     required this.leadStage,
     this.leadHealth,
     this.onHoldReason,
@@ -65,7 +66,8 @@ class LeadModel {
   final String? destination;
   final LeadTravelDatesModel? travelDates;
   final PassengerCountModel? passengerCount;
-  final num? budget;
+  final int? budget;
+  final String? budgetType;
   final LeadStage leadStage;
   final LeadHealthModel? leadHealth;
   final String? onHoldReason;
@@ -111,7 +113,8 @@ class LeadModel {
       destination: map['destination'] as String?,
       travelDates: _leadTravelDatesFromDynamic(map['travelDates']),
       passengerCount: _passengerCountFromDynamic(map['passengerCount']),
-      budget: map['budget'] as num?,
+      budget: _budgetFromDynamic(map['budget']),
+      budgetType: map['budgetType'] as String?,
       leadStage: _leadStageFromDynamic(map['leadStage']),
       leadHealth: _leadHealthFromDynamic(map['leadHealth']),
       onHoldReason: map['onHoldReason'] as String?,
@@ -162,6 +165,7 @@ class LeadModel {
       'travelDates': travelDates?.toMap(),
       'passengerCount': passengerCount?.toMap(),
       'budget': budget,
+      'budgetType': budgetType,
       'leadStage': leadStage.firestoreValue,
       'leadHealth': leadHealth?.toMap(),
       'onHoldReason': onHoldReason,
@@ -208,7 +212,8 @@ class LeadModel {
     String? destination,
     LeadTravelDatesModel? travelDates,
     PassengerCountModel? passengerCount,
-    num? budget,
+    int? budget,
+    String? budgetType,
     LeadStage? leadStage,
     LeadHealthModel? leadHealth,
     String? onHoldReason,
@@ -254,6 +259,7 @@ class LeadModel {
       travelDates: travelDates ?? this.travelDates,
       passengerCount: passengerCount ?? this.passengerCount,
       budget: budget ?? this.budget,
+      budgetType: budgetType ?? this.budgetType,
       leadStage: leadStage ?? this.leadStage,
       leadHealth: leadHealth ?? this.leadHealth,
       onHoldReason: onHoldReason ?? this.onHoldReason,
@@ -317,6 +323,26 @@ List<String> _stringListFromDynamic(dynamic value) {
   }
 
   return const <String>[];
+}
+
+int? _budgetFromDynamic(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+
+  if (value is int) {
+    return value;
+  }
+
+  if (value is num) {
+    return value.toInt();
+  }
+
+  if (value is String) {
+    return int.tryParse(value.trim());
+  }
+
+  return null;
 }
 
 Map<String, dynamic>? _mapFromDynamic(dynamic value) {

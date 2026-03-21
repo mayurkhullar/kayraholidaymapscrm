@@ -87,6 +87,7 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
 
   String _travelType = 'fit';
   String _tripScope = 'international';
+  String? _budgetType;
   bool _isSubmitting = false;
 
   static const List<DropdownMenuItem<String>> _travelTypeItems = [
@@ -99,6 +100,17 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
   static const List<DropdownMenuItem<String>> _tripScopeItems = [
     DropdownMenuItem(value: 'domestic', child: Text('domestic')),
     DropdownMenuItem(value: 'international', child: Text('international')),
+  ];
+
+  static const List<DropdownMenuItem<String>> _budgetTypeItems = [
+    DropdownMenuItem(
+      value: 'WITH_FLIGHTS',
+      child: Text('With Flights'),
+    ),
+    DropdownMenuItem(
+      value: 'WITHOUT_FLIGHTS',
+      child: Text('Without Flights'),
+    ),
   ];
 
   @override
@@ -121,28 +133,52 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
     final destination = _destinationController.text.trim();
     final normalizedDestination = destination.toLowerCase();
     final budgetValue = _budgetController.text.trim();
-    final budget = budgetValue.isEmpty ? null : num.tryParse(budgetValue);
-    final timestamp = Timestamp.now();
+    final budget = budgetValue.isEmpty ? null : int.tryParse(budgetValue);
+    final budgetType = _budgetType;
 
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      await FirebaseFirestore.instance.collection('leads').add({
-        'leadCode': 'LD-${DateTime.now().millisecondsSinceEpoch}',
-        'clientNameSnapshot': clientName,
-        'destination': destination,
-        'destinationSearch': normalizedDestination,
-        'normalizedDestination': normalizedDestination,
-        'travelType': _travelType,
-        'tripScope': _tripScope,
-        'leadStage': 'newLead',
-        'leadOwnerId': 'EMP001',
-        'isArchived': false,
-        'budget': budget,
-        'createdAt': timestamp,
-        'updatedAt': timestamp,
+      final firestore = FirebaseFirestore.instance;
+      final leadsCollection = firestore.collection('leads');
+      final leadDocument = leadsCollection.doc();
+
+      await firestore.runTransaction((transaction) async {
+        final counterReference = firestore.collection('counters').doc('lead_2026');
+        final counterSnapshot = await transaction.get(counterReference);
+        final current = (counterSnapshot.data()?['current'] as num?)?.toInt() ?? 0;
+        final next = current + 1;
+        final now = Timestamp.now();
+        final leadCode = 'LD-2026-${next.toString().padLeft(4, '0')}';
+
+        if (counterSnapshot.exists) {
+          transaction.update(counterReference, <String, dynamic>{
+            'current': next,
+          });
+        } else {
+          transaction.set(counterReference, <String, dynamic>{
+            'current': next,
+          });
+        }
+
+        transaction.set(leadDocument, <String, dynamic>{
+          'leadCode': leadCode,
+          'clientNameSnapshot': clientName,
+          'destination': destination,
+          'destinationSearch': normalizedDestination,
+          'normalizedDestination': normalizedDestination,
+          'travelType': _travelType,
+          'tripScope': _tripScope,
+          'leadStage': 'newLead',
+          'leadOwnerId': 'EMP001',
+          'isArchived': false,
+          'budget': budget,
+          'budgetType': budgetType,
+          'createdAt': now,
+          'updatedAt': now,
+        });
       });
 
       if (!mounted) {
@@ -314,12 +350,44 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
                           const SizedBox(height: AppSpacing.lg),
                           TextFormField(
                             controller: _budgetController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
+                            keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: 'Budget (optional)',
                             ),
+                            validator: (value) {
+                              final normalizedValue = value?.trim() ?? '';
+                              if (normalizedValue.isEmpty) {
+                                return null;
+                              }
+
+                              if (int.tryParse(normalizedValue) == null) {
+                                return 'Enter budget in INR as a whole number';
+                              }
+
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          DropdownButtonFormField<String>(
+                            value: _budgetType,
+                            decoration: const InputDecoration(
+                              labelText: 'Budget Type',
+                            ),
+                            items: _budgetTypeItems,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Budget Type is required';
+                              }
+
+                              return null;
+                            },
+                            onChanged: _isSubmitting
+                                ? null
+                                : (value) {
+                                    setState(() {
+                                      _budgetType = value;
+                                    });
+                                  },
                           ),
                         ],
                       ),

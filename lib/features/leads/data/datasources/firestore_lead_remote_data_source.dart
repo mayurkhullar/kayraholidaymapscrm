@@ -66,11 +66,37 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
     final documentReference = lead.id.isEmpty
         ? _leadsCollection.doc()
         : _leadsCollection.doc(lead.id);
-    final leadToCreate = lead.id.isEmpty
-        ? lead.copyWith(id: documentReference.id, isArchived: false)
-        : lead.copyWith(isArchived: false);
 
-    await documentReference.set(leadToCreate.toMap());
+    await _firestore.runTransaction((transaction) async {
+      final counterReference = _firestore.collection('counters').doc('lead_2026');
+      final counterSnapshot = await transaction.get(counterReference);
+      final current = (counterSnapshot.data()?['current'] as num?)?.toInt() ?? 0;
+      final next = current + 1;
+      final leadCode = 'LD-2026-${next.toString().padLeft(4, '0')}';
+      final leadToCreate = (lead.id.isEmpty
+              ? lead.copyWith(id: documentReference.id)
+              : lead)
+          .copyWith(
+            leadCode: leadCode,
+            budget: lead.budget,
+            budgetType: lead.budgetType,
+            isArchived: false,
+            createdAt: lead.createdAt ?? DateTime.now(),
+            updatedAt: lead.updatedAt ?? DateTime.now(),
+          );
+
+      if (counterSnapshot.exists) {
+        transaction.update(counterReference, <String, dynamic>{
+          'current': next,
+        });
+      } else {
+        transaction.set(counterReference, <String, dynamic>{
+          'current': next,
+        });
+      }
+
+      transaction.set(documentReference, leadToCreate.toMap());
+    });
   }
 
   @override

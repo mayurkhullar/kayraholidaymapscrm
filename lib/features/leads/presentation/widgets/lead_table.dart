@@ -19,6 +19,7 @@ class LeadTable extends StatelessWidget {
     _LeadTableColumn(label: 'Client', width: leadTableClientWidth),
     _LeadTableColumn(label: 'Destination', width: leadTableDestinationWidth),
     _LeadTableColumn(label: 'Travel Type', width: leadTableTravelTypeWidth),
+    _LeadTableColumn(label: 'Budget', width: leadTableBudgetWidth),
     _LeadTableColumn(label: 'Stage', width: leadTableStageWidth),
     _LeadTableColumn(label: 'Owner', width: leadTableOwnerWidth),
     _LeadTableColumn(label: 'Updated', width: leadTableUpdatedWidth),
@@ -29,6 +30,7 @@ class LeadTable extends StatelessWidget {
       leadTableClientWidth +
       leadTableDestinationWidth +
       leadTableTravelTypeWidth +
+      leadTableBudgetWidth +
       leadTableStageWidth +
       leadTableOwnerWidth +
       leadTableUpdatedWidth +
