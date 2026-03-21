@@ -49,8 +49,8 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
     final colorScheme = theme.colorScheme;
     final baseColor = widget.index.isEven
         ? Colors.transparent
-        : colorScheme.surface.withValues(alpha: 0.08);
-    final hoverColor = colorScheme.primary.withValues(alpha: 0.05);
+        : colorScheme.surface.withValues(alpha: 0.05);
+    final hoverColor = colorScheme.onSurface.withValues(alpha: 0.035);
 
     return MouseRegion(
       cursor: widget.onTap == null
@@ -67,12 +67,12 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
           child: InkWell(
             onTap: widget.onTap,
             hoverColor: Colors.transparent,
-            highlightColor: colorScheme.primary.withValues(alpha: 0.06),
-            splashColor: colorScheme.primary.withValues(alpha: 0.08),
+            highlightColor: colorScheme.primary.withValues(alpha: 0.04),
+            splashColor: colorScheme.primary.withValues(alpha: 0.06),
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 24,
-                vertical: 16,
+                vertical: 13,
               ),
               child: Row(
                 children: [
@@ -82,7 +82,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                       _fallback(widget.lead.leadCode, '—'),
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        letterSpacing: 0.1,
+                        letterSpacing: 0.08,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -110,7 +110,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _travelTypeLabel(widget.lead.travelType),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.92),
+                        color: colorScheme.onSurface.withValues(alpha: 0.9),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -140,7 +140,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _fallback(widget.lead.leadOwnerId, 'Unassigned'),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -151,7 +151,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _formatDate(widget.lead.updatedAt),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.84),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -212,11 +212,11 @@ class _PrimarySecondaryText extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         if (secondaryText != null && secondaryText.isNotEmpty) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: 1),
           Text(
             secondaryText,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.82),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
             ),
             overflow: TextOverflow.ellipsis,
           ),

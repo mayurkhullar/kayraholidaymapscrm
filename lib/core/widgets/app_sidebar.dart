@@ -29,18 +29,18 @@ class AppSidebar extends StatelessWidget {
       curve: Curves.easeOutCubic,
       width: isCollapsed ? collapsedWidth : expandedWidth,
       decoration: BoxDecoration(
-        color: const Color(0xFF0D1420),
+        color: const Color(0xFF0B121B),
         border: Border(
           right: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.12),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.09),
           ),
         ),
       ),
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.xl,
-            vertical: isCollapsed ? AppSpacing.md : AppSpacing.xl,
+            horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.lg,
+            vertical: isCollapsed ? AppSpacing.md : AppSpacing.lg,
           ),
           child: Column(
             crossAxisAlignment:
@@ -111,25 +111,25 @@ class _SidebarHeader extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(20),
+        color: colorScheme.surface.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.14),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
         children: [
           Container(
-            height: 40,
-            width: 40,
+            height: 38,
+            width: 38,
             decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(14),
+              color: colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.dashboard_customize_rounded,
-              color: colorScheme.primary,
-              size: 20,
+              color: colorScheme.primary.withValues(alpha: 0.92),
+              size: 19,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -150,7 +150,7 @@ class _SidebarHeader extends StatelessWidget {
                 Text(
                   'Operations suite',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.64),
                   ),
                 ),
               ],
@@ -197,13 +197,13 @@ class _SidebarToggleButtonState extends State<_SidebarToggleButton> {
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
             color: _isHovered
-                ? colorScheme.primary.withValues(alpha: 0.12)
-                : colorScheme.surface.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(14),
+                ? colorScheme.primary.withValues(alpha: 0.1)
+                : colorScheme.surface.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: _isHovered
-                  ? colorScheme.primary.withValues(alpha: 0.24)
-                  : colorScheme.outlineVariant.withValues(alpha: 0.16),
+                  ? colorScheme.primary.withValues(alpha: 0.2)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.12),
             ),
           ),
           child: IconButton(
@@ -248,12 +248,12 @@ class _SidebarItem extends StatelessWidget {
 
     final itemContent = Material(
       color: isActive
-          ? colorScheme.primary.withValues(alpha: 0.14)
+          ? colorScheme.primary.withValues(alpha: 0.12)
           : Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        hoverColor: colorScheme.surface.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(16),
+        hoverColor: colorScheme.surface.withValues(alpha: 0.12),
         onTap: () {
           if (!isActive) {
             Navigator.of(context).pushReplacementNamed(item.route);
@@ -264,13 +264,13 @@ class _SidebarItem extends StatelessWidget {
           curve: Curves.easeOutCubic,
           padding: EdgeInsets.symmetric(
             horizontal: isCollapsed ? AppSpacing.md : AppSpacing.lg,
-            vertical: AppSpacing.md,
+            vertical: 10,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isActive
-                  ? colorScheme.primary.withValues(alpha: 0.24)
+                  ? colorScheme.primary.withValues(alpha: 0.18)
                   : Colors.transparent,
             ),
           ),
@@ -284,8 +284,8 @@ class _SidebarItem extends StatelessWidget {
                 item.icon,
                 size: 20,
                 color: isActive
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.88),
+                    ? colorScheme.primary.withValues(alpha: 0.96)
+                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
               ),
               if (!isCollapsed) ...[
                 const SizedBox(width: AppSpacing.md),
@@ -295,7 +295,7 @@ class _SidebarItem extends StatelessWidget {
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: isActive
                           ? colorScheme.onSurface
-                          : colorScheme.onSurface.withValues(alpha: 0.88),
+                          : colorScheme.onSurface.withValues(alpha: 0.8),
                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),

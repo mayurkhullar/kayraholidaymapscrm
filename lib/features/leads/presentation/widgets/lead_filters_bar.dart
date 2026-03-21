@@ -48,58 +48,61 @@ class LeadFiltersBar extends StatelessWidget {
     final controlTheme = theme.copyWith(
       inputDecorationTheme: inputDecorationTheme.copyWith(
         filled: true,
-        fillColor: const Color(0xFF0F1723),
+        fillColor: const Color(0xFF0E1622),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
-          vertical: 14,
+          vertical: 12,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(11),
           borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.18),
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(11),
           borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.18),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(11),
           borderSide: BorderSide(
-            color: colorScheme.primary.withValues(alpha: 0.48),
+            color: colorScheme.primary.withValues(alpha: 0.4),
           ),
         ),
         labelStyle: theme.textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
         ),
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.68),
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.62),
         ),
       ),
     );
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF111A27),
-        borderRadius: BorderRadius.circular(18),
+        color: colorScheme.surface.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.16),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.1),
         ),
       ),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Theme(
         data: controlTheme,
         child: Wrap(
           spacing: AppSpacing.md,
-          runSpacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             ConstrainedBox(
               constraints: const BoxConstraints(
                 minWidth: 240,
-                maxWidth: 360,
+                maxWidth: 340,
               ),
               child: TextField(
                 controller: searchController,
@@ -107,8 +110,9 @@ class LeadFiltersBar extends StatelessWidget {
                   hintText: 'Search client, destination, or lead code',
                   prefixIcon: Icon(
                     Icons.search_rounded,
+                    size: 18,
                     color: colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.76,
+                      alpha: 0.72,
                     ),
                   ),
                   isDense: true,
@@ -116,7 +120,7 @@ class LeadFiltersBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 190,
+              width: 180,
               child: DropdownButtonFormField<String?>(
                 value: selectedStage,
                 decoration: const InputDecoration(
@@ -135,7 +139,7 @@ class LeadFiltersBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 190,
+              width: 180,
               child: DropdownButtonFormField<String?>(
                 value: selectedTravelType,
                 decoration: const InputDecoration(
@@ -155,23 +159,33 @@ class LeadFiltersBar extends StatelessWidget {
             ),
             OutlinedButton.icon(
               onPressed: onClearFilters,
-              icon: const Icon(Icons.restart_alt_rounded, size: 18),
+              icon: const Icon(Icons.restart_alt_rounded, size: 17),
               label: const Text('Clear Filters'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: colorScheme.onSurface,
+                foregroundColor: colorScheme.onSurface.withValues(alpha: 0.92),
                 visualDensity: VisualDensity.compact,
-                minimumSize: const Size(0, 46),
+                minimumSize: const Size(0, 42),
                 side: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.28),
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
                 ),
-                backgroundColor: colorScheme.surface.withValues(alpha: 0.16),
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.08),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
+                  horizontal: AppSpacing.md,
                   vertical: AppSpacing.md,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(11),
                 ),
+              ).copyWith(
+                overlayColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.pressed)) {
+                    return colorScheme.primary.withValues(alpha: 0.08);
+                  }
+                  if (states.contains(WidgetState.hovered)) {
+                    return colorScheme.onSurface.withValues(alpha: 0.03);
+                  }
+                  return null;
+                }),
               ),
             ),
           ],

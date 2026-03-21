@@ -151,14 +151,14 @@ class _LeadTableState extends State<LeadTable> {
           borderRadius: BorderRadius.circular(22),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF0F1723),
+              color: const Color(0xFF0C141F),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.22),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.16),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 24,
                   offset: const Offset(0, 12),
                 ),
@@ -176,10 +176,19 @@ class _LeadTableState extends State<LeadTable> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        color: const Color(0xFF141F2E),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF121D2A),
+                          border: Border(
+                            bottom: BorderSide(
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.18,
+                              ),
+                            ),
+                          ),
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
-                          vertical: 16,
+                          vertical: 13,
                         ),
                         child: Row(
                           children: [
@@ -204,11 +213,6 @@ class _LeadTableState extends State<LeadTable> {
                           ],
                         ),
                       ),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: colorScheme.outlineVariant.withValues(alpha: 0.18),
-                      ),
                       Column(
                         children: [
                           for (var index = 0; index < sortedLeads.length; index++) ...[
@@ -224,7 +228,7 @@ class _LeadTableState extends State<LeadTable> {
                                 height: 1,
                                 thickness: 1,
                                 color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.12,
+                                  alpha: 0.1,
                                 ),
                               ),
                           ],
@@ -266,9 +270,9 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final textStyle = theme.textTheme.labelLarge?.copyWith(
       color: isActive
           ? colorScheme.onSurface
-          : colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.24,
+          : colorScheme.onSurfaceVariant.withValues(alpha: 0.82),
+      fontWeight: FontWeight.w800,
+      letterSpacing: 0.28,
     );
 
     return Padding(
@@ -282,12 +286,12 @@ class _LeadTableHeaderCell extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(10),
-                  hoverColor: colorScheme.primary.withValues(alpha: 0.045),
+                  hoverColor: colorScheme.primary.withValues(alpha: 0.04),
                   splashColor: colorScheme.primary.withValues(alpha: 0.06),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm,
-                      vertical: 4,
+                      vertical: 3,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

@@ -130,22 +130,15 @@ class _LeadsScreenState extends State<LeadsScreen> {
             const SizedBox(height: AppSpacing.lg),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF182334),
-                borderRadius: BorderRadius.circular(22),
+                color: const Color(0xFF151F2D),
+                borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.12),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 28,
-                    offset: const Offset(0, 16),
-                  ),
-                ],
               ),
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
-                AppSpacing.lg,
+                AppSpacing.md,
                 AppSpacing.lg,
                 AppSpacing.md,
               ),
@@ -197,7 +190,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                         },
                         onClearFilters: _clearFilters,
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.md),
                       if (filteredLeads.isEmpty)
                         const EmptyStateView(
                           title: 'No matching leads',
@@ -232,8 +225,8 @@ class _LeadTableLoadingState extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF121B29),
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF101926),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: colorScheme.outlineVariant.withValues(alpha: 0.18),
         ),
@@ -259,77 +252,20 @@ class _LeadTableLoadingState extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Divider(color: theme.dividerColor),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.xl),
             ...List<Widget>.generate(
-              5,
+              6,
               (index) => Padding(
-                padding: EdgeInsets.only(bottom: index == 4 ? 0 : AppSpacing.md),
-                child: _LoadingRow(color: colorScheme.surfaceContainerHighest),
+                padding: EdgeInsets.only(bottom: index == 5 ? 0 : AppSpacing.lg),
+                child: _LoadingBar(
+                  widthFactor: 1,
+                  height: 44,
+                  radius: 14,
+                  color: colorScheme.surface.withValues(alpha: 0.42),
+                ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingRow extends StatelessWidget {
-  const _LoadingRow({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.lg,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: color.withValues(alpha: 0.35),
-      ),
-      child: Row(
-        children: List<Widget>.generate(
-          7,
-          (index) => Expanded(
-            flex: index == 1 || index == 2 ? 2 : 1,
-            child: Padding(
-              padding: EdgeInsets.only(right: index == 6 ? 0 : AppSpacing.md),
-              child: _LoadingBar(
-                widthFactor: index.isEven ? 0.78 : 0.58,
-                color: color,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingBar extends StatelessWidget {
-  const _LoadingBar({
-    required this.widthFactor,
-    required this.color,
-  });
-
-  final double widthFactor;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: widthFactor,
-      alignment: Alignment.centerLeft,
-      child: Container(
-        height: 14,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(999),
         ),
       ),
     );
@@ -343,7 +279,8 @@ class _PageSuccessMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Container(
       width: double.infinity,
@@ -352,24 +289,59 @@ class _PageSuccessMessage extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: 0.08),
+        color: colorScheme.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.18)),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: 0.22),
+        ),
       ),
       child: Row(
         children: [
           Icon(
             Icons.check_circle_outline_rounded,
             color: colorScheme.primary,
+            size: 18,
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LoadingBar extends StatelessWidget {
+  const _LoadingBar({
+    required this.widthFactor,
+    required this.color,
+    this.height = 12,
+    this.radius = 999,
+  });
+
+  final double widthFactor;
+  final double height;
+  final double radius;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: widthFactor,
+      alignment: Alignment.centerLeft,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(radius),
+        ),
       ),
     );
   }
