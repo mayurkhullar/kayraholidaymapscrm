@@ -124,7 +124,9 @@ class _LeadsScreenState extends State<LeadsScreen> {
               const SizedBox(height: AppSpacing.md),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            const SizedBox(height: AppSpacing.md),
+            // Root cause: this page also stacked an additional full
+            // medium gap between the header and the filters/table block.
+            const SizedBox(height: AppSpacing.sm),
             StreamBuilder<List<LeadModel>>(
               stream: LeadsScreen._leadsStream,
               builder: (context, snapshot) {
@@ -173,7 +175,9 @@ class _LeadsScreenState extends State<LeadsScreen> {
                       },
                       onClearFilters: _clearFilters,
                     ),
-                    const SizedBox(height: AppSpacing.md),
+                    // Keep the filter-to-table spacing tight so the
+                    // CRM workspace feels dense instead of airy.
+                    const SizedBox(height: AppSpacing.sm),
                     if (filteredLeads.isEmpty)
                       const EmptyStateView(
                         title: 'No matching leads',

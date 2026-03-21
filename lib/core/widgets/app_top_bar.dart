@@ -15,7 +15,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64);
+  Size get preferredSize => const Size.fromHeight(56);
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +31,10 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xl,
-        // Tighten the bar itself slightly so it doesn't add extra vertical air
-        // before page content starts, while keeping a comfortable CRM density.
-        vertical: AppSpacing.sm,
+        // Root cause: the toolbar height is mostly the 48px IconButton row plus
+        // this container padding, so trimming the vertical inset reduces the
+        // global chrome height without changing page-level widgets.
+        vertical: AppSpacing.xs,
       ),
       child: SafeArea(
         bottom: false,
