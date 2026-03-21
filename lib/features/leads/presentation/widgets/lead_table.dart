@@ -53,7 +53,7 @@ class LeadTable extends StatefulWidget {
       leadTableOwnerWidth +
       leadTableUpdatedWidth +
       (AppSpacing.md * (_columns.length - 1)) +
-      (AppSpacing.xl * 2);
+      (20 * 2);
 
   @override
   State<LeadTable> createState() => _LeadTableState();
@@ -140,34 +140,39 @@ class _LeadTableState extends State<LeadTable> {
     final colorScheme = theme.colorScheme;
     final sortedLeads = _sortedLeads(widget.leads);
 
-    return Card(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final viewportWidth = constraints.maxWidth.isFinite
-              ? constraints.maxWidth
-              : LeadTable._tableContentWidth;
-          final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : LeadTable._tableContentWidth;
+        final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
 
-          return Scrollbar(
-            controller: _horizontalScrollController,
-            thumbVisibility: tableWidth > viewportWidth,
-            child: SingleChildScrollView(
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+              ),
+            ),
+            child: Scrollbar(
               controller: _horizontalScrollController,
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: tableWidth),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: colorScheme.outlineVariant),
-                  ),
+              thumbVisibility: tableWidth > viewportWidth,
+              child: SingleChildScrollView(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: tableWidth),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
+                      Container(
+                        color: colorScheme.surface.withValues(alpha: 0.28),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.xl,
-                          vertical: AppSpacing.lg,
+                          horizontal: 20,
+                          vertical: 14,
                         ),
                         child: Row(
                           children: [
@@ -195,7 +200,7 @@ class _LeadTableState extends State<LeadTable> {
                       Divider(
                         height: 1,
                         thickness: 1,
-                        color: colorScheme.outlineVariant,
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.55),
                       ),
                       Column(
                         children: [
@@ -211,7 +216,7 @@ class _LeadTableState extends State<LeadTable> {
                                 height: 1,
                                 thickness: 1,
                                 color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.7,
+                                  alpha: 0.42,
                                 ),
                               ),
                           ],
@@ -222,9 +227,9 @@ class _LeadTableState extends State<LeadTable> {
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -251,8 +256,11 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textStyle = theme.textTheme.labelLarge?.copyWith(
-      color: isActive ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+      color: isActive
+          ? colorScheme.onSurface.withValues(alpha: 0.96)
+          : colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
       fontWeight: FontWeight.w700,
+      letterSpacing: 0.1,
     );
 
     return Padding(
@@ -266,12 +274,12 @@ class _LeadTableHeaderCell extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(10),
-                  hoverColor: colorScheme.primary.withValues(alpha: 0.04),
-                  splashColor: colorScheme.primary.withValues(alpha: 0.06),
+                  hoverColor: colorScheme.primary.withValues(alpha: 0.035),
+                  splashColor: colorScheme.primary.withValues(alpha: 0.05),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xs,
+                      vertical: 2,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

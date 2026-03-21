@@ -45,7 +45,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hoverColor = colorScheme.primary.withValues(alpha: 0.035);
+    final hoverColor = colorScheme.primary.withValues(alpha: 0.03);
 
     return MouseRegion(
       cursor: widget.onTap == null
@@ -62,12 +62,12 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
           child: InkWell(
             onTap: widget.onTap,
             hoverColor: Colors.transparent,
-            highlightColor: colorScheme.primary.withValues(alpha: 0.05),
-            splashColor: colorScheme.primary.withValues(alpha: 0.07),
+            highlightColor: colorScheme.primary.withValues(alpha: 0.045),
+            splashColor: colorScheme.primary.withValues(alpha: 0.06),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.lg,
+                horizontal: 20,
+                vertical: 14,
               ),
               child: Row(
                 children: [
@@ -202,7 +202,7 @@ class _PrimarySecondaryText extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         if (secondaryText != null && secondaryText.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: 2),
           Text(
             secondaryText,
             style: theme.textTheme.bodySmall?.copyWith(

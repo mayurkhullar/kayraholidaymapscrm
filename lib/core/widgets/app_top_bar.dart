@@ -15,7 +15,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(52);
+  Size get preferredSize => const Size.fromHeight(48);
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +23,10 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: colorScheme.surface.withValues(alpha: 0.96),
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -35,10 +35,10 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
-            vertical: AppSpacing.xs,
+            vertical: 6,
           ),
           child: SizedBox(
-            height: 36,
+            height: 34,
             child: Row(
               children: [
                 if (showMenuButton) ...[
@@ -55,7 +55,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: Icons.search_rounded,
                   tooltip: 'Search',
                 ),
-                const SizedBox(width: AppSpacing.xs),
+                const SizedBox(width: 2),
                 _TopBarIconButton(
                   onPressed: () {},
                   icon: Icons.notifications_none_rounded,
@@ -63,11 +63,11 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(width: AppSpacing.md),
                 CircleAvatar(
-                  radius: 16,
-                  backgroundColor: colorScheme.primary.withValues(alpha: 0.12),
+                  radius: 15,
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                   child: Icon(
                     Icons.person_outline_rounded,
-                    size: 16,
+                    size: 15,
                     color: colorScheme.primary,
                   ),
                 ),
@@ -99,12 +99,12 @@ class _TopBarIconButton extends StatelessWidget {
       onPressed: onPressed,
       tooltip: tooltip,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-      splashRadius: 18,
+      constraints: const BoxConstraints.tightFor(width: 34, height: 34),
+      splashRadius: 17,
       icon: Icon(
         icon,
-        size: 20,
-        color: colorScheme.onSurfaceVariant,
+        size: 19,
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.92),
       ),
     );
   }

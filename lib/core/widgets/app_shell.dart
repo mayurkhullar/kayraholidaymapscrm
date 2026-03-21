@@ -49,9 +49,9 @@ class _AppShellState extends State<AppShell> {
         final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
         final contentPadding = EdgeInsets.fromLTRB(
           AppSpacing.xl,
-          AppSpacing.sm,
+          AppSpacing.xs,
           AppSpacing.xl,
-          AppSpacing.xl,
+          AppSpacing.lg,
         );
 
         return Scaffold(

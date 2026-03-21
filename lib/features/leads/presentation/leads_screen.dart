@@ -173,7 +173,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                       },
                       onClearFilters: _clearFilters,
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.xs),
                     if (filteredLeads.isEmpty)
                       const EmptyStateView(
                         title: 'No matching leads',

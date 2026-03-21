@@ -46,39 +46,41 @@ class LeadFiltersBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.22),
-        borderRadius: BorderRadius.circular(18),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
         ),
       ),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+        horizontal: AppSpacing.md,
+        vertical: 10,
       ),
       child: Theme(
         data: theme,
         child: Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.md,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 240, maxWidth: 340),
+              constraints: const BoxConstraints(minWidth: 240, maxWidth: 336),
               child: TextField(
                 controller: searchController,
                 decoration: const InputDecoration(
                   hintText: 'Search by client or destination',
                   prefixIcon: Icon(Icons.search_rounded),
+                  isDense: true,
                 ),
               ),
             ),
             SizedBox(
-              width: 210,
+              width: 206,
               child: DropdownButtonFormField<String?>(
                 value: selectedStage,
                 decoration: const InputDecoration(
                   labelText: 'Stage',
+                  isDense: true,
                 ),
                 items: _stageOptions
                     .map(
@@ -92,11 +94,12 @@ class LeadFiltersBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 210,
+              width: 206,
               child: DropdownButtonFormField<String?>(
                 value: selectedTravelType,
                 decoration: const InputDecoration(
                   labelText: 'Travel Type',
+                  isDense: true,
                 ),
                 items: _travelTypeOptions
                     .map(
@@ -115,12 +118,14 @@ class LeadFiltersBar extends StatelessWidget {
               label: const Text('Clear Filters'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: colorScheme.onSurfaceVariant,
+                visualDensity: VisualDensity.compact,
+                minimumSize: const Size(0, 44),
                 side: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.9),
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.68),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg,
-                  vertical: 15,
+                  vertical: 13,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),

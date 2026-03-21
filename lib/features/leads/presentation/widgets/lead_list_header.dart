@@ -19,55 +19,61 @@ class LeadListHeader extends StatelessWidget {
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 760;
 
-        return Flex(
-          direction: isCompact ? Axis.vertical : Axis.horizontal,
-          crossAxisAlignment: isCompact
-              ? CrossAxisAlignment.start
-              : CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              flex: isCompact ? 0 : 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Leads',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.4,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+          child: Flex(
+            direction: isCompact ? Axis.vertical : Axis.horizontal,
+            crossAxisAlignment: isCompact
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: isCompact ? 0 : 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Leads',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.55,
+                        height: 1.06,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Manage and monitor all active lead inquiries',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      height: 1.35,
+                    const SizedBox(height: 4),
+                    Text(
+                      'Manage and monitor all active lead inquiries',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.88),
+                        height: 1.28,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: isCompact ? AppSpacing.md : 0,
-              width: isCompact ? 0 : AppSpacing.lg,
-            ),
-            ElevatedButton.icon(
-              onPressed: onCreateLead,
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('New Lead'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  ],
                 ),
               ),
-            ),
-          ],
+              SizedBox(
+                height: isCompact ? AppSpacing.md : 0,
+                width: isCompact ? 0 : AppSpacing.lg,
+              ),
+              ElevatedButton.icon(
+                onPressed: onCreateLead,
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: const Text('New Lead'),
+                style: ElevatedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: 13,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
