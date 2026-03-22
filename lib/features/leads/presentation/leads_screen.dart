@@ -124,7 +124,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
               const SizedBox(height: AppSpacing.sm),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
             Expanded(
               child: StreamBuilder<List<LeadModel>>(
                 stream: LeadsScreen._leadsStream,
@@ -174,7 +174,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                         },
                         onClearFilters: _clearFilters,
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.xs),
                       Expanded(
                         child: filteredLeads.isEmpty
                             ? const EmptyStateView(

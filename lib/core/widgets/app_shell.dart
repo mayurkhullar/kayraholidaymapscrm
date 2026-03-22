@@ -91,7 +91,7 @@ class _AppShellState extends State<AppShell> {
                                 mainPadding,
                                 AppSpacing.md,
                                 mainPadding,
-                                AppSpacing.md,
+                                AppSpacing.xs,
                               ),
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
@@ -113,7 +113,7 @@ class _AppShellState extends State<AppShell> {
                                     isDesktop ? AppSpacing.lg : AppSpacing.md,
                                     isDesktop ? AppSpacing.lg : AppSpacing.md,
                                     isDesktop ? AppSpacing.lg : AppSpacing.md,
-                                    isDesktop ? AppSpacing.md : AppSpacing.sm,
+                                    AppSpacing.xs,
                                   ),
                                   child: widget.child,
                                 ),

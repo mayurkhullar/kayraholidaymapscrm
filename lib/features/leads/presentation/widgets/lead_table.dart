@@ -147,8 +147,15 @@ class _LeadTableState extends State<LeadTable> {
             : LeadTable._tableContentWidth;
         final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
 
+        final viewportHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : 0.0;
+
         return Container(
           width: double.infinity,
+          constraints: BoxConstraints(
+            minHeight: viewportHeight,
+          ),
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
@@ -171,7 +178,10 @@ class _LeadTableState extends State<LeadTable> {
               controller: _horizontalScrollController,
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: tableWidth),
+                constraints: BoxConstraints(
+                  minWidth: tableWidth,
+                  minHeight: viewportHeight,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
