@@ -10,6 +10,7 @@ class AppSidebar extends StatelessWidget {
     required this.currentRoute,
     required this.isCollapsed,
     required this.onToggleCollapse,
+    this.closeOnNavigate = false,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class AppSidebar extends StatelessWidget {
   final String currentRoute;
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
+  final bool closeOnNavigate;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +76,7 @@ class AppSidebar extends StatelessWidget {
                           item: item,
                           isActive: isActive,
                           isCollapsed: isCollapsed,
+                          closeOnNavigate: closeOnNavigate,
                         );
                       },
                     ),
@@ -207,11 +210,13 @@ class _SidebarItem extends StatelessWidget {
     required this.item,
     required this.isActive,
     required this.isCollapsed,
+    required this.closeOnNavigate,
   });
 
   final AppNavigationItem item;
   final bool isActive;
   final bool isCollapsed;
+  final bool closeOnNavigate;
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +231,9 @@ class _SidebarItem extends StatelessWidget {
         hoverColor: colorScheme.surface.withValues(alpha: 0.6),
         onTap: () {
           if (!isActive) {
+            if (closeOnNavigate) {
+              Navigator.of(context).pop();
+            }
             Navigator.of(context).pushReplacementNamed(item.route);
           }
         },
