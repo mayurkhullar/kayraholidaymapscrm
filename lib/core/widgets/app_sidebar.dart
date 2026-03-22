@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../constants/app_navigation_items.dart';
 import '../theme/app_spacing.dart';
 
+const _animationDuration = Duration(milliseconds: 200);
+
 class AppSidebar extends StatelessWidget {
   const AppSidebar({
     required this.currentRoute,
@@ -13,7 +15,6 @@ class AppSidebar extends StatelessWidget {
 
   static const double expandedWidth = 248;
   static const double collapsedWidth = 80;
-  static const Duration _animationDuration = Duration(milliseconds: 180);
 
   final String currentRoute;
   final bool isCollapsed;
