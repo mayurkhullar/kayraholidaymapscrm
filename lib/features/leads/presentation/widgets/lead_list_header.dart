@@ -21,8 +21,7 @@ class LeadListHeader extends StatelessWidget {
 
         return Flex(
           direction: isCompact ? Axis.vertical : Axis.horizontal,
-          crossAxisAlignment:
-              isCompact ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               flex: isCompact ? 0 : 1,
@@ -53,22 +52,25 @@ class LeadListHeader extends StatelessWidget {
               width: isCompact ? 0 : AppSpacing.md,
               height: isCompact ? AppSpacing.sm : 0,
             ),
-            FilledButton.icon(
-              onPressed: onCreateLead,
-              icon: const Icon(Icons.add_rounded, size: 17),
-              label: const Text('New Lead'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: 10,
-                ),
-                textStyle: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.1,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            Align(
+              alignment: isCompact ? Alignment.centerLeft : Alignment.topRight,
+              child: FilledButton.icon(
+                onPressed: onCreateLead,
+                icon: const Icon(Icons.add_rounded, size: 17),
+                label: const Text('New Lead'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: 10,
+                  ),
+                  textStyle: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.1,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),

@@ -121,10 +121,11 @@ class _LeadsScreenState extends State<LeadsScreen> {
               onCreateLead: () => CreateLeadPanel.show(context),
             ),
             if (_successMessage != null) ...[
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.xs),
               _PageSuccessMessage(message: _successMessage!),
-            ],
-            const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.xs),
+            ] else
+              const SizedBox(height: AppSpacing.xs),
             Expanded(
               child: StreamBuilder<List<LeadModel>>(
                 stream: LeadsScreen._leadsStream,
