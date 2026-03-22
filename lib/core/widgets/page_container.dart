@@ -10,8 +10,6 @@ class PageContainer extends StatelessWidget {
 
   final Widget child;
 
-  static const double _maxWidth = 1228;
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -22,19 +20,14 @@ class PageContainer extends StatelessWidget {
                 ? AppSpacing.lg
                 : AppSpacing.md;
 
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxWidth),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                AppSpacing.xl,
-                horizontalPadding,
-                AppSpacing.xl,
-              ),
-              child: child,
-            ),
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding,
+            AppSpacing.xl,
+            horizontalPadding,
+            AppSpacing.xl,
           ),
+          child: child,
         );
       },
     );

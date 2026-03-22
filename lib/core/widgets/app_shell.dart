@@ -15,7 +15,6 @@ class AppShell extends StatefulWidget {
   final Widget child;
 
   static const double desktopBreakpoint = 1024;
-  static const double contentMaxWidth = 1280;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -112,34 +111,30 @@ class _AppShellState extends State<AppShell> {
                             onMenuPressed: () {},
                           ),
                           Expanded(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: SingleChildScrollView(
-                                padding: contentPadding,
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: AppShell.contentMaxWidth,
-                                  ),
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF151F2E),
-                                      borderRadius: BorderRadius.circular(28),
-                                      border: Border.all(
-                                        color: colorScheme.outlineVariant
-                                            .withValues(alpha: 0.22),
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(
-                                            alpha: 0.22,
-                                          ),
-                                          blurRadius: 32,
-                                          offset: const Offset(0, 16),
-                                        ),
-                                      ],
+                            child: SingleChildScrollView(
+                              padding: contentPadding,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF151F2E),
+                                  borderRadius: BorderRadius.circular(28),
+                                  border: Border.all(
+                                    color: colorScheme.outlineVariant.withValues(
+                                      alpha: 0.22,
                                     ),
-                                    child: widget.child,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.22,
+                                      ),
+                                      blurRadius: 32,
+                                      offset: const Offset(0, 16),
+                                    ),
+                                  ],
+                                ),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: widget.child,
                                 ),
                               ),
                             ),

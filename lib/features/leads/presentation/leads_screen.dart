@@ -118,7 +118,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
       pageTitle: 'Leads',
       child: PageContainer(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             LeadListHeader(
               onCreateLead: () => CreateLeadPanel.show(context),
@@ -234,7 +234,7 @@ class _LeadTableLoadingState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: List<Widget>.generate(
