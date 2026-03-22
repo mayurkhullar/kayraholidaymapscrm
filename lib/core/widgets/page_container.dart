@@ -18,6 +18,7 @@ class PageContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final horizontalPadding = ResponsiveUtils.horizontalPagePadding(context);
     final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Align(
       alignment: Alignment.topCenter,
@@ -28,11 +29,19 @@ class PageContainer extends StatelessWidget {
           horizontalPadding,
           bottomSpacing,
         ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: contentMaxWidth,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.42),
+            ),
           ),
-          child: SizedBox(width: double.infinity, child: child),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: contentMaxWidth,
+            ),
+            child: SizedBox(width: double.infinity, child: child),
+          ),
         ),
       ),
     );

@@ -50,20 +50,15 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colorScheme.outlineVariant),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x070F172A),
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.72),
+          ),
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: Colors.grey.withValues(alpha: 0.15),
+                color: Colors.grey.withValues(alpha: 0.16),
               ),
             ),
           ),

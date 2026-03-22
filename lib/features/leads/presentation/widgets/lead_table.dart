@@ -157,13 +157,13 @@ class _LeadTableState extends State<LeadTable> {
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 1),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.68),
             ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x100F172A),
-                blurRadius: 18,
-                offset: Offset(0, 8),
+                color: Color(0x050F172A),
+                blurRadius: 10,
+                offset: Offset(0, 2),
               ),
             ],
           ),
@@ -184,12 +184,12 @@ class _LeadTableState extends State<LeadTable> {
                     Container(
                       decoration: BoxDecoration(
                         color: colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.72,
+                          alpha: 0.82,
                         ),
                         border: Border(
                           bottom: BorderSide(
                             color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.6,
+                              alpha: 0.7,
                             ),
                           ),
                         ),
