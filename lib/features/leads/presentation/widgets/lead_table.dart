@@ -187,9 +187,15 @@ class _LeadTableState extends State<LeadTable> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest,
+                        color: colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.72,
+                        ),
                         border: Border(
-                          bottom: BorderSide(color: colorScheme.outlineVariant),
+                          bottom: BorderSide(
+                            color: colorScheme.outlineVariant.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -240,7 +246,9 @@ class _LeadTableState extends State<LeadTable> {
                               Divider(
                                 height: 1,
                                 thickness: 1,
-                                color: colorScheme.outlineVariant,
+                                color: colorScheme.outlineVariant.withValues(
+                                  alpha: 0.35,
+                                ),
                               ),
                           ],
                         ],
@@ -278,8 +286,10 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textStyle = theme.textTheme.labelLarge?.copyWith(
-      color: isActive ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
-      fontWeight: FontWeight.w700,
+      color: isActive
+          ? colorScheme.onSurface
+          : colorScheme.onSurface.withValues(alpha: 0.82),
+      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
       letterSpacing: 0.15,
     );
 

@@ -49,8 +49,8 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
     final colorScheme = theme.colorScheme;
     final baseColor = widget.index.isEven
         ? colorScheme.surface
-        : colorScheme.surfaceContainerHighest;
-    final hoverColor = colorScheme.primary.withValues(alpha: 0.05);
+        : colorScheme.surfaceContainerHighest.withValues(alpha: 0.28);
+    final hoverColor = colorScheme.onSurface.withValues(alpha: 0.035);
 
     return MouseRegion(
       cursor: widget.onTap == null
