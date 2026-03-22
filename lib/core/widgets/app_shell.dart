@@ -4,6 +4,7 @@ import '../theme/app_spacing.dart';
 import '../utils/responsive_utils.dart';
 import 'app_sidebar.dart';
 import 'app_top_bar.dart';
+import 'page_container.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({
@@ -45,11 +46,9 @@ class _AppShellState extends State<AppShell> {
 
     final isDesktopLayout =
         ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
-    final horizontalPagePadding = ResponsiveUtils.horizontalPagePadding(context);
-    final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
-    final shellTopPadding = isDesktopLayout ? AppSpacing.md : AppSpacing.sm;
-    final shellBottomPadding = isDesktopLayout ? AppSpacing.sm : AppSpacing.xs;
-    const contentPadding = 20.0;
+    final shellTopPadding = isDesktopLayout ? AppSpacing.sm : AppSpacing.xs;
+    final shellBottomPadding = isDesktopLayout ? AppSpacing.sm : AppSpacing.sm;
+    final contentPadding = isDesktopLayout ? 20.0 : 16.0;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -88,44 +87,32 @@ class _AppShellState extends State<AppShell> {
                         onMenuPressed: () => Scaffold.of(context).openDrawer(),
                       ),
                       Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            horizontalPagePadding,
-                            shellTopPadding,
-                            horizontalPagePadding,
-                            shellBottomPadding,
-                          ),
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: contentMaxWidth,
+                        child: PageContainer(
+                          topSpacing: shellTopPadding,
+                          bottomSpacing: shellBottomPadding,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: colorScheme.outlineVariant,
                               ),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: colorScheme.outlineVariant,
-                                  ),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color(0x120F172A),
-                                      blurRadius: 26,
-                                      offset: Offset(0, 10),
-                                    ),
-                                  ],
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x120F172A),
+                                  blurRadius: 26,
+                                  offset: Offset(0, 10),
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    contentPadding,
-                                    contentPadding,
-                                    contentPadding,
-                                    contentPadding,
-                                  ),
-                                  child: widget.child,
-                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                contentPadding,
+                                contentPadding,
+                                contentPadding,
+                                contentPadding,
                               ),
+                              child: widget.child,
                             ),
                           ),
                         ),

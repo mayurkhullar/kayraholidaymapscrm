@@ -16,7 +16,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize => const Size.fromHeight(52);
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +27,8 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     final outerHorizontalPadding = ResponsiveUtils.horizontalPagePadding(
       context,
     );
-    final outerTopPadding = isWideLayout ? AppSpacing.md : AppSpacing.sm;
-    final innerHorizontalPadding = isWideLayout ? AppSpacing.md : AppSpacing.sm;
+    final outerTopPadding = isWideLayout ? AppSpacing.sm : AppSpacing.xs;
+    final innerHorizontalPadding = isWideLayout ? AppSpacing.sm : AppSpacing.sm;
     final actionSpacing = isWideLayout ? AppSpacing.sm : AppSpacing.xs;
     final profileHorizontalPadding =
         isWideLayout ? AppSpacing.sm : AppSpacing.xs;
@@ -43,16 +43,19 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       child: Container(
         height: preferredSize.height,
-        padding: EdgeInsets.symmetric(horizontal: innerHorizontalPadding),
+        padding: EdgeInsets.symmetric(
+          horizontal: innerHorizontalPadding,
+          vertical: isWideLayout ? 4 : 2,
+        ),
         decoration: BoxDecoration(
           color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: colorScheme.outlineVariant),
           boxShadow: const [
             BoxShadow(
               color: Color(0x070F172A),
-              blurRadius: 12,
-              offset: Offset(0, 4),
+              blurRadius: 10,
+              offset: Offset(0, 3),
             ),
           ],
         ),
@@ -112,7 +115,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                       Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: profileHorizontalPadding,
-                          vertical: 6,
+                          vertical: 5,
                         ),
                         decoration: BoxDecoration(
                           color: colorScheme.surfaceContainerHighest,

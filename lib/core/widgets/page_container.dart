@@ -6,9 +6,13 @@ class PageContainer extends StatelessWidget {
   const PageContainer({
     required this.child,
     super.key,
+    this.topSpacing = 0,
+    this.bottomSpacing = 0,
   });
 
   final Widget child;
+  final double topSpacing;
+  final double bottomSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +22,12 @@ class PageContainer extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        padding: EdgeInsets.fromLTRB(
+          horizontalPadding,
+          topSpacing,
+          horizontalPadding,
+          bottomSpacing,
+        ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: contentMaxWidth,
