@@ -5,11 +5,13 @@ import '../utils/responsive_utils.dart';
 
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({
+    required this.pageTitle,
     super.key,
     this.showMenuButton = false,
     this.onMenuPressed,
   });
 
+  final String pageTitle;
   final bool showMenuButton;
   final VoidCallback? onMenuPressed;
 
@@ -64,7 +66,19 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               SizedBox(width: actionSpacing),
             ],
-            const Spacer(),
+            Expanded(
+              child: Text(
+                pageTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                ),
+              ),
+            ),
+            SizedBox(width: actionSpacing),
             ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: isWideLayout ? 240 : 156,
