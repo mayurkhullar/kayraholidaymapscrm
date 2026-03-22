@@ -71,8 +71,8 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
             splashColor: colorScheme.primary.withValues(alpha: 0.06),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 13,
+                horizontal: 20,
+                vertical: 11,
               ),
               child: Row(
                 children: [
@@ -217,6 +217,7 @@ class _PrimarySecondaryText extends StatelessWidget {
             secondaryText,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              height: 1.15,
             ),
             overflow: TextOverflow.ellipsis,
           ),

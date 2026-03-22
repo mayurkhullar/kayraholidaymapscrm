@@ -48,7 +48,7 @@ class _AppShellState extends State<AppShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
-        final mainPadding = isDesktop ? AppSpacing.xl : AppSpacing.lg;
+        final mainPadding = isDesktop ? AppSpacing.lg : AppSpacing.md;
 
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
@@ -89,28 +89,31 @@ class _AppShellState extends State<AppShell> {
                             child: Padding(
                               padding: EdgeInsets.fromLTRB(
                                 mainPadding,
-                                AppSpacing.lg,
+                                AppSpacing.md,
                                 mainPadding,
-                                AppSpacing.lg,
+                                AppSpacing.md,
                               ),
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(28),
+                                  borderRadius: BorderRadius.circular(24),
                                   border: Border.all(
                                     color: colorScheme.outlineVariant,
                                   ),
                                   boxShadow: const [
                                     BoxShadow(
                                       color: Color(0x0D0F172A),
-                                      blurRadius: 24,
-                                      offset: Offset(0, 10),
+                                      blurRadius: 22,
+                                      offset: Offset(0, 8),
                                     ),
                                   ],
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.all(
-                                    isDesktop ? AppSpacing.xl : AppSpacing.lg,
+                                  padding: EdgeInsets.fromLTRB(
+                                    isDesktop ? AppSpacing.lg : AppSpacing.md,
+                                    isDesktop ? AppSpacing.lg : AppSpacing.md,
+                                    isDesktop ? AppSpacing.lg : AppSpacing.md,
+                                    isDesktop ? AppSpacing.md : AppSpacing.sm,
                                   ),
                                   child: widget.child,
                                 ),

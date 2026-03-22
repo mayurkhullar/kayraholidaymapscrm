@@ -111,8 +111,6 @@ class _LeadsScreenState extends State<LeadsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return AppShell(
       pageTitle: 'Leads',
       child: PageContainer(
@@ -123,10 +121,10 @@ class _LeadsScreenState extends State<LeadsScreen> {
               onCreateLead: () => CreateLeadPanel.show(context),
             ),
             if (_successMessage != null) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               _PageSuccessMessage(message: _successMessage!),
             ],
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
             Expanded(
               child: StreamBuilder<List<LeadModel>>(
                 stream: LeadsScreen._leadsStream,
@@ -176,7 +174,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                         },
                         onClearFilters: _clearFilters,
                       ),
-                      const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.sm),
                       Expanded(
                         child: filteredLeads.isEmpty
                             ? const EmptyStateView(
@@ -212,70 +210,38 @@ class _LeadTableLoadingState extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: List<Widget>.generate(
-                4,
-                (index) => Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: index == 3 ? 0 : AppSpacing.lg,
-                    ),
-                    child: _LoadingBar(
-                      widthFactor: index.isEven ? 0.72 : 0.54,
-                      color: colorScheme.surfaceContainerHighest,
-                    ),
+            Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            for (var index = 0; index < 7; index++) ...[
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(
+                    bottom: index == 6 ? 0 : AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: index.isEven
+                        ? colorScheme.surface
+                        : colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            ...List<Widget>.generate(
-              6,
-              (index) => Padding(
-                padding: EdgeInsets.only(bottom: index == 5 ? 0 : AppSpacing.md),
-                child: _LoadingBar(
-                  widthFactor: 1,
-                  height: 56,
-                  color: colorScheme.surfaceContainerHighest,
-                ),
-              ),
-            ),
+            ],
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingBar extends StatelessWidget {
-  const _LoadingBar({
-    required this.widthFactor,
-    required this.color,
-    this.height = 14,
-  });
-
-  final double widthFactor;
-  final double height;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: widthFactor,
-      alignment: Alignment.centerLeft,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(999),
         ),
       ),
     );
@@ -289,35 +255,39 @@ class _PageSuccessMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.tertiaryContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.tertiary.withValues(alpha: 0.24)),
+        color: colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
       ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.check_circle_outline_rounded,
-            color: colorScheme.tertiary,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.check_circle_outline_rounded,
+              size: 18,
+              color: colorScheme.primary,
             ),
-          ),
-        ],
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                message,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

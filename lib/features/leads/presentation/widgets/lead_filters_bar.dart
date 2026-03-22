@@ -51,7 +51,7 @@ class LeadFiltersBar extends StatelessWidget {
         fillColor: colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
-          vertical: 12,
+          vertical: 10,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -78,21 +78,24 @@ class LeadFiltersBar extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorScheme.outlineVariant),
       ),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Theme(
         data: controlTheme,
         child: Wrap(
-          spacing: AppSpacing.md,
+          spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             ConstrainedBox(
               constraints: const BoxConstraints(
-                minWidth: 240,
-                maxWidth: 360,
+                minWidth: 220,
+                maxWidth: 320,
               ),
               child: TextField(
                 controller: searchController,
@@ -108,7 +111,7 @@ class LeadFiltersBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 190,
+              width: 180,
               child: DropdownButtonFormField<String?>(
                 value: selectedStage,
                 decoration: const InputDecoration(
@@ -127,7 +130,7 @@ class LeadFiltersBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 190,
+              width: 180,
               child: DropdownButtonFormField<String?>(
                 value: selectedTravelType,
                 decoration: const InputDecoration(
@@ -147,15 +150,15 @@ class LeadFiltersBar extends StatelessWidget {
             ),
             OutlinedButton.icon(
               onPressed: onClearFilters,
-              icon: const Icon(Icons.restart_alt_rounded, size: 17),
+              icon: const Icon(Icons.restart_alt_rounded, size: 16),
               label: const Text('Clear Filters'),
               style: OutlinedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 40),
                 backgroundColor: colorScheme.surface,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
-                  vertical: AppSpacing.md,
+                  vertical: 10,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

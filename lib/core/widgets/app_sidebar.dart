@@ -37,19 +37,19 @@ class AppSidebar extends StatelessWidget {
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.lg,
-            vertical: AppSpacing.lg,
+            horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.md,
+            vertical: AppSpacing.md,
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: const Color(0xFFEAF0F5),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.md,
-                vertical: AppSpacing.md,
+                horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.sm,
+                vertical: AppSpacing.sm,
               ),
               child: Column(
                 crossAxisAlignment:
@@ -59,7 +59,7 @@ class AppSidebar extends StatelessWidget {
                     isCollapsed: isCollapsed,
                     onToggleCollapse: onToggleCollapse,
                   ),
-                  SizedBox(height: isCollapsed ? AppSpacing.lg : AppSpacing.xl),
+                  SizedBox(height: isCollapsed ? AppSpacing.md : AppSpacing.lg),
                   Expanded(
                     child: ListView.separated(
                       padding: EdgeInsets.zero,
@@ -107,7 +107,7 @@ class _SidebarHeader extends StatelessWidget {
 
     if (isCollapsed) {
       return SizedBox(
-        height: 56,
+        height: 52,
         width: double.infinity,
         child: Center(child: toggleButton),
       );
@@ -116,18 +116,18 @@ class _SidebarHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
           Container(
-            height: 40,
-            width: 40,
+            height: 38,
+            width: 38,
             decoration: BoxDecoration(
               color: colorScheme.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
@@ -218,20 +218,30 @@ class _SidebarItem extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final itemContent = Material(
-      color: isActive ? colorScheme.primary.withValues(alpha: 0.12) : Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      color: isActive ? colorScheme.primary.withValues(alpha: 0.16) : Colors.transparent,
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         hoverColor: colorScheme.surface.withValues(alpha: 0.6),
         onTap: () {
           if (!isActive) {
             Navigator.of(context).pushReplacementNamed(item.route);
           }
         },
-        child: Padding(
+        child: AnimatedContainer(
+          duration: _animationDuration,
+          curve: Curves.easeOut,
           padding: EdgeInsets.symmetric(
             horizontal: isCollapsed ? 0 : AppSpacing.md,
-            vertical: AppSpacing.md,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: isActive
+                ? Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.22),
+                  )
+                : null,
           ),
           child: Row(
             mainAxisAlignment:

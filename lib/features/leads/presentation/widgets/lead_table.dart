@@ -53,7 +53,7 @@ class LeadTable extends StatefulWidget {
       leadTableOwnerWidth +
       leadTableUpdatedWidth +
       (AppSpacing.md * (_columns.length - 1)) +
-      (24 * 2);
+      (20 * 2);
 
   @override
   State<LeadTable> createState() => _LeadTableState();
@@ -151,13 +151,15 @@ class _LeadTableState extends State<LeadTable> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.95),
+            ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x080F172A),
-                blurRadius: 14,
-                offset: Offset(0, 6),
+                color: Color(0x0A0F172A),
+                blurRadius: 18,
+                offset: Offset(0, 8),
               ),
             ],
           ),
@@ -181,8 +183,8 @@ class _LeadTableState extends State<LeadTable> {
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
+                        horizontal: 20,
+                        vertical: 12,
                       ),
                       child: Row(
                         children: [
@@ -205,7 +207,7 @@ class _LeadTableState extends State<LeadTable> {
                     ),
                     if (sortedLeads.isEmpty)
                       Padding(
-                        padding: const EdgeInsets.all(AppSpacing.xl),
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Text(
                           'No leads available.',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -268,7 +270,7 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final textStyle = theme.textTheme.labelLarge?.copyWith(
       color: isActive ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
       fontWeight: FontWeight.w700,
-      letterSpacing: 0.2,
+      letterSpacing: 0.15,
     );
 
     return Padding(
@@ -282,33 +284,23 @@ class _LeadTableHeaderCell extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(10),
-                  hoverColor: colorScheme.primary.withValues(alpha: 0.04),
-                  splashColor: colorScheme.primary.withValues(alpha: 0.06),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: 3,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Flexible(
-                          child: Text(
-                            label,
-                            style: textStyle,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        Flexible(child: Text(label, style: textStyle)),
+                        const SizedBox(width: AppSpacing.xs),
+                        Icon(
+                          isActive
+                              ? (isAscending
+                                  ? Icons.arrow_upward_rounded
+                                  : Icons.arrow_downward_rounded)
+                              : Icons.unfold_more_rounded,
+                          size: 16,
+                          color: isActive
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
                         ),
-                        if (isActive) ...[
-                          const SizedBox(width: AppSpacing.xs),
-                          Icon(
-                            isAscending
-                                ? Icons.arrow_upward_rounded
-                                : Icons.arrow_downward_rounded,
-                            size: 15,
-                            color: colorScheme.primary,
-                          ),
-                        ],
                       ],
                     ),
                   ),
@@ -319,7 +311,12 @@ class _LeadTableHeaderCell extends StatelessWidget {
   }
 }
 
-enum _LeadSortColumn { leadCode, client, destination, updated }
+enum _LeadSortColumn {
+  leadCode,
+  client,
+  destination,
+  updated,
+}
 
 class _LeadTableColumn {
   const _LeadTableColumn({
