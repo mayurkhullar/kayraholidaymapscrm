@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/firestore_collections.dart';
 import '../../../../shared/models/passenger_count_model.dart';
 import '../../domain/models/lead_model.dart';
+import '../../domain/models/lead_note_model.dart';
 import 'lead_remote_data_source.dart';
 
 class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
@@ -13,6 +14,10 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
 
   CollectionReference<Map<String, dynamic>> get _leadsCollection =>
       _firestore.collection(FirestoreCollections.leads);
+
+  CollectionReference<Map<String, dynamic>> _leadNotesCollection(
+    String leadId,
+  ) => _leadsCollection.doc(leadId).collection('notes');
 
   @override
   Future<List<LeadModel>> fetchLeads() async {
@@ -122,5 +127,36 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
       'isArchived': true,
       'archivedAt': DateTime.now(),
     });
+  }
+
+  @override
+  Future<List<LeadNoteModel>> fetchLeadNotes(String leadId) async {
+    final querySnapshot = await _leadNotesCollection(leadId)
+        .orderBy('createdAt', descending: true)
+        .get();
+
+    return querySnapshot.docs
+        .map(
+          (doc) => LeadNoteModel.fromMap(<String, dynamic>{
+            ...doc.data(),
+            'id': doc.id,
+            'leadId': leadId,
+          }),
+        )
+        .toList(growable: false);
+  }
+
+  @override
+  Future<void> addLeadNote(LeadNoteModel note) async {
+    final notesCollection = _leadNotesCollection(note.leadId);
+    final documentReference = note.id.isEmpty
+        ? notesCollection.doc()
+        : notesCollection.doc(note.id);
+
+    final noteToCreate = note.id.isEmpty
+        ? note.copyWith(id: documentReference.id)
+        : note;
+
+    await documentReference.set(noteToCreate.toMap());
   }
 }
