@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/empty_state_view.dart';
-import '../../../core/widgets/page_container.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/stat_card.dart';
 
@@ -42,30 +41,20 @@ class DashboardScreen extends StatelessWidget {
     return AppShell(
       pageTitle: 'Dashboard',
       child: SingleChildScrollView(
-        child: const PageContainer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SectionHeader(
-                title: 'Dashboard Overview',
-                subtitle: 'A polished snapshot of your CRM activity will live here.',
-              ),
-              SizedBox(height: AppSpacing.xl),
-              _DashboardStatGrid(),
-              SizedBox(height: AppSpacing.xxl),
-              SectionHeader(
-                title: 'Recent Activity',
-                subtitle: 'Latest updates from the system',
-              ),
-              SizedBox(height: AppSpacing.lg),
-              EmptyStateView(
-                title: 'No activity yet',
-                message: 'Recent updates, timeline items, and system events will appear here once modules are connected.',
-                icon: Icons.history_toggle_off_rounded,
-              ),
-            ],
-          ),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _DashboardStatGrid(),
+            SizedBox(height: AppSpacing.xxl),
+            SectionHeader(title: 'Recent Activity'),
+            SizedBox(height: AppSpacing.lg),
+            EmptyStateView(
+              title: 'No activity yet',
+              message: 'Recent updates, timeline items, and system events will appear here once modules are connected.',
+              icon: Icons.history_toggle_off_rounded,
+            ),
+          ],
         ),
       ),
     );

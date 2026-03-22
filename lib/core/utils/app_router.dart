@@ -82,14 +82,15 @@ class _PlaceholderModuleScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
-                style: theme.textTheme.headlineMedium?.copyWith(
+                'Module content',
+                style: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                '$title module placeholder',
+                'This workspace is not available yet.',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
