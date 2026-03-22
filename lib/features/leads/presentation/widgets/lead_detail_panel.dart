@@ -340,6 +340,38 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                               label: 'Budget Type',
                               value: _formatBudgetType(widget.lead.budgetType),
                             ),
+                            const SizedBox(height: AppSpacing.xs),
+                            const _LeadSectionHeader(
+                              title: 'Travellers',
+                              subtitle:
+                                  'Passenger counts needed for quotation prep.',
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _LeadDetailItem(
+                              label: 'Adults',
+                              value: widget.lead.adultCount.toString(),
+                            ),
+                            _LeadDetailItem(
+                              label: 'Children',
+                              value: widget.lead.childCount.toString(),
+                            ),
+                            _LeadDetailItem(
+                              label: 'Infants',
+                              value: widget.lead.infantCount.toString(),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            const _LeadSectionHeader(
+                              title: 'Requirement Notes',
+                              subtitle:
+                                  'Saved trip requirements and briefing notes.',
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            _LeadDetailItem(
+                              label: 'Notes',
+                              value: _notesValue(widget.lead.notes),
+                              useMutedValueStyle:
+                                  _isNotesEmpty(widget.lead.notes),
+                            ),
                             _LeadDetailItem(
                               label: 'Created',
                               value: _formatDateTime(widget.lead.createdAt),
@@ -569,11 +601,13 @@ class _LeadDetailItem extends StatelessWidget {
     required this.label,
     required this.value,
     this.isLast = false,
+    this.useMutedValueStyle = false,
   });
 
   final String label;
   final String value;
   final bool isLast;
+  final bool useMutedValueStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -601,6 +635,9 @@ class _LeadDetailItem extends StatelessWidget {
               value,
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: useMutedValueStyle
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.onSurface,
               ),
             ),
           ),
@@ -677,6 +714,20 @@ String _formatBudgetType(String? value) {
     default:
       return '—';
   }
+}
+
+String _notesValue(String? value) {
+  final normalized = value?.trim();
+  if (normalized == null || normalized.isEmpty) {
+    return 'No notes added';
+  }
+
+  return normalized;
+}
+
+bool _isNotesEmpty(String? value) {
+  final normalized = value?.trim();
+  return normalized == null || normalized.isEmpty;
 }
 
 String _formatDateTime(DateTime? value) {
