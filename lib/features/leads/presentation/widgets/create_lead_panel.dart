@@ -84,6 +84,10 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
   final _clientNameController = TextEditingController();
   final _destinationController = TextEditingController();
   final _budgetController = TextEditingController();
+  final _adultCountController = TextEditingController(text: '1');
+  final _childCountController = TextEditingController(text: '0');
+  final _infantCountController = TextEditingController(text: '0');
+  final _notesController = TextEditingController();
 
   String _travelType = 'fit';
   String _tripScope = 'international';
@@ -118,6 +122,10 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
     _clientNameController.dispose();
     _destinationController.dispose();
     _budgetController.dispose();
+    _adultCountController.dispose();
+    _childCountController.dispose();
+    _infantCountController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -135,6 +143,11 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
     final budgetValue = _budgetController.text.trim();
     final budget = budgetValue.isEmpty ? null : int.tryParse(budgetValue);
     final budgetType = _budgetType;
+    final adultCount = int.parse(_adultCountController.text.trim());
+    final childCount = int.tryParse(_childCountController.text.trim()) ?? 0;
+    final infantCount = int.tryParse(_infantCountController.text.trim()) ?? 0;
+    final notesValue = _notesController.text.trim();
+    final notes = notesValue.isEmpty ? null : notesValue;
 
     setState(() {
       _isSubmitting = true;
@@ -174,6 +187,17 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
           'leadStage': 'newLead',
           'leadOwnerId': 'EMP001',
           'isArchived': false,
+          'adultCount': adultCount,
+          'childCount': childCount,
+          'infantCount': infantCount,
+          'passengerCount': <String, dynamic>{
+            'adults': adultCount,
+            'children': childCount,
+            'childrenAges': const <int>[],
+            'infants': infantCount,
+            'totalPax': adultCount + childCount + infantCount,
+          },
+          'notes': notes,
           'budget': budget,
           'budgetType': budgetType,
           'createdAt': now,
@@ -208,6 +232,62 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
         });
       }
     }
+  }
+
+  String? _validateRequiredCount(String? value, {required String label}) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) {
+      return '$label is required';
+    }
+
+    final parsed = int.tryParse(normalized);
+    if (parsed == null) {
+      return '$label must be a whole number';
+    }
+
+    if (parsed < 1) {
+      return '$label must be at least 1';
+    }
+
+    return null;
+  }
+
+  String? _validateOptionalCount(String? value, {required String label}) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    final parsed = int.tryParse(normalized);
+    if (parsed == null) {
+      return '$label must be a whole number';
+    }
+
+    if (parsed < 0) {
+      return '$label cannot be negative';
+    }
+
+    return null;
+  }
+
+  Widget _buildCountField({
+    required TextEditingController controller,
+    required String label,
+    required String? Function(String? value) validator,
+  }) {
+    return Expanded(
+      child: TextFormField(
+        controller: controller,
+        enabled: !_isSubmitting,
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.next,
+        decoration: InputDecoration(
+          labelText: label,
+          isDense: true,
+        ),
+        validator: validator,
+      ),
+    );
   }
 
   @override
@@ -282,6 +362,7 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
                         children: [
                           TextFormField(
                             controller: _clientNameController,
+                            enabled: !_isSubmitting,
                             textInputAction: TextInputAction.next,
                             decoration: const InputDecoration(
                               labelText: 'Client Name',
@@ -297,6 +378,7 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
                           const SizedBox(height: AppSpacing.lg),
                           TextFormField(
                             controller: _destinationController,
+                            enabled: !_isSubmitting,
                             textInputAction: TextInputAction.next,
                             decoration: const InputDecoration(
                               labelText: 'Destination',
@@ -308,6 +390,37 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
 
                               return null;
                             },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Row(
+                            children: [
+                              _buildCountField(
+                                controller: _adultCountController,
+                                label: 'Adults',
+                                validator: (value) => _validateRequiredCount(
+                                  value,
+                                  label: 'Adults',
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              _buildCountField(
+                                controller: _childCountController,
+                                label: 'Children',
+                                validator: (value) => _validateOptionalCount(
+                                  value,
+                                  label: 'Children',
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              _buildCountField(
+                                controller: _infantCountController,
+                                label: 'Infants',
+                                validator: (value) => _validateOptionalCount(
+                                  value,
+                                  label: 'Infants',
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: AppSpacing.lg),
                           DropdownButtonFormField<String>(
@@ -350,7 +463,9 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
                           const SizedBox(height: AppSpacing.lg),
                           TextFormField(
                             controller: _budgetController,
+                            enabled: !_isSubmitting,
                             keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
                             decoration: const InputDecoration(
                               labelText: 'Budget (optional)',
                             ),
@@ -388,6 +503,18 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
                                       _budgetType = value;
                                     });
                                   },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _notesController,
+                            enabled: !_isSubmitting,
+                            minLines: 3,
+                            maxLines: 5,
+                            textInputAction: TextInputAction.newline,
+                            decoration: const InputDecoration(
+                              labelText: 'Notes',
+                              alignLabelWithHint: true,
+                            ),
                           ),
                         ],
                       ),

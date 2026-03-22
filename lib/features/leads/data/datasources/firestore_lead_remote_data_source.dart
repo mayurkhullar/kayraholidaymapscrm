@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_collections.dart';
+import '../../../../shared/models/passenger_count_model.dart';
 import '../../domain/models/lead_model.dart';
 import 'lead_remote_data_source.dart';
 
@@ -78,6 +79,17 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
               : lead)
           .copyWith(
             leadCode: leadCode,
+            passengerCount: (lead.passengerCount ??
+                    PassengerCountModel.calculate(
+                      adults: lead.adultCount,
+                      children: lead.childCount,
+                      infants: lead.infantCount,
+                    ))
+                .withComputedTotal(),
+            adultCount: lead.adultCount,
+            childCount: lead.childCount,
+            infantCount: lead.infantCount,
+            notes: lead.notes,
             budget: lead.budget,
             budgetType: lead.budgetType,
             isArchived: false,

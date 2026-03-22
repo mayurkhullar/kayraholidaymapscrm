@@ -20,6 +20,10 @@ class LeadModel {
     this.destination,
     this.travelDates,
     this.passengerCount,
+    this.adultCount = 0,
+    this.childCount = 0,
+    this.infantCount = 0,
+    this.notes,
     this.budget,
     this.budgetType,
     required this.leadStage,
@@ -66,6 +70,10 @@ class LeadModel {
   final String? destination;
   final LeadTravelDatesModel? travelDates;
   final PassengerCountModel? passengerCount;
+  final int adultCount;
+  final int childCount;
+  final int infantCount;
+  final String? notes;
   final int? budget;
   final String? budgetType;
   final LeadStage leadStage;
@@ -100,6 +108,8 @@ class LeadModel {
   final DateTime? archivedAt;
 
   factory LeadModel.fromMap(Map<String, dynamic> map) {
+    final passengerCountMap = _mapFromDynamic(map['passengerCount']);
+
     return LeadModel(
       id: (map['id'] as String?) ?? '',
       leadCode: (map['leadCode'] as String?) ?? '',
@@ -112,7 +122,20 @@ class LeadModel {
       tripScope: _tripScopeFromDynamic(map['tripScope']),
       destination: map['destination'] as String?,
       travelDates: _leadTravelDatesFromDynamic(map['travelDates']),
-      passengerCount: _passengerCountFromDynamic(map['passengerCount']),
+      passengerCount: _passengerCountFromDynamic(passengerCountMap),
+      adultCount: _intFromDynamic(
+        map['adultCount'] ?? passengerCountMap?['adults'],
+        fallback: 0,
+      ),
+      childCount: _intFromDynamic(
+        map['childCount'] ?? passengerCountMap?['children'],
+        fallback: 0,
+      ),
+      infantCount: _intFromDynamic(
+        map['infantCount'] ?? passengerCountMap?['infants'],
+        fallback: 0,
+      ),
+      notes: map['notes'] as String?,
       budget: _budgetFromDynamic(map['budget']),
       budgetType: map['budgetType'] as String?,
       leadStage: _leadStageFromDynamic(map['leadStage']),
@@ -163,7 +186,17 @@ class LeadModel {
       'tripScope': tripScope.firestoreValue,
       'destination': destination,
       'travelDates': travelDates?.toMap(),
-      'passengerCount': passengerCount?.toMap(),
+      'passengerCount': (passengerCount ??
+              PassengerCountModel.calculate(
+                adults: adultCount,
+                children: childCount,
+                infants: infantCount,
+              ))
+          .toMap(),
+      'adultCount': adultCount,
+      'childCount': childCount,
+      'infantCount': infantCount,
+      'notes': notes,
       'budget': budget,
       'budgetType': budgetType,
       'leadStage': leadStage.firestoreValue,
@@ -212,6 +245,10 @@ class LeadModel {
     String? destination,
     LeadTravelDatesModel? travelDates,
     PassengerCountModel? passengerCount,
+    int? adultCount,
+    int? childCount,
+    int? infantCount,
+    String? notes,
     int? budget,
     String? budgetType,
     LeadStage? leadStage,
@@ -258,6 +295,10 @@ class LeadModel {
       destination: destination ?? this.destination,
       travelDates: travelDates ?? this.travelDates,
       passengerCount: passengerCount ?? this.passengerCount,
+      adultCount: adultCount ?? this.adultCount,
+      childCount: childCount ?? this.childCount,
+      infantCount: infantCount ?? this.infantCount,
+      notes: notes ?? this.notes,
       budget: budget ?? this.budget,
       budgetType: budgetType ?? this.budgetType,
       leadStage: leadStage ?? this.leadStage,
@@ -323,6 +364,27 @@ List<String> _stringListFromDynamic(dynamic value) {
   }
 
   return const <String>[];
+}
+
+
+int _intFromDynamic(dynamic value, {int fallback = 0}) {
+  if (value == null) {
+    return fallback;
+  }
+
+  if (value is int) {
+    return value;
+  }
+
+  if (value is num) {
+    return value.toInt();
+  }
+
+  if (value is String) {
+    return int.tryParse(value.trim()) ?? fallback;
+  }
+
+  return fallback;
 }
 
 int? _budgetFromDynamic(dynamic value) {
