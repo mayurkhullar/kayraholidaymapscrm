@@ -49,7 +49,7 @@ class _AppShellState extends State<AppShell> {
     final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
     final shellTopPadding = isDesktopLayout ? AppSpacing.md : AppSpacing.sm;
     final shellBottomPadding = isDesktopLayout ? AppSpacing.sm : AppSpacing.xs;
-    final contentPadding = isDesktopLayout ? AppSpacing.lg : AppSpacing.md;
+    const contentPadding = 20.0;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -110,18 +110,18 @@ class _AppShellState extends State<AppShell> {
                                   ),
                                   boxShadow: const [
                                     BoxShadow(
-                                      color: Color(0x0D0F172A),
-                                      blurRadius: 22,
-                                      offset: Offset(0, 8),
+                                      color: Color(0x120F172A),
+                                      blurRadius: 26,
+                                      offset: Offset(0, 10),
                                     ),
                                   ],
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.fromLTRB(
+                                  padding: const EdgeInsets.fromLTRB(
                                     contentPadding,
                                     contentPadding,
                                     contentPadding,
-                                    AppSpacing.sm,
+                                    contentPadding,
                                   ),
                                   child: widget.child,
                                 ),

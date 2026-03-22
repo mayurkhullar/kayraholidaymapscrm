@@ -5,11 +5,9 @@ import '../../../core/constants/app_enums.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/empty_state_view.dart';
-import '../../../core/widgets/page_container.dart';
 import '../domain/models/lead_model.dart';
 import 'widgets/create_lead_panel.dart';
 import 'widgets/lead_detail_panel.dart';
-import 'widgets/lead_filters_bar.dart';
 import 'widgets/lead_list_header.dart';
 import 'widgets/lead_table.dart';
 
@@ -113,89 +111,83 @@ class _LeadsScreenState extends State<LeadsScreen> {
   Widget build(BuildContext context) {
     return AppShell(
       pageTitle: 'Leads',
-      child: PageContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            LeadListHeader(
-              onCreateLead: () => CreateLeadPanel.show(context),
-            ),
-            if (_successMessage != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              _PageSuccessMessage(message: _successMessage!),
-              const SizedBox(height: AppSpacing.xs),
-            ] else
-              const SizedBox(height: AppSpacing.xs),
-            Expanded(
-              child: StreamBuilder<List<LeadModel>>(
-                stream: LeadsScreen._leadsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const EmptyStateView(
-                      title: 'Unable to load leads',
-                      message:
-                          'There was a problem loading active leads. Please try again shortly.',
-                      icon: Icons.error_outline_rounded,
-                    );
-                  }
-
-                  if (snapshot.connectionState == ConnectionState.waiting &&
-                      !snapshot.hasData) {
-                    return const _LeadTableLoadingState();
-                  }
-
-                  final leads = snapshot.data ?? const <LeadModel>[];
-
-                  if (leads.isEmpty) {
-                    return const EmptyStateView(
-                      title: 'No leads found',
-                      message: 'Create your first lead to get started.',
-                      icon: Icons.people_outline_rounded,
-                    );
-                  }
-
-                  final filteredLeads = _applyFilters(leads);
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      LeadFiltersBar(
-                        searchController: _searchController,
-                        selectedStage: _selectedStage,
-                        selectedTravelType: _selectedTravelType,
-                        onStageChanged: (value) {
-                          setState(() {
-                            _selectedStage = value;
-                          });
-                        },
-                        onTravelTypeChanged: (value) {
-                          setState(() {
-                            _selectedTravelType = value;
-                          });
-                        },
-                        onClearFilters: _clearFilters,
-                      ),
-                      const SizedBox(height: 2),
-                      Expanded(
-                        child: filteredLeads.isEmpty
-                            ? const EmptyStateView(
-                                title: 'No matching leads',
-                                message:
-                                    'Try adjusting your search, stage, or travel type filters.',
-                                icon: Icons.filter_alt_off_rounded,
-                              )
-                            : LeadTable(
-                                leads: filteredLeads,
-                                onLeadTap: _openLeadDetails,
-                              ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_successMessage != null) ...[
+            _PageSuccessMessage(message: _successMessage!),
+            const SizedBox(height: AppSpacing.sm),
           ],
-        ),
+          Expanded(
+            child: StreamBuilder<List<LeadModel>>(
+              stream: LeadsScreen._leadsStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const EmptyStateView(
+                    title: 'Unable to load leads',
+                    message:
+                        'There was a problem loading active leads. Please try again shortly.',
+                    icon: Icons.error_outline_rounded,
+                  );
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
+                  return const _LeadTableLoadingState();
+                }
+
+                final leads = snapshot.data ?? const <LeadModel>[];
+
+                if (leads.isEmpty) {
+                  return const EmptyStateView(
+                    title: 'No leads found',
+                    message: 'Create your first lead to get started.',
+                    icon: Icons.people_outline_rounded,
+                  );
+                }
+
+                final filteredLeads = _applyFilters(leads);
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _LeadToolbar(
+                      searchController: _searchController,
+                      selectedStage: _selectedStage,
+                      selectedTravelType: _selectedTravelType,
+                      onStageChanged: (value) {
+                        setState(() {
+                          _selectedStage = value;
+                        });
+                      },
+                      onTravelTypeChanged: (value) {
+                        setState(() {
+                          _selectedTravelType = value;
+                        });
+                      },
+                      onClearFilters: _clearFilters,
+                      onCreateLead: () => CreateLeadPanel.show(context),
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: filteredLeads.isEmpty
+                          ? const EmptyStateView(
+                              title: 'No matching leads',
+                              message:
+                                  'Try adjusting your search, stage, or travel type filters.',
+                              icon: Icons.filter_alt_off_rounded,
+                            )
+                          : LeadTable(
+                              leads: filteredLeads,
+                              onLeadTap: _openLeadDetails,
+                            ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -289,6 +281,148 @@ class _PageSuccessMessage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LeadToolbar extends StatelessWidget {
+  const _LeadToolbar({
+    required this.searchController,
+    required this.selectedStage,
+    required this.selectedTravelType,
+    required this.onStageChanged,
+    required this.onTravelTypeChanged,
+    required this.onClearFilters,
+    required this.onCreateLead,
+  });
+
+  final TextEditingController searchController;
+  final String? selectedStage;
+  final String? selectedTravelType;
+  final ValueChanged<String?> onStageChanged;
+  final ValueChanged<String?> onTravelTypeChanged;
+  final VoidCallback onClearFilters;
+  final VoidCallback onCreateLead;
+
+  static const List<DropdownMenuItem<String?>> _stageItems = [
+    DropdownMenuItem(value: null, child: Text('All Stages')),
+    DropdownMenuItem(value: 'NEW_LEAD', child: Text('New Lead')),
+    DropdownMenuItem(value: 'CONTACTED', child: Text('Contacted')),
+    DropdownMenuItem(value: 'QUOTATION_SENT', child: Text('Quotation Sent')),
+    DropdownMenuItem(value: 'NEGOTIATION', child: Text('Negotiation')),
+    DropdownMenuItem(value: 'ON_HOLD', child: Text('On Hold')),
+    DropdownMenuItem(value: 'CONFIRMED', child: Text('Confirmed')),
+    DropdownMenuItem(value: 'LOST', child: Text('Lost')),
+  ];
+
+  static const List<DropdownMenuItem<String?>> _travelTypeItems = [
+    DropdownMenuItem(value: null, child: Text('All Types')),
+    DropdownMenuItem(value: 'FIT', child: Text('FIT')),
+    DropdownMenuItem(value: 'CORPORATE', child: Text('Corporate')),
+    DropdownMenuItem(value: 'GROUP', child: Text('Group')),
+    DropdownMenuItem(value: 'MICE', child: Text('MICE')),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final inputDecorationTheme = theme.inputDecorationTheme;
+
+    final controlTheme = theme.copyWith(
+      inputDecorationTheme: inputDecorationTheme.copyWith(
+        filled: true,
+        fillColor: colorScheme.surface,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.2),
+        ),
+        labelStyle: theme.textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+
+    return Theme(
+      data: controlTheme,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 2,
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Search client, destination, or lead code',
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  size: 18,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                isDense: true,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonFormField<String?>(
+              value: selectedStage,
+              decoration: const InputDecoration(
+                labelText: 'Stage',
+                isDense: true,
+              ),
+              items: _stageItems,
+              onChanged: onStageChanged,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonFormField<String?>(
+              value: selectedTravelType,
+              decoration: const InputDecoration(
+                labelText: 'Travel Type',
+                isDense: true,
+              ),
+              items: _travelTypeItems,
+              onChanged: onTravelTypeChanged,
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 132,
+            child: OutlinedButton.icon(
+              onPressed: onClearFilters,
+              icon: const Icon(Icons.restart_alt_rounded, size: 16),
+              label: const Text('Clear Filters'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(132, 40),
+                backgroundColor: colorScheme.surface,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          LeadListHeader(onCreateLead: onCreateLead),
+        ],
       ),
     );
   }

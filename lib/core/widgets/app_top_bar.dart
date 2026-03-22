@@ -16,7 +16,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
 
   @override
-  Size get preferredSize => const Size.fromHeight(60);
+  Size get preferredSize => const Size.fromHeight(56);
 
   @override
   Widget build(BuildContext context) {
@@ -50,97 +50,106 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
           border: Border.all(color: colorScheme.outlineVariant),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x080F172A),
-              blurRadius: 14,
-              offset: Offset(0, 5),
+              color: Color(0x070F172A),
+              blurRadius: 12,
+              offset: Offset(0, 4),
             ),
           ],
         ),
-        child: Row(
-          children: [
-            if (showMenuButton) ...[
-              _TopBarIconButton(
-                onPressed: onMenuPressed,
-                icon: Icons.menu_rounded,
-                tooltip: 'Open navigation',
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              if (showMenuButton) ...[
+                _TopBarIconButton(
+                  onPressed: onMenuPressed,
+                  icon: Icons.menu_rounded,
+                  tooltip: 'Open navigation',
+                ),
+                SizedBox(width: actionSpacing),
+              ],
+              Expanded(
+                child: Text(
+                  pageTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
               ),
               SizedBox(width: actionSpacing),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isWideLayout ? 240 : 156,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _TopBarIconButton(
+                        onPressed: () {},
+                        icon: Icons.search_rounded,
+                        tooltip: 'Search',
+                      ),
+                      SizedBox(width: actionSpacing),
+                      _TopBarIconButton(
+                        onPressed: () {},
+                        icon: Icons.notifications_none_rounded,
+                        tooltip: 'Notifications',
+                      ),
+                      SizedBox(width: actionSpacing),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: profileHorizontalPadding,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: colorScheme.outlineVariant),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              radius: 14,
+                              backgroundColor:
+                                  colorScheme.primary.withValues(alpha: 0.12),
+                              child: Icon(
+                                Icons.person_outline_rounded,
+                                size: 15,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                            SizedBox(width: actionSpacing),
+                            Text(
+                              'Admin',
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: colorScheme.onSurface,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
-            Expanded(
-              child: Text(
-                pageTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
-                ),
-              ),
-            ),
-            SizedBox(width: actionSpacing),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: isWideLayout ? 240 : 156,
-              ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _TopBarIconButton(
-                      onPressed: () {},
-                      icon: Icons.search_rounded,
-                      tooltip: 'Search',
-                    ),
-                    SizedBox(width: actionSpacing),
-                    _TopBarIconButton(
-                      onPressed: () {},
-                      icon: Icons.notifications_none_rounded,
-                      tooltip: 'Notifications',
-                    ),
-                    SizedBox(width: actionSpacing),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: profileHorizontalPadding,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: colorScheme.outlineVariant),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleAvatar(
-                            radius: 14,
-                            backgroundColor:
-                                colorScheme.primary.withValues(alpha: 0.12),
-                            child: Icon(
-                              Icons.person_outline_rounded,
-                              size: 15,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                          SizedBox(width: actionSpacing),
-                          Text(
-                            'Admin',
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

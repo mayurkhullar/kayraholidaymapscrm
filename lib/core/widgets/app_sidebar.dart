@@ -52,7 +52,7 @@ class AppSidebar extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: isCollapsed ? AppSpacing.sm : AppSpacing.sm,
-                vertical: AppSpacing.sm,
+                vertical: AppSpacing.xs,
               ),
               child: Column(
                 crossAxisAlignment:
@@ -62,12 +62,12 @@ class AppSidebar extends StatelessWidget {
                     isCollapsed: isCollapsed,
                     onToggleCollapse: onToggleCollapse,
                   ),
-                  SizedBox(height: isCollapsed ? AppSpacing.md : AppSpacing.lg),
+                  SizedBox(height: isCollapsed ? AppSpacing.sm : AppSpacing.md),
                   Expanded(
                     child: ListView.separated(
                       padding: EdgeInsets.zero,
                       itemCount: AppNavigationItems.items.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+                      separatorBuilder: (_, _) => const SizedBox(height: 6),
                       itemBuilder: (context, index) {
                         final item = AppNavigationItems.items[index];
                         final isActive = currentRoute == item.route;
@@ -224,10 +224,10 @@ class _SidebarItem extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final itemContent = Material(
-      color: isActive ? colorScheme.primary.withValues(alpha: 0.16) : Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
+      color: isActive ? colorScheme.primary.withValues(alpha: 0.14) : Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         hoverColor: colorScheme.surface.withValues(alpha: 0.6),
         onTap: () {
           if (!isActive) {
@@ -241,14 +241,14 @@ class _SidebarItem extends StatelessWidget {
           duration: _animationDuration,
           curve: Curves.easeOut,
           padding: EdgeInsets.symmetric(
-            horizontal: isCollapsed ? 0 : AppSpacing.md,
-            vertical: 10,
+            horizontal: isCollapsed ? 0 : 14,
+            vertical: 8,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             border: isActive
                 ? Border.all(
-                    color: colorScheme.primary.withValues(alpha: 0.22),
+                    color: colorScheme.primary.withValues(alpha: 0.28),
                   )
                 : null,
           ),
@@ -262,7 +262,7 @@ class _SidebarItem extends StatelessWidget {
                 color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
               ),
               if (!isCollapsed) ...[
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     item.label,

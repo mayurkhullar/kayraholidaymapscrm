@@ -56,7 +56,7 @@ class LeadTable extends StatefulWidget {
         leadTableOwnerWidth +
         leadTableUpdatedWidth +
         (AppSpacing.md * (_columns.length - 1)) +
-        (20 * 2),
+        (16 * 2),
   );
 
   @override
@@ -161,9 +161,9 @@ class _LeadTableState extends State<LeadTable> {
             ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x120F172A),
-                blurRadius: 22,
-                offset: Offset(0, 10),
+                color: Color(0x100F172A),
+                blurRadius: 18,
+                offset: Offset(0, 8),
               ),
             ],
           ),
@@ -195,8 +195,8 @@ class _LeadTableState extends State<LeadTable> {
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
+                        horizontal: 16,
+                        vertical: 10,
                       ),
                       child: Row(
                         children: [
@@ -284,9 +284,9 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final textStyle = theme.textTheme.labelLarge?.copyWith(
       color: isActive
           ? colorScheme.onSurface
-          : colorScheme.onSurface.withValues(alpha: 0.82),
-      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-      letterSpacing: 0.15,
+          : colorScheme.onSurface.withValues(alpha: 0.9),
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.05,
     );
 
     return Padding(

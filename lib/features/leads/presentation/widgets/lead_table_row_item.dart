@@ -71,8 +71,8 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
             splashColor: colorScheme.primary.withValues(alpha: 0.06),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 11,
+                horizontal: 16,
+                vertical: 9,
               ),
               child: Row(
                 children: [
@@ -82,7 +82,8 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                       _fallback(widget.lead.leadCode, '—'),
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        letterSpacing: 0.08,
+                        letterSpacing: 0.04,
+                        height: 1.1,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -208,6 +209,7 @@ class _PrimarySecondaryText extends StatelessWidget {
           primary,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
+            height: 1.15,
           ),
           overflow: TextOverflow.ellipsis,
         ),
@@ -217,7 +219,7 @@ class _PrimarySecondaryText extends StatelessWidget {
             secondaryText,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              height: 1.15,
+              height: 1.1,
             ),
             overflow: TextOverflow.ellipsis,
           ),
