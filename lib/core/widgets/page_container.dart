@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/responsive_utils.dart';
+
 class PageContainer extends StatelessWidget {
   const PageContainer({
     required this.child,
@@ -10,6 +12,14 @@ class PageContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(width: double.infinity, child: child);
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: ResponsiveUtils.contentMaxWidth(context),
+        ),
+        child: SizedBox(width: double.infinity, child: child),
+      ),
+    );
   }
 }

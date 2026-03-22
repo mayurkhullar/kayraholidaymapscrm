@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_spacing.dart';
+import '../utils/responsive_utils.dart';
 import 'app_sidebar.dart';
 import 'app_top_bar.dart';
 
@@ -48,7 +49,10 @@ class _AppShellState extends State<AppShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
-        final mainPadding = isDesktop ? AppSpacing.lg : AppSpacing.md;
+        final horizontalPagePadding = ResponsiveUtils.horizontalPagePadding(
+          context,
+        );
+        final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
 
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
@@ -88,34 +92,48 @@ class _AppShellState extends State<AppShell> {
                           Expanded(
                             child: Padding(
                               padding: EdgeInsets.fromLTRB(
-                                mainPadding,
+                                horizontalPagePadding,
                                 AppSpacing.md,
-                                mainPadding,
+                                horizontalPagePadding,
                                 AppSpacing.xs,
                               ),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: colorScheme.outlineVariant,
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: contentMaxWidth,
                                   ),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color(0x0D0F172A),
-                                      blurRadius: 22,
-                                      offset: Offset(0, 8),
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surface,
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: colorScheme.outlineVariant,
+                                      ),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Color(0x0D0F172A),
+                                          blurRadius: 22,
+                                          offset: Offset(0, 8),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                    isDesktop ? AppSpacing.lg : AppSpacing.md,
-                                    isDesktop ? AppSpacing.lg : AppSpacing.md,
-                                    isDesktop ? AppSpacing.lg : AppSpacing.md,
-                                    AppSpacing.xs,
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        isDesktop
+                                            ? AppSpacing.lg
+                                            : AppSpacing.md,
+                                        isDesktop
+                                            ? AppSpacing.lg
+                                            : AppSpacing.md,
+                                        isDesktop
+                                            ? AppSpacing.lg
+                                            : AppSpacing.md,
+                                        AppSpacing.xs,
+                                      ),
+                                      child: widget.child,
+                                    ),
                                   ),
-                                  child: widget.child,
                                 ),
                               ),
                             ),
