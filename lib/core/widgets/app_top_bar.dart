@@ -5,13 +5,11 @@ import '../utils/responsive_utils.dart';
 
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({
-    this.title,
     super.key,
     this.showMenuButton = false,
     this.onMenuPressed,
   });
 
-  final String? title;
   final bool showMenuButton;
   final VoidCallback? onMenuPressed;
 
@@ -29,7 +27,6 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     );
     final outerTopPadding = isWideLayout ? AppSpacing.md : AppSpacing.sm;
     final innerHorizontalPadding = isWideLayout ? AppSpacing.md : AppSpacing.sm;
-    final titleSpacing = isWideLayout ? AppSpacing.sm : AppSpacing.xs;
     final actionSpacing = isWideLayout ? AppSpacing.sm : AppSpacing.xs;
     final profileHorizontalPadding =
         isWideLayout ? AppSpacing.sm : AppSpacing.xs;
@@ -65,36 +62,9 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                 icon: Icons.menu_rounded,
                 tooltip: 'Open navigation',
               ),
-              SizedBox(width: titleSpacing),
+              SizedBox(width: actionSpacing),
             ],
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title ?? 'Workspace',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Clean, focused CRM workspace',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: actionSpacing),
+            const Spacer(),
             ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: isWideLayout ? 240 : 156,
@@ -140,7 +110,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                               color: colorScheme.primary,
                             ),
                           ),
-                          SizedBox(width: titleSpacing),
+                          SizedBox(width: actionSpacing),
                           Text(
                             'Admin',
                             overflow: TextOverflow.ellipsis,

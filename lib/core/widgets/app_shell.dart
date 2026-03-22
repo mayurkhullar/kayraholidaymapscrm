@@ -83,7 +83,6 @@ class _AppShellState extends State<AppShell> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       AppTopBar(
-                        title: widget.pageTitle,
                         showMenuButton: !isDesktopLayout,
                         onMenuPressed: () => Scaffold.of(context).openDrawer(),
                       ),
