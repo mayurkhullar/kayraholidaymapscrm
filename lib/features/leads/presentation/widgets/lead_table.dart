@@ -160,13 +160,13 @@ class _LeadTableState extends State<LeadTable> {
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.95),
+              color: colorScheme.outlineVariant.withValues(alpha: 1),
             ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x0A0F172A),
-                blurRadius: 18,
-                offset: Offset(0, 8),
+                color: Color(0x120F172A),
+                blurRadius: 22,
+                offset: Offset(0, 10),
               ),
             ],
           ),

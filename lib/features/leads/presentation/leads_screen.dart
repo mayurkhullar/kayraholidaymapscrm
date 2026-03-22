@@ -175,7 +175,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                         },
                         onClearFilters: _clearFilters,
                       ),
-                      const SizedBox(height: AppSpacing.xs),
+                      const SizedBox(height: 2),
                       Expanded(
                         child: filteredLeads.isEmpty
                             ? const EmptyStateView(
