@@ -48,58 +48,82 @@ class _AppShellState extends State<AppShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= AppShell.desktopBreakpoint;
+        final mainPadding = isDesktop ? AppSpacing.xl : AppSpacing.lg;
 
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
-          body: Row(
-            children: [
-              if (isDesktop)
-                AppSidebar(
-                  currentRoute: routeName,
-                  isCollapsed: _isSidebarCollapsed,
-                  onToggleCollapse: _toggleSidebar,
-                ),
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    border: Border(
-                      left: BorderSide(
-                        color: colorScheme.outlineVariant.withValues(
-                          alpha: isDesktop ? 0.3 : 0,
-                        ),
-                      ),
-                    ),
+          drawer: isDesktop
+              ? null
+              : Drawer(
+                  width: 280,
+                  backgroundColor: colorScheme.surface,
+                  surfaceTintColor: Colors.transparent,
+                  child: AppSidebar(
+                    currentRoute: routeName,
+                    isCollapsed: false,
+                    onToggleCollapse: () {},
                   ),
-                  child: Column(
-                    children: [
-                      AppTopBar(
-                        title: widget.pageTitle,
-                        showMenuButton: !isDesktop,
-                        onMenuPressed: () {},
+                ),
+          body: Builder(
+            builder: (context) {
+              return SafeArea(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (isDesktop)
+                      AppSidebar(
+                        currentRoute: routeName,
+                        isCollapsed: _isSidebarCollapsed,
+                        onToggleCollapse: _toggleSidebar,
                       ),
-                      Expanded(
-                        child: ColoredBox(
-                          color: colorScheme.surface,
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              isDesktop ? AppSpacing.lg : AppSpacing.md,
-                              isDesktop ? AppSpacing.lg : AppSpacing.md,
-                              isDesktop ? AppSpacing.lg : AppSpacing.md,
-                              AppSpacing.lg,
-                            ),
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: widget.child,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AppTopBar(
+                            title: widget.pageTitle,
+                            showMenuButton: !isDesktop,
+                            onMenuPressed: () => Scaffold.of(context).openDrawer(),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                mainPadding,
+                                AppSpacing.lg,
+                                mainPadding,
+                                AppSpacing.lg,
+                              ),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(28),
+                                  border: Border.all(
+                                    color: colorScheme.outlineVariant,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x0D0F172A),
+                                      blurRadius: 24,
+                                      offset: Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(
+                                    isDesktop ? AppSpacing.xl : AppSpacing.lg,
+                                  ),
+                                  child: widget.child,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
         );
       },

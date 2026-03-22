@@ -55,27 +55,21 @@ class LeadFiltersBar extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
-          ),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
-          ),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: colorScheme.primary.withValues(alpha: 0.52),
-          ),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.2),
         ),
         labelStyle: theme.textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
+          color: colorScheme.onSurfaceVariant,
         ),
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.66),
+          color: colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -85,9 +79,7 @@ class LeadFiltersBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.16),
-        ),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Theme(
@@ -109,9 +101,7 @@ class LeadFiltersBar extends StatelessWidget {
                   prefixIcon: Icon(
                     Icons.search_rounded,
                     size: 18,
-                    color: colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.72,
-                    ),
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   isDense: true,
                 ),
@@ -160,13 +150,9 @@ class LeadFiltersBar extends StatelessWidget {
               icon: const Icon(Icons.restart_alt_rounded, size: 17),
               label: const Text('Clear Filters'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: colorScheme.onSurface.withValues(alpha: 0.94),
                 visualDensity: VisualDensity.compact,
                 minimumSize: const Size(0, 44),
-                side: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.22),
-                ),
-                backgroundColor: colorScheme.surface.withValues(alpha: 0.92),
+                backgroundColor: colorScheme.surface,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.md,
@@ -174,16 +160,6 @@ class LeadFiltersBar extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-              ).copyWith(
-                overlayColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.pressed)) {
-                    return colorScheme.primary.withValues(alpha: 0.08);
-                  }
-                  if (states.contains(WidgetState.hovered)) {
-                    return colorScheme.onSurface.withValues(alpha: 0.03);
-                  }
-                  return null;
-                }),
               ),
             ),
           ],

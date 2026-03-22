@@ -6,9 +6,12 @@ class AppColorPalette {
     required this.primaryLight,
     required this.primaryDark,
     required this.background,
+    required this.sidebar,
     required this.surface,
     required this.card,
+    required this.cardMuted,
     required this.border,
+    required this.borderStrong,
     required this.textPrimary,
     required this.textSecondary,
     required this.textMuted,
@@ -23,9 +26,12 @@ class AppColorPalette {
   final Color primaryDark;
 
   final Color background;
+  final Color sidebar;
   final Color surface;
   final Color card;
+  final Color cardMuted;
   final Color border;
+  final Color borderStrong;
 
   final Color textPrimary;
   final Color textSecondary;
@@ -39,36 +45,22 @@ class AppColorPalette {
 
 class AppColors {
   static const AppColorPalette light = AppColorPalette(
-    primary: Color(0xFF0F8B8D),
-    primaryLight: Color(0xFF5FBFC1),
-    primaryDark: Color(0xFF0A5E73),
-    background: Color(0xFFF4F7FB),
+    primary: Color(0xFF0F7C82),
+    primaryLight: Color(0xFFD9F1F2),
+    primaryDark: Color(0xFF0B5968),
+    background: Color(0xFFF3F6FA),
+    sidebar: Color(0xFFEAF0F5),
     surface: Color(0xFFFFFFFF),
-    card: Color(0xFFFCFDFE),
+    card: Color(0xFFFFFFFF),
+    cardMuted: Color(0xFFF8FAFC),
     border: Color(0xFFD9E2EC),
+    borderStrong: Color(0xFFC4D0DD),
     textPrimary: Color(0xFF102A43),
     textSecondary: Color(0xFF486581),
-    textMuted: Color(0xFF829AB1),
-    success: Color(0xFF2F9E78),
-    warning: Color(0xFFD98E04),
-    error: Color(0xFFD64545),
+    textMuted: Color(0xFF7B8794),
+    success: Color(0xFF2F855A),
+    warning: Color(0xFFB7791F),
+    error: Color(0xFFC53030),
     info: Color(0xFF2B6CB0),
-  );
-
-  static const AppColorPalette dark = AppColorPalette(
-    primary: Color(0xFF58C7BE),
-    primaryLight: Color(0xFF8EE0DA),
-    primaryDark: Color(0xFF1D7B79),
-    background: Color(0xFF091018),
-    surface: Color(0xFF121A24),
-    card: Color(0xFF1A2430),
-    border: Color(0xFF2A3947),
-    textPrimary: Color(0xFFF3F6FA),
-    textSecondary: Color(0xFFB9C5D3),
-    textMuted: Color(0xFF8190A1),
-    success: Color(0xFF5BC99A),
-    warning: Color(0xFFF0B44D),
-    error: Color(0xFFFF7B7B),
-    info: Color(0xFF63B3ED),
   );
 }

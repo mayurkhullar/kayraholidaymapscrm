@@ -76,8 +76,8 @@ class _LeadsScreenState extends State<LeadsScreen> {
           lead.clientNameSnapshot?.toLowerCase().contains(query) == true ||
           lead.destination?.toLowerCase().contains(query) == true ||
           lead.leadCode.toLowerCase().contains(query);
-      final matchesStage = _selectedStage == null ||
-          lead.leadStage.firestoreValue == _selectedStage;
+      final matchesStage =
+          _selectedStage == null || lead.leadStage.firestoreValue == _selectedStage;
       final matchesTravelType = _selectedTravelType == null ||
           lead.travelType.firestoreValue == _selectedTravelType;
 
@@ -116,28 +116,19 @@ class _LeadsScreenState extends State<LeadsScreen> {
     return AppShell(
       pageTitle: 'Leads',
       child: PageContainer(
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            LeadListHeader(
+              onCreateLead: () => CreateLeadPanel.show(context),
             ),
-          ),
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              LeadListHeader(
-                onCreateLead: () => CreateLeadPanel.show(context),
-              ),
-              if (_successMessage != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                _PageSuccessMessage(message: _successMessage!),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              StreamBuilder<List<LeadModel>>(
+            if (_successMessage != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _PageSuccessMessage(message: _successMessage!),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            Expanded(
+              child: StreamBuilder<List<LeadModel>>(
                 stream: LeadsScreen._leadsStream,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -186,24 +177,25 @@ class _LeadsScreenState extends State<LeadsScreen> {
                         onClearFilters: _clearFilters,
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      if (filteredLeads.isEmpty)
-                        const EmptyStateView(
-                          title: 'No matching leads',
-                          message:
-                              'Try adjusting your search, stage, or travel type filters.',
-                          icon: Icons.filter_alt_off_rounded,
-                        )
-                      else
-                        LeadTable(
-                          leads: filteredLeads,
-                          onLeadTap: _openLeadDetails,
-                        ),
+                      Expanded(
+                        child: filteredLeads.isEmpty
+                            ? const EmptyStateView(
+                                title: 'No matching leads',
+                                message:
+                                    'Try adjusting your search, stage, or travel type filters.',
+                                icon: Icons.filter_alt_off_rounded,
+                              )
+                            : LeadTable(
+                                leads: filteredLeads,
+                                onLeadTap: _openLeadDetails,
+                              ),
+                      ),
                     ],
                   );
                 },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -219,11 +211,9 @@ class _LeadTableLoadingState extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -240,7 +230,7 @@ class _LeadTableLoadingState extends StatelessWidget {
                     ),
                     child: _LoadingBar(
                       widthFactor: index.isEven ? 0.72 : 0.54,
-                      color: colorScheme.surface.withValues(alpha: 0.9),
+                      color: colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ),
@@ -250,11 +240,11 @@ class _LeadTableLoadingState extends StatelessWidget {
             ...List<Widget>.generate(
               6,
               (index) => Padding(
-                padding: EdgeInsets.only(bottom: index == 5 ? 0 : AppSpacing.lg),
+                padding: EdgeInsets.only(bottom: index == 5 ? 0 : AppSpacing.md),
                 child: _LoadingBar(
                   widthFactor: 1,
                   height: 56,
-                  color: colorScheme.surface.withValues(alpha: 0.76),
+                  color: colorScheme.surfaceContainerHighest,
                 ),
               ),
             ),
@@ -307,11 +297,9 @@ class _PageSuccessMessage extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.tertiaryContainer.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: colorScheme.tertiary.withValues(alpha: 0.28),
-        ),
+        color: colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.tertiary.withValues(alpha: 0.24)),
       ),
       child: Row(
         children: [

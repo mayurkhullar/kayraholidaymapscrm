@@ -150,11 +150,16 @@ class _LeadTableState extends State<LeadTable> {
         return Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: colorScheme.outlineVariant),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x080F172A),
+                blurRadius: 14,
+                offset: Offset(0, 6),
+              ),
+            ],
           ),
           clipBehavior: Clip.antiAlias,
           child: Scrollbar(
@@ -170,26 +175,18 @@ class _LeadTableState extends State<LeadTable> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: colorScheme.surface,
+                        color: colorScheme.surfaceContainerHighest,
                         border: Border(
-                          bottom: BorderSide(
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.18,
-                            ),
-                          ),
+                          bottom: BorderSide(color: colorScheme.outlineVariant),
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
-                        vertical: 13,
+                        vertical: 14,
                       ),
                       child: Row(
                         children: [
-                          for (
-                            var index = 0;
-                            index < LeadTable._columns.length;
-                            index++
-                          )
+                          for (var index = 0; index < LeadTable._columns.length; index++)
                             _LeadTableHeaderCell(
                               label: LeadTable._columns[index].label,
                               width: LeadTable._columns[index].width,
@@ -200,33 +197,42 @@ class _LeadTableState extends State<LeadTable> {
                               onTap: LeadTable._columns[index].sortKey == null
                                   ? null
                                   : () => _handleSort(
-                                      LeadTable._columns[index].sortKey!,
-                                    ),
+                                        LeadTable._columns[index].sortKey!,
+                                      ),
                             ),
                         ],
                       ),
                     ),
-                    Column(
-                      children: [
-                        for (var index = 0; index < sortedLeads.length; index++) ...[
-                          LeadTableRowItem(
-                            lead: sortedLeads[index],
-                            index: index,
-                            onTap: widget.onLeadTap == null
-                                ? null
-                                : () => widget.onLeadTap!(sortedLeads[index]),
+                    if (sortedLeads.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(AppSpacing.xl),
+                        child: Text(
+                          'No leads available.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
                           ),
-                          if (index < sortedLeads.length - 1)
-                            Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: colorScheme.outlineVariant.withValues(
-                                alpha: 0.1,
-                              ),
+                        ),
+                      )
+                    else
+                      Column(
+                        children: [
+                          for (var index = 0; index < sortedLeads.length; index++) ...[
+                            LeadTableRowItem(
+                              lead: sortedLeads[index],
+                              index: index,
+                              onTap: widget.onLeadTap == null
+                                  ? null
+                                  : () => widget.onLeadTap!(sortedLeads[index]),
                             ),
+                            if (index < sortedLeads.length - 1)
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: colorScheme.outlineVariant,
+                              ),
+                          ],
                         ],
-                      ],
-                    ),
+                      ),
                   ],
                 ),
               ),
@@ -260,11 +266,9 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textStyle = theme.textTheme.labelLarge?.copyWith(
-      color: isActive
-          ? colorScheme.onSurface
-          : colorScheme.onSurfaceVariant.withValues(alpha: 0.84),
-      fontWeight: FontWeight.w800,
-      letterSpacing: 0.28,
+      color: isActive ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.2,
     );
 
     return Padding(

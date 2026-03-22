@@ -48,9 +48,9 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final baseColor = widget.index.isEven
-        ? Colors.transparent
-        : colorScheme.surface.withValues(alpha: 0.05);
-    final hoverColor = colorScheme.onSurface.withValues(alpha: 0.035);
+        ? colorScheme.surface
+        : colorScheme.surfaceContainerHighest;
+    final hoverColor = colorScheme.primary.withValues(alpha: 0.05);
 
     return MouseRegion(
       cursor: widget.onTap == null
@@ -110,7 +110,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _travelTypeLabel(widget.lead.travelType),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.9),
+                        color: colorScheme.onSurface,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -140,7 +140,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _fallback(widget.lead.leadOwnerId, 'Unassigned'),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -151,7 +151,7 @@ class _LeadTableRowItemState extends State<LeadTableRowItem> {
                     child: Text(
                       _formatDate(widget.lead.updatedAt),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -216,7 +216,7 @@ class _PrimarySecondaryText extends StatelessWidget {
           Text(
             secondaryText,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             overflow: TextOverflow.ellipsis,
           ),
