@@ -251,7 +251,7 @@ class _SidebarItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleSmall?.copyWith(
                       color:
-                          isActive ? colorScheme.primaryDark : colorScheme.onSurface,
+                          isActive ? colorScheme.primary : colorScheme.onSurface,
                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
                     ),
                   ),

@@ -45,6 +45,30 @@ class ClientModel {
     );
   }
 
+  ClientModel copyWith({
+    String? id,
+    String? clientCode,
+    String? name,
+    String? email,
+    String? phone,
+    String? companyName,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isActive,
+  }) {
+    return ClientModel(
+      id: id ?? this.id,
+      clientCode: clientCode ?? this.clientCode,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      companyName: companyName ?? this.companyName,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isActive: isActive ?? this.isActive,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'clientCode': clientCode,

@@ -20,10 +20,9 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
         .get();
 
     return querySnapshot.docs
-        .map((doc) => ClientModel.fromMap(<String, dynamic>{
-              ...doc.data(),
-              'id': doc.id,
-            }))
+        .map(
+          (doc) => ClientModel.fromMap(doc.data(), doc.id),
+        )
         .toList(growable: false);
   }
 
@@ -40,10 +39,7 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
       return null;
     }
 
-    return ClientModel.fromMap(<String, dynamic>{
-      ...data,
-      'id': documentSnapshot.id,
-    });
+    return ClientModel.fromMap(data, documentSnapshot.id);
   }
 
   @override
