@@ -12,13 +12,19 @@ class PageContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final horizontalPadding = ResponsiveUtils.horizontalPagePadding(context);
+    final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
+
     return Align(
       alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: ResponsiveUtils.contentMaxWidth(context),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: contentMaxWidth,
+          ),
+          child: SizedBox(width: double.infinity, child: child),
         ),
-        child: SizedBox(width: double.infinity, child: child),
       ),
     );
   }

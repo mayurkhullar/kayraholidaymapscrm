@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_spacing.dart';
+import '../utils/responsive_utils.dart';
 
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({
@@ -21,18 +22,29 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isWideLayout =
+        ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
+    final outerHorizontalPadding = ResponsiveUtils.horizontalPagePadding(
+      context,
+    );
+    final outerTopPadding = isWideLayout ? AppSpacing.md : AppSpacing.sm;
+    final innerHorizontalPadding = isWideLayout ? AppSpacing.md : AppSpacing.sm;
+    final titleSpacing = isWideLayout ? AppSpacing.sm : AppSpacing.xs;
+    final actionSpacing = isWideLayout ? AppSpacing.sm : AppSpacing.xs;
+    final profileHorizontalPadding =
+        isWideLayout ? AppSpacing.sm : AppSpacing.xs;
 
     return Container(
       color: theme.scaffoldBackgroundColor,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
+      padding: EdgeInsets.fromLTRB(
+        outerHorizontalPadding,
+        outerTopPadding,
+        outerHorizontalPadding,
         0,
       ),
       child: Container(
         height: preferredSize.height,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        padding: EdgeInsets.symmetric(horizontal: innerHorizontalPadding),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(18),
@@ -53,7 +65,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                 icon: Icons.menu_rounded,
                 tooltip: 'Open navigation',
               ),
-              const SizedBox(width: AppSpacing.sm),
+              SizedBox(width: titleSpacing),
             ],
             Expanded(
               child: Column(
@@ -82,59 +94,66 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                 ],
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _TopBarIconButton(
-                    onPressed: () {},
-                    icon: Icons.search_rounded,
-                    tooltip: 'Search',
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  _TopBarIconButton(
-                    onPressed: () {},
-                    icon: Icons.notifications_none_rounded,
-                    tooltip: 'Notifications',
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: 6,
+            SizedBox(width: actionSpacing),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isWideLayout ? 240 : 156,
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _TopBarIconButton(
+                      onPressed: () {},
+                      icon: Icons.search_rounded,
+                      tooltip: 'Search',
                     ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: colorScheme.outlineVariant),
+                    SizedBox(width: actionSpacing),
+                    _TopBarIconButton(
+                      onPressed: () {},
+                      icon: Icons.notifications_none_rounded,
+                      tooltip: 'Notifications',
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 14,
-                          backgroundColor:
-                              colorScheme.primary.withValues(alpha: 0.12),
-                          child: Icon(
-                            Icons.person_outline_rounded,
-                            size: 15,
-                            color: colorScheme.primary,
+                    SizedBox(width: actionSpacing),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: profileHorizontalPadding,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 14,
+                            backgroundColor:
+                                colorScheme.primary.withValues(alpha: 0.12),
+                            child: Icon(
+                              Icons.person_outline_rounded,
+                              size: 15,
+                              color: colorScheme.primary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          'Admin',
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w600,
+                          SizedBox(width: titleSpacing),
+                          Text(
+                            'Admin',
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

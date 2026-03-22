@@ -47,6 +47,9 @@ class _AppShellState extends State<AppShell> {
         ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
     final horizontalPagePadding = ResponsiveUtils.horizontalPagePadding(context);
     final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
+    final shellTopPadding = isDesktopLayout ? AppSpacing.md : AppSpacing.sm;
+    final shellBottomPadding = isDesktopLayout ? AppSpacing.sm : AppSpacing.xs;
+    final contentPadding = isDesktopLayout ? AppSpacing.lg : AppSpacing.md;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -88,9 +91,9 @@ class _AppShellState extends State<AppShell> {
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(
                             horizontalPagePadding,
-                            AppSpacing.md,
+                            shellTopPadding,
                             horizontalPagePadding,
-                            AppSpacing.xs,
+                            shellBottomPadding,
                           ),
                           child: Align(
                             alignment: Alignment.topCenter,
@@ -115,16 +118,10 @@ class _AppShellState extends State<AppShell> {
                                 ),
                                 child: Padding(
                                   padding: EdgeInsets.fromLTRB(
-                                    isDesktopLayout
-                                        ? AppSpacing.lg
-                                        : AppSpacing.md,
-                                    isDesktopLayout
-                                        ? AppSpacing.lg
-                                        : AppSpacing.md,
-                                    isDesktopLayout
-                                        ? AppSpacing.lg
-                                        : AppSpacing.md,
-                                    AppSpacing.xs,
+                                    contentPadding,
+                                    contentPadding,
+                                    contentPadding,
+                                    AppSpacing.sm,
                                   ),
                                   child: widget.child,
                                 ),
