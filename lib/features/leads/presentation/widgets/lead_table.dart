@@ -43,17 +43,21 @@ class LeadTable extends StatefulWidget {
     ),
   ];
 
-  static final double _tableContentWidth =
-      leadTableLeadCodeWidth +
-      leadTableClientWidth +
-      leadTableDestinationWidth +
-      leadTableTravelTypeWidth +
-      leadTableBudgetWidth +
-      leadTableStageWidth +
-      leadTableOwnerWidth +
-      leadTableUpdatedWidth +
-      (AppSpacing.md * (_columns.length - 1)) +
-      (20 * 2);
+  static const double _minTableWidth = 1100;
+
+  static final double _tableContentWidth = math.max(
+    _minTableWidth,
+    leadTableLeadCodeWidth +
+        leadTableClientWidth +
+        leadTableDestinationWidth +
+        leadTableTravelTypeWidth +
+        leadTableBudgetWidth +
+        leadTableStageWidth +
+        leadTableOwnerWidth +
+        leadTableUpdatedWidth +
+        (AppSpacing.md * (_columns.length - 1)) +
+        (20 * 2),
+  );
 
   @override
   State<LeadTable> createState() => _LeadTableState();
@@ -147,15 +151,8 @@ class _LeadTableState extends State<LeadTable> {
             : LeadTable._tableContentWidth;
         final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
 
-        final viewportHeight = constraints.maxHeight.isFinite
-            ? constraints.maxHeight
-            : 0.0;
-
         return Container(
           width: double.infinity,
-          constraints: BoxConstraints(
-            minHeight: viewportHeight,
-          ),
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
@@ -174,14 +171,13 @@ class _LeadTableState extends State<LeadTable> {
           child: Scrollbar(
             controller: _horizontalScrollController,
             thumbVisibility: tableWidth > viewportWidth,
+            trackVisibility: tableWidth > viewportWidth,
             child: SingleChildScrollView(
               controller: _horizontalScrollController,
               scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: tableWidth,
-                  minHeight: viewportHeight,
-                ),
+              physics: const ClampingScrollPhysics(),
+              child: SizedBox(
+                width: tableWidth,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
