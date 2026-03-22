@@ -48,50 +48,48 @@ class LeadFiltersBar extends StatelessWidget {
     final controlTheme = theme.copyWith(
       inputDecorationTheme: inputDecorationTheme.copyWith(
         filled: true,
-        fillColor: const Color(0xFF0E1622),
+        fillColor: colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: 12,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.22),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: colorScheme.primary.withValues(alpha: 0.4),
+            color: colorScheme.primary.withValues(alpha: 0.52),
           ),
         ),
         labelStyle: theme.textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
         ),
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.62),
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.66),
         ),
       ),
     );
 
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.1),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.16),
         ),
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Theme(
         data: controlTheme,
         child: Wrap(
@@ -102,7 +100,7 @@ class LeadFiltersBar extends StatelessWidget {
             ConstrainedBox(
               constraints: const BoxConstraints(
                 minWidth: 240,
-                maxWidth: 340,
+                maxWidth: 360,
               ),
               child: TextField(
                 controller: searchController,
@@ -120,7 +118,7 @@ class LeadFiltersBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 180,
+              width: 190,
               child: DropdownButtonFormField<String?>(
                 value: selectedStage,
                 decoration: const InputDecoration(
@@ -139,7 +137,7 @@ class LeadFiltersBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 180,
+              width: 190,
               child: DropdownButtonFormField<String?>(
                 value: selectedTravelType,
                 decoration: const InputDecoration(
@@ -162,19 +160,19 @@ class LeadFiltersBar extends StatelessWidget {
               icon: const Icon(Icons.restart_alt_rounded, size: 17),
               label: const Text('Clear Filters'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: colorScheme.onSurface.withValues(alpha: 0.92),
+                foregroundColor: colorScheme.onSurface.withValues(alpha: 0.94),
                 visualDensity: VisualDensity.compact,
-                minimumSize: const Size(0, 42),
+                minimumSize: const Size(0, 44),
                 side: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.22),
                 ),
-                backgroundColor: colorScheme.surface.withValues(alpha: 0.08),
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.92),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.md,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ).copyWith(
                 overlayColor: WidgetStateProperty.resolveWith((states) {

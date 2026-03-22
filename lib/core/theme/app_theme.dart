@@ -26,7 +26,7 @@ class AppTheme {
       onPrimaryContainer: colors.primaryDark,
       secondary: colors.info,
       onSecondary: Colors.white,
-      secondaryContainer: colors.primaryLight.withValues(alpha: 0.20),
+      secondaryContainer: colors.primaryLight.withValues(alpha: 0.18),
       onSecondaryContainer: colors.textPrimary,
       tertiary: colors.success,
       onTertiary: Colors.white,
@@ -41,13 +41,19 @@ class AppTheme {
       surfaceContainerHighest: colors.card,
       onSurfaceVariant: colors.textSecondary,
       outline: colors.border,
-      outlineVariant: colors.border.withValues(alpha: 0.75),
-      shadow: Colors.black.withValues(alpha: brightness == Brightness.light ? 0.08 : 0.24),
+      outlineVariant: colors.border.withValues(alpha: 0.78),
+      shadow: Colors.black.withValues(
+        alpha: brightness == Brightness.light ? 0.08 : 0.28,
+      ),
       scrim: Colors.black.withValues(alpha: 0.45),
-      inverseSurface: brightness == Brightness.light ? const Color(0xFF102A43) : const Color(0xFFF4F7FB),
-      onInverseSurface: brightness == Brightness.light ? const Color(0xFFF4F7FB) : const Color(0xFF102A43),
+      inverseSurface: brightness == Brightness.light
+          ? const Color(0xFF102A43)
+          : const Color(0xFFF4F7FB),
+      onInverseSurface: brightness == Brightness.light
+          ? const Color(0xFFF4F7FB)
+          : const Color(0xFF102A43),
       inversePrimary: colors.primaryLight,
-      surfaceTint: colors.primary,
+      surfaceTint: Colors.transparent,
     );
 
     final textTheme = AppTypography.textTheme(
@@ -82,21 +88,19 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: colors.border.withValues(alpha: 0.45)),
+          side: BorderSide(color: colors.border.withValues(alpha: 0.4)),
         ),
         margin: EdgeInsets.zero,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: brightness == Brightness.light
-            ? colors.surface
-            : colors.card.withValues(alpha: 0.95),
+        fillColor: brightness == Brightness.light ? colors.surface : colors.card,
         hintStyle: AppTypography.bodyMedium.copyWith(color: colors.textMuted),
         labelStyle: AppTypography.label.copyWith(color: colors.textSecondary),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: colors.border.withValues(alpha: 0.70)),
+          borderSide: BorderSide(color: colors.border.withValues(alpha: 0.72)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -132,7 +136,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: colors.textPrimary,
           textStyle: AppTypography.label,
-          side: BorderSide(color: colors.border.withValues(alpha: 0.7)),
+          side: BorderSide(color: colors.border.withValues(alpha: 0.72)),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -140,7 +144,7 @@ class AppTheme {
         ),
       ),
       dividerTheme: DividerThemeData(
-        color: colors.border.withValues(alpha: 0.7),
+        color: colors.border.withValues(alpha: 0.68),
         thickness: 1,
         space: 1,
       ),

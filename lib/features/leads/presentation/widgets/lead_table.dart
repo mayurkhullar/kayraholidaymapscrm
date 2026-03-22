@@ -147,95 +147,87 @@ class _LeadTableState extends State<LeadTable> {
             : LeadTable._tableContentWidth;
         final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
 
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF0C141F),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.22),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
             ),
-            child: Scrollbar(
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Scrollbar(
+            controller: _horizontalScrollController,
+            thumbVisibility: tableWidth > viewportWidth,
+            child: SingleChildScrollView(
               controller: _horizontalScrollController,
-              thumbVisibility: tableWidth > viewportWidth,
-              child: SingleChildScrollView(
-                controller: _horizontalScrollController,
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: tableWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF121D2A),
-                          border: Border(
-                            bottom: BorderSide(
-                              color: colorScheme.outlineVariant.withValues(
-                                alpha: 0.18,
-                              ),
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: tableWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: colorScheme.outlineVariant.withValues(
+                              alpha: 0.18,
                             ),
                           ),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 13,
-                        ),
-                        child: Row(
-                          children: [
-                            for (
-                              var index = 0;
-                              index < LeadTable._columns.length;
-                              index++
-                            )
-                              _LeadTableHeaderCell(
-                                label: LeadTable._columns[index].label,
-                                width: LeadTable._columns[index].width,
-                                isLast: index == LeadTable._columns.length - 1,
-                                isActive:
-                                    LeadTable._columns[index].sortKey == _sortColumn,
-                                isAscending: _isAscending,
-                                onTap: LeadTable._columns[index].sortKey == null
-                                    ? null
-                                    : () => _handleSort(
-                                        LeadTable._columns[index].sortKey!,
-                                      ),
-                              ),
-                          ],
-                        ),
                       ),
-                      Column(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 13,
+                      ),
+                      child: Row(
                         children: [
-                          for (var index = 0; index < sortedLeads.length; index++) ...[
-                            LeadTableRowItem(
-                              lead: sortedLeads[index],
-                              index: index,
-                              onTap: widget.onLeadTap == null
+                          for (
+                            var index = 0;
+                            index < LeadTable._columns.length;
+                            index++
+                          )
+                            _LeadTableHeaderCell(
+                              label: LeadTable._columns[index].label,
+                              width: LeadTable._columns[index].width,
+                              isLast: index == LeadTable._columns.length - 1,
+                              isActive:
+                                  LeadTable._columns[index].sortKey == _sortColumn,
+                              isAscending: _isAscending,
+                              onTap: LeadTable._columns[index].sortKey == null
                                   ? null
-                                  : () => widget.onLeadTap!(sortedLeads[index]),
+                                  : () => _handleSort(
+                                      LeadTable._columns[index].sortKey!,
+                                    ),
                             ),
-                            if (index < sortedLeads.length - 1)
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.1,
-                                ),
-                              ),
-                          ],
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Column(
+                      children: [
+                        for (var index = 0; index < sortedLeads.length; index++) ...[
+                          LeadTableRowItem(
+                            lead: sortedLeads[index],
+                            index: index,
+                            onTap: widget.onLeadTap == null
+                                ? null
+                                : () => widget.onLeadTap!(sortedLeads[index]),
+                          ),
+                          if (index < sortedLeads.length - 1)
+                            Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.1,
+                              ),
+                            ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -270,7 +262,7 @@ class _LeadTableHeaderCell extends StatelessWidget {
     final textStyle = theme.textTheme.labelLarge?.copyWith(
       color: isActive
           ? colorScheme.onSurface
-          : colorScheme.onSurfaceVariant.withValues(alpha: 0.82),
+          : colorScheme.onSurfaceVariant.withValues(alpha: 0.84),
       fontWeight: FontWeight.w800,
       letterSpacing: 0.28,
     );
@@ -323,6 +315,8 @@ class _LeadTableHeaderCell extends StatelessWidget {
   }
 }
 
+enum _LeadSortColumn { leadCode, client, destination, updated }
+
 class _LeadTableColumn {
   const _LeadTableColumn({
     required this.label,
@@ -333,11 +327,4 @@ class _LeadTableColumn {
   final String label;
   final double width;
   final _LeadSortColumn? sortKey;
-}
-
-enum _LeadSortColumn {
-  leadCode,
-  client,
-  destination,
-  updated,
 }

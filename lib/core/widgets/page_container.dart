@@ -14,20 +14,20 @@ class PageContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPadding = constraints.maxWidth >= 1200
+        final horizontalPadding = constraints.maxWidth >= 1400
             ? AppSpacing.xl
             : constraints.maxWidth >= 768
                 ? AppSpacing.lg
-                : AppSpacing.md;
+                : 0.0;
 
         return Padding(
           padding: EdgeInsets.fromLTRB(
             horizontalPadding,
-            AppSpacing.xl,
+            0,
             horizontalPadding,
-            AppSpacing.xl,
+            0,
           ),
-          child: child,
+          child: SizedBox(width: double.infinity, child: child),
         );
       },
     );

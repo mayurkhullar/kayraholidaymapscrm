@@ -111,38 +111,33 @@ class _LeadsScreenState extends State<LeadsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return AppShell(
       pageTitle: 'Leads',
       child: PageContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            LeadListHeader(
-              onCreateLead: () => CreateLeadPanel.show(context),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
             ),
-            if (_successMessage != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              _PageSuccessMessage(message: _successMessage!),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF151F2D),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.12),
-                ),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              LeadListHeader(
+                onCreateLead: () => CreateLeadPanel.show(context),
               ),
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.lg,
-                AppSpacing.md,
-              ),
-              child: StreamBuilder<List<LeadModel>>(
+              if (_successMessage != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                _PageSuccessMessage(message: _successMessage!),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              StreamBuilder<List<LeadModel>>(
                 stream: LeadsScreen._leadsStream,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -172,7 +167,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                   final filteredLeads = _applyFilters(leads);
 
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       LeadFiltersBar(
                         searchController: _searchController,
@@ -207,8 +202,8 @@ class _LeadsScreenState extends State<LeadsScreen> {
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -220,12 +215,11 @@ class _LeadTableLoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF101926),
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: colorScheme.outlineVariant.withValues(alpha: 0.18),
@@ -246,7 +240,7 @@ class _LeadTableLoadingState extends StatelessWidget {
                     ),
                     child: _LoadingBar(
                       widthFactor: index.isEven ? 0.72 : 0.54,
-                      color: colorScheme.surfaceContainerHighest,
+                      color: colorScheme.surface.withValues(alpha: 0.9),
                     ),
                   ),
                 ),
@@ -259,13 +253,39 @@ class _LeadTableLoadingState extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: index == 5 ? 0 : AppSpacing.lg),
                 child: _LoadingBar(
                   widthFactor: 1,
-                  height: 44,
-                  radius: 14,
-                  color: colorScheme.surface.withValues(alpha: 0.42),
+                  height: 56,
+                  color: colorScheme.surface.withValues(alpha: 0.76),
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingBar extends StatelessWidget {
+  const _LoadingBar({
+    required this.widthFactor,
+    required this.color,
+    this.height = 14,
+  });
+
+  final double widthFactor;
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: widthFactor,
+      alignment: Alignment.centerLeft,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(999),
         ),
       ),
     );
@@ -279,69 +299,37 @@ class _PageSuccessMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.22),
+          color: colorScheme.tertiary.withValues(alpha: 0.28),
         ),
       ),
       child: Row(
         children: [
           Icon(
             Icons.check_circle_outline_rounded,
-            color: colorScheme.primary,
-            size: 18,
+            color: colorScheme.tertiary,
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               message,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _LoadingBar extends StatelessWidget {
-  const _LoadingBar({
-    required this.widthFactor,
-    required this.color,
-    this.height = 12,
-    this.radius = 999,
-  });
-
-  final double widthFactor;
-  final double height;
-  final double radius;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: widthFactor,
-      alignment: Alignment.centerLeft,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(radius),
-        ),
       ),
     );
   }
