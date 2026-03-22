@@ -41,28 +41,31 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       pageTitle: 'Dashboard',
-      child: const PageContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SectionHeader(
-              title: 'Dashboard Overview',
-              subtitle: 'A polished snapshot of your CRM activity will live here.',
-            ),
-            SizedBox(height: AppSpacing.xl),
-            _DashboardStatGrid(),
-            SizedBox(height: AppSpacing.xxl),
-            SectionHeader(
-              title: 'Recent Activity',
-              subtitle: 'Latest updates from the system',
-            ),
-            SizedBox(height: AppSpacing.lg),
-            EmptyStateView(
-              title: 'No activity yet',
-              message: 'Recent updates, timeline items, and system events will appear here once modules are connected.',
-              icon: Icons.history_toggle_off_rounded,
-            ),
-          ],
+      child: SingleChildScrollView(
+        child: const PageContainer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SectionHeader(
+                title: 'Dashboard Overview',
+                subtitle: 'A polished snapshot of your CRM activity will live here.',
+              ),
+              SizedBox(height: AppSpacing.xl),
+              _DashboardStatGrid(),
+              SizedBox(height: AppSpacing.xxl),
+              SectionHeader(
+                title: 'Recent Activity',
+                subtitle: 'Latest updates from the system',
+              ),
+              SizedBox(height: AppSpacing.lg),
+              EmptyStateView(
+                title: 'No activity yet',
+                message: 'Recent updates, timeline items, and system events will appear here once modules are connected.',
+                icon: Icons.history_toggle_off_rounded,
+              ),
+            ],
+          ),
         ),
       ),
     );
