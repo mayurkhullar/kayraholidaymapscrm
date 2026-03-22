@@ -74,100 +74,109 @@ class LeadFiltersBar extends StatelessWidget {
       ),
     );
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 6,
-      ),
-      child: Theme(
-        data: controlTheme,
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: 220,
-                maxWidth: 320,
-              ),
-              child: TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search client, destination, or lead code',
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    size: 18,
-                    color: colorScheme.onSurfaceVariant,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 760;
+        final compactFieldWidth = constraints.maxWidth - (AppSpacing.md * 2);
+        final searchMaxWidth = isCompact ? compactFieldWidth : 320.0;
+        final dropdownWidth = isCompact ? compactFieldWidth : 180.0;
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: 6,
+          ),
+          child: Theme(
+            data: controlTheme,
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SizedBox(
+                  width: searchMaxWidth.clamp(0.0, 320.0).toDouble(),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search client, destination, or lead code',
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        size: 18,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      isDense: true,
+                    ),
                   ),
-                  isDense: true,
                 ),
-              ),
-            ),
-            SizedBox(
-              width: 180,
-              child: DropdownButtonFormField<String?>(
-                value: selectedStage,
-                decoration: const InputDecoration(
-                  labelText: 'Stage',
-                  isDense: true,
+                SizedBox(
+                  width: dropdownWidth.clamp(0.0, 180.0).toDouble(),
+                  child: DropdownButtonFormField<String?>(
+                    value: selectedStage,
+                    decoration: const InputDecoration(
+                      labelText: 'Stage',
+                      isDense: true,
+                    ),
+                    items: _stageOptions
+                        .map(
+                          (option) => DropdownMenuItem<String?>(
+                            value: option.value,
+                            child: Text(option.label),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: onStageChanged,
+                  ),
                 ),
-                items: _stageOptions
-                    .map(
-                      (option) => DropdownMenuItem<String?>(
-                        value: option.value,
-                        child: Text(option.label),
+                SizedBox(
+                  width: dropdownWidth.clamp(0.0, 180.0).toDouble(),
+                  child: DropdownButtonFormField<String?>(
+                    value: selectedTravelType,
+                    decoration: const InputDecoration(
+                      labelText: 'Travel Type',
+                      isDense: true,
+                    ),
+                    items: _travelTypeOptions
+                        .map(
+                          (option) => DropdownMenuItem<String?>(
+                            value: option.value,
+                            child: Text(option.label),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: onTravelTypeChanged,
+                  ),
+                ),
+                SizedBox(
+                  width: isCompact ? compactFieldWidth : null,
+                  child: OutlinedButton.icon(
+                    onPressed: onClearFilters,
+                    icon: const Icon(Icons.restart_alt_rounded, size: 16),
+                    label: const Text('Clear Filters'),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      minimumSize: Size(isCompact ? compactFieldWidth : 0, 40),
+                      backgroundColor: colorScheme.surface,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 10,
                       ),
-                    )
-                    .toList(growable: false),
-                onChanged: onStageChanged,
-              ),
-            ),
-            SizedBox(
-              width: 180,
-              child: DropdownButtonFormField<String?>(
-                value: selectedTravelType,
-                decoration: const InputDecoration(
-                  labelText: 'Travel Type',
-                  isDense: true,
-                ),
-                items: _travelTypeOptions
-                    .map(
-                      (option) => DropdownMenuItem<String?>(
-                        value: option.value,
-                        child: Text(option.label),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    )
-                    .toList(growable: false),
-                onChanged: onTravelTypeChanged,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: onClearFilters,
-              icon: const Icon(Icons.restart_alt_rounded, size: 16),
-              label: const Text('Clear Filters'),
-              style: OutlinedButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                minimumSize: const Size(0, 40),
-                backgroundColor: colorScheme.surface,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: 10,
+                    ),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
