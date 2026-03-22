@@ -223,6 +223,44 @@ class _SidebarItem extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    Widget buildExpandedContent() {
+      return Row(
+        children: [
+          Icon(
+            item.icon,
+            size: 20,
+            color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: isActive ? colorScheme.primary : colorScheme.onSurface,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget buildCollapsedContent() {
+      return SizedBox(
+        height: 40,
+        width: double.infinity,
+        child: Center(
+          child: Icon(
+            item.icon,
+            size: 20,
+            color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+
     final itemContent = Material(
       color: isActive ? colorScheme.primary.withValues(alpha: 0.14) : Colors.transparent,
       borderRadius: BorderRadius.circular(12),
@@ -252,32 +290,7 @@ class _SidebarItem extends StatelessWidget {
                   )
                 : null,
           ),
-          child: Row(
-            mainAxisAlignment:
-                isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
-            children: [
-              Icon(
-                item.icon,
-                size: 20,
-                color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
-              ),
-              if (!isCollapsed) ...[
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    item.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color:
-                          isActive ? colorScheme.primary : colorScheme.onSurface,
-                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+          child: isCollapsed ? buildCollapsedContent() : buildExpandedContent(),
         ),
       ),
     );
