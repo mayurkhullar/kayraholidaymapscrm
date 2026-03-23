@@ -8,6 +8,7 @@ import '../../../core/widgets/empty_state_view.dart';
 import '../data/datasources/firestore_lead_remote_data_source.dart';
 import '../data/repositories/lead_repository_impl.dart';
 import '../domain/models/lead_model.dart';
+import '../domain/models/lead_note_model.dart';
 
 class LeadDetailScreen extends StatefulWidget {
   const LeadDetailScreen({required this.leadId, super.key});
@@ -21,6 +22,7 @@ class LeadDetailScreen extends StatefulWidget {
 class _LeadDetailScreenState extends State<LeadDetailScreen> {
   late final LeadRepositoryImpl _leadRepository;
   late final Future<LeadModel?> _leadFuture;
+  late Future<List<LeadNoteModel>> _notesFuture;
 
   @override
   void initState() {
@@ -31,6 +33,43 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       ),
     );
     _leadFuture = _leadRepository.getLeadById(widget.leadId);
+    _notesFuture = _leadRepository.fetchLeadNotes(widget.leadId);
+  }
+
+  Future<void> _refreshNotes() async {
+    setState(() {
+      _notesFuture = _leadRepository.fetchLeadNotes(widget.leadId);
+    });
+    await _notesFuture;
+  }
+
+  Future<void> _showAddNoteDialog() async {
+    final noteText = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => const _AddNoteDialog(),
+    );
+
+    if (!mounted || noteText == null) {
+      return;
+    }
+
+    await _leadRepository.addLeadNote(
+      LeadNoteModel(
+        id: '',
+        leadId: widget.leadId,
+        noteText: noteText,
+        noteType: 'general',
+        relatedStage: null,
+        createdBy: null,
+        createdAt: DateTime.now(),
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    await _refreshNotes();
   }
 
   @override
@@ -79,7 +118,10 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _LeadSummaryStrip(lead: lead),
+                          _LeadSummaryStrip(
+                            lead: lead,
+                            onAddNote: _showAddNoteDialog,
+                          ),
                           const SizedBox(height: AppSpacing.md),
                           SectionContainer(
                             title: 'Overview',
@@ -89,7 +131,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                   label: 'Client Name',
                                   value: _displayValue(lead.clientNameSnapshot),
                                 ),
-                                _OverviewRow(
+                                const _OverviewRow(
                                   label: 'Phone',
                                   value: '—',
                                 ),
@@ -132,9 +174,57 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                             child: _PlaceholderMessage('No tasks yet'),
                           ),
                           const SizedBox(height: AppSpacing.md),
-                          const SectionContainer(
+                          SectionContainer(
                             title: 'Timeline',
-                            child: _PlaceholderMessage('No activity yet'),
+                            child: FutureBuilder<List<LeadNoteModel>>(
+                              future: _notesFuture,
+                              builder: (context, notesSnapshot) {
+                                if (notesSnapshot.connectionState ==
+                                        ConnectionState.waiting &&
+                                    !notesSnapshot.hasData) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: AppSpacing.sm,
+                                      ),
+                                      child: SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                if (notesSnapshot.hasError) {
+                                  return const _PlaceholderMessage(
+                                    'Unable to load notes',
+                                  );
+                                }
+
+                                final notes = notesSnapshot.data ??
+                                    const <LeadNoteModel>[];
+                                if (notes.isEmpty) {
+                                  return const _PlaceholderMessage(
+                                    'No notes yet',
+                                  );
+                                }
+
+                                return Column(
+                                  children: [
+                                    for (var index = 0;
+                                        index < notes.length;
+                                        index++)
+                                      _TimelineNoteItem(
+                                        note: notes[index],
+                                        isLast: index == notes.length - 1,
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -154,11 +244,13 @@ class SectionContainer extends StatelessWidget {
   const SectionContainer({
     required this.title,
     required this.child,
+    this.trailing,
     super.key,
   });
 
   final String title;
   final Widget child;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -176,12 +268,22 @@ class SectionContainer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              if (trailing != null) ...[
+                const SizedBox(width: AppSpacing.sm),
+                trailing!,
+              ],
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
           child,
@@ -192,9 +294,10 @@ class SectionContainer extends StatelessWidget {
 }
 
 class _LeadSummaryStrip extends StatelessWidget {
-  const _LeadSummaryStrip({required this.lead});
+  const _LeadSummaryStrip({required this.lead, required this.onAddNote});
 
   final LeadModel lead;
+  final VoidCallback onAddNote;
 
   @override
   Widget build(BuildContext context) {
@@ -257,8 +360,152 @@ class _LeadSummaryStrip extends StatelessWidget {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: AppSpacing.md),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: onAddNote,
+              icon: const Icon(Icons.note_add_outlined),
+              label: const Text('Add Note'),
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _TimelineNoteItem extends StatelessWidget {
+  const _TimelineNoteItem({required this.note, required this.isLast});
+
+  final LeadNoteModel note;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
+      margin: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : Border(
+                bottom: BorderSide(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+                ),
+              ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      _labelizeNoteType(note.noteType),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      _formatTimelineDateTime(context, note.createdAt),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  note.noteText.trim(),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AddNoteDialog extends StatefulWidget {
+  const _AddNoteDialog();
+
+  @override
+  State<_AddNoteDialog> createState() => _AddNoteDialogState();
+}
+
+class _AddNoteDialogState extends State<_AddNoteDialog> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final value = _controller.text.trim();
+    if (value.isEmpty) {
+      return;
+    }
+
+    Navigator.of(context).pop(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add Note'),
+      content: SizedBox(
+        width: 420,
+        child: TextField(
+          controller: _controller,
+          autofocus: true,
+          minLines: 4,
+          maxLines: 8,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            hintText: 'Write a quick note',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (_) => _save(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: const Text('Save Note'),
+        ),
+      ],
     );
   }
 }
@@ -389,6 +636,32 @@ String _formatDate(DateTime value) {
   ];
 
   return '${value.day} ${months[value.month - 1]} ${value.year}';
+}
+
+String _formatTimelineDateTime(BuildContext context, DateTime value) {
+  final localizations = MaterialLocalizations.of(context);
+  final dateText = localizations.formatMediumDate(value);
+  final timeText = localizations.formatTimeOfDay(
+    TimeOfDay.fromDateTime(value),
+    alwaysUse24HourFormat: false,
+  );
+
+  return '$dateText • $timeText';
+}
+
+String _labelizeNoteType(String noteType) {
+  final trimmedValue = noteType.trim();
+  if (trimmedValue.isEmpty) {
+    return 'General';
+  }
+
+  final words = trimmedValue.split(RegExp(r'[_\s]+'));
+  return words
+      .where((word) => word.isNotEmpty)
+      .map(
+        (word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
+      )
+      .join(' ');
 }
 
 String _travelTypeLabel(TravelType travelType) {
