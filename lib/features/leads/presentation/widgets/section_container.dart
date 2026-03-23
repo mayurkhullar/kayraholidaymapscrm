@@ -8,6 +8,7 @@ class SectionContainer extends StatelessWidget {
     required this.child,
     this.subtitle,
     this.trailing,
+    this.bodyTopSpacing = AppSpacing.md,
     super.key,
   });
 
@@ -15,6 +16,7 @@ class SectionContainer extends StatelessWidget {
   final String? subtitle;
   final Widget child;
   final Widget? trailing;
+  final double bodyTopSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +65,7 @@ class SectionContainer extends StatelessWidget {
               ],
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: bodyTopSpacing),
           child,
         ],
       ),

@@ -268,8 +268,19 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                       ? null
                       : lead.leadStage;
 
-                  final horizontalPadding = ResponsiveUtils.horizontalPagePadding(context);
-                  final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
+                  final baseHorizontalPadding =
+                      ResponsiveUtils.horizontalPagePadding(context);
+                  final horizontalPadding =
+                      (ResponsiveUtils.isDesktop(context) ||
+                              ResponsiveUtils.isWide(context))
+                          ? (baseHorizontalPadding - 4).clamp(16, double.infinity)
+                          : baseHorizontalPadding;
+                  final baseContentMaxWidth =
+                      ResponsiveUtils.contentMaxWidth(context);
+                  final contentMaxWidth =
+                      baseContentMaxWidth == double.infinity
+                          ? baseContentMaxWidth
+                          : baseContentMaxWidth + 48;
 
                   return SingleChildScrollView(
                     child: Center(
@@ -291,10 +302,11 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                 onUpdateStage: () => _showStageUpdateModal(lead),
                                 onAddNote: _showAddNoteDialog,
                               ),
-                              const SizedBox(height: AppSpacing.lg),
+                              const SizedBox(height: AppSpacing.xl),
                               SectionContainer(
                                 title: 'Timeline',
                                 subtitle: 'Recent activity and stage movements',
+                                bodyTopSpacing: AppSpacing.lg,
                                 child: FutureBuilder<List<LeadNoteModel>>(
                                   future: _notesFuture,
                                   builder: (context, notesSnapshot) {
@@ -351,7 +363,10 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                               SectionContainer(
                                 title: 'Overview',
                                 subtitle: 'Key deal details at a glance',
-                                child: _LeadOverviewGrid(lead: lead),
+                                bodyTopSpacing: AppSpacing.lg,
+                                child: _OverviewSurface(
+                                  child: _LeadOverviewGrid(lead: lead),
+                                ),
                               ),
                               const SizedBox(height: AppSpacing.lg),
                               const SectionContainer(
@@ -823,6 +838,30 @@ class _StageBadge extends StatelessWidget {
   }
 }
 
+class _OverviewSurface extends StatelessWidget {
+  const _OverviewSurface({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: child,
+    );
+  }
+}
+
 class _LeadOverviewGrid extends StatelessWidget {
   const _LeadOverviewGrid({required this.lead});
 
@@ -851,7 +890,7 @@ class _LeadOverviewGrid extends StatelessWidget {
 
     final isDesktopLayout =
         ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
-    const rowGapByIndex = <double>[0, 14, 10, 14];
+    const rowGapByIndex = <double>[0, 16, 12, 16];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,7 +905,7 @@ class _LeadOverviewGrid extends StatelessWidget {
                     columnIndex++) ...[
                   Expanded(child: _OverviewCell(item: overviewRows[index][columnIndex])),
                   if (columnIndex < overviewRows[index].length - 1)
-                    const SizedBox(width: AppSpacing.xl),
+                    const SizedBox(width: AppSpacing.lg),
                 ],
               ],
             )
@@ -879,7 +918,7 @@ class _LeadOverviewGrid extends StatelessWidget {
                     columnIndex++) ...[
                   _OverviewCell(item: overviewRows[index][columnIndex]),
                   if (columnIndex < overviewRows[index].length - 1)
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                 ],
               ],
             ),
@@ -916,7 +955,7 @@ class _OverviewCell extends StatelessWidget {
           item.label,
           style: theme.textTheme.labelSmall?.copyWith(
             fontSize: 10.5,
-            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.64),
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.62),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.12,
             height: 1.05,
@@ -1013,14 +1052,9 @@ class _TimelineNoteItem extends StatelessWidget {
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: _isStageChange
-                      ? palette.background.withValues(alpha: 0.12)
-                      : colorScheme.surfaceContainerLowest,
+                      ? palette.background.withValues(alpha: 0.1)
+                      : colorScheme.surfaceContainerLow.withValues(alpha: 0.42),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: _isStageChange
-                        ? palette.foreground.withValues(alpha: 0.08)
-                        : colorScheme.outlineVariant.withValues(alpha: 0.18),
-                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1036,14 +1070,14 @@ class _TimelineNoteItem extends StatelessWidget {
                               : _labelizeNoteType(note.noteType),
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             height: 1.2,
                           ),
                         ),
                         Text(
                           _formatTimelineDateTime(context, note.createdAt),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.84),
+                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
                           ),
                         ),
                       ],
@@ -1055,7 +1089,7 @@ class _TimelineNoteItem extends StatelessWidget {
                       Text(
                         note.reason!.trim(),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.foreground.withValues(alpha: 0.92),
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1064,7 +1098,7 @@ class _TimelineNoteItem extends StatelessWidget {
                     Text(
                       note.noteText.trim(),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.92),
+                        color: colorScheme.onSurface.withValues(alpha: 0.88),
                         height: 1.5,
                       ),
                     ),
