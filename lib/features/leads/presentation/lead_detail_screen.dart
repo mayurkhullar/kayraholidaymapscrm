@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_enums.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../data/datasources/firestore_lead_remote_data_source.dart';
@@ -69,12 +70,56 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     await _notesFuture;
   }
 
-  Future<void> _updateLeadStage(LeadModel lead) async {
+  Future<void> _showStageUpdateModal(LeadModel lead) async {
+    final selectedStage = await showModalBottomSheet<LeadStage>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _StageSelectionSheet(
+        currentStage: lead.leadStage,
+        selectedStage: _selectedLeadStage ?? lead.leadStage,
+        previousStageBeforeHold: _previousStageBeforeHold,
+        transitionError: _stageTransitionError,
+      ),
+    );
+
+    if (!mounted || selectedStage == null) {
+      return;
+    }
+
+    final isAllowedTransition = LeadStageTransitionRules.isAllowedTransition(
+      lead.leadStage,
+      selectedStage,
+      previousStageBeforeHold: _previousStageBeforeHold,
+    );
+
+    setState(() {
+      _selectedLeadStage = selectedStage;
+      _stageTransitionError = isAllowedTransition || selectedStage == lead.leadStage
+          ? null
+          : LeadStageTransitionRules.invalidTransitionMessage;
+
+      if (selectedStage == LeadStage.onHold && lead.leadStage != LeadStage.onHold) {
+        _previousStageBeforeHold = lead.leadStage;
+      }
+    });
+
+    if (!isAllowedTransition || selectedStage == lead.leadStage) {
+      return;
+    }
+
+    await _updateLeadStage(lead, stageOverride: selectedStage);
+  }
+
+  Future<void> _updateLeadStage(
+    LeadModel lead, {
+    LeadStage? stageOverride,
+  }) async {
     if (_isSavingStageChange) {
       return;
     }
 
-    final selectedStage = _selectedLeadStage ?? lead.leadStage;
+    final selectedStage = stageOverride ?? _selectedLeadStage ?? lead.leadStage;
     final isAllowedTransition = LeadStageTransitionRules.isAllowedTransition(
       lead.leadStage,
       selectedStage,
@@ -180,6 +225,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,152 +268,112 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                       ? null
                       : lead.leadStage;
 
+                  final horizontalPadding = ResponsiveUtils.horizontalPagePadding(context);
+                  final contentMaxWidth = ResponsiveUtils.contentMaxWidth(context);
+
                   return SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _LeadSummaryStrip(
-                            lead: lead,
-                            selectedStage: _selectedLeadStage ?? lead.leadStage,
-                            isSavingStageChange: _isSavingStageChange,
-                            onStageChanged: (stage) {
-                              if (stage == null) {
-                                return;
-                              }
-
-                              final isAllowedTransition =
-                                  LeadStageTransitionRules.isAllowedTransition(
-                                lead.leadStage,
-                                stage,
-                                previousStageBeforeHold: _previousStageBeforeHold,
-                              );
-
-                              setState(() {
-                                _selectedLeadStage = stage;
-                                _stageTransitionError = isAllowedTransition ||
-                                        stage == lead.leadStage
-                                    ? null
-                                    : LeadStageTransitionRules
-                                        .invalidTransitionMessage;
-
-                                if (stage == LeadStage.onHold &&
-                                    lead.leadStage != LeadStage.onHold) {
-                                  _previousStageBeforeHold = lead.leadStage;
-                                }
-                              });
-                            },
-                            stageTransitionError: _stageTransitionError,
-                            previousStageBeforeHold: _previousStageBeforeHold,
-                            onUpdateStage: () => _updateLeadStage(lead),
-                            onAddNote: _showAddNoteDialog,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: contentMaxWidth),
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            horizontalPadding,
+                            AppSpacing.xl,
+                            horizontalPadding,
+                            AppSpacing.xxl,
                           ),
-                          const SizedBox(height: AppSpacing.lg),
-                          SectionContainer(
-                            title: 'Overview',
-                            child: Column(
-                              children: [
-                                _OverviewRow(
-                                  label: 'Client Name',
-                                  value: _displayValue(lead.clientNameSnapshot),
-                                ),
-                                const _OverviewRow(
-                                  label: 'Phone',
-                                  value: '—',
-                                ),
-                                _OverviewRow(
-                                  label: 'Destination',
-                                  value: _displayValue(lead.destination),
-                                ),
-                                _OverviewRow(
-                                  label: 'Travel Dates',
-                                  value: _travelDateRange(lead),
-                                ),
-                                _OverviewRow(
-                                  label: 'Travel Type',
-                                  value: _travelTypeLabel(lead.travelType),
-                                ),
-                                _OverviewRow(
-                                  label: 'Budget (₹)',
-                                  value: _budgetValue(lead.budget),
-                                ),
-                                _OverviewRow(
-                                  label: 'Budget Type',
-                                  value: _displayValue(lead.budgetType),
-                                ),
-                                _OverviewRow(
-                                  label: 'Initial Notes',
-                                  value: _displayValue(lead.notes),
-                                  isLast: true,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          const SectionContainer(
-                            title: 'Quotations',
-                            child: _PlaceholderMessage('No quotations yet'),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          const SectionContainer(
-                            title: 'Tasks / Follow-ups',
-                            child: _PlaceholderMessage('No tasks yet'),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          SectionContainer(
-                            title: 'Timeline',
-                            child: FutureBuilder<List<LeadNoteModel>>(
-                              future: _notesFuture,
-                              builder: (context, notesSnapshot) {
-                                if (notesSnapshot.connectionState ==
-                                        ConnectionState.waiting &&
-                                    !notesSnapshot.hasData) {
-                                  return const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: AppSpacing.sm,
-                                      ),
-                                      child: SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _LeadDealHeader(
+                                lead: lead,
+                                isSavingStageChange: _isSavingStageChange,
+                                onUpdateStage: () => _showStageUpdateModal(lead),
+                                onAddNote: _showAddNoteDialog,
+                              ),
+                              const SizedBox(height: AppSpacing.xl),
+                              SectionContainer(
+                                title: 'Timeline',
+                                subtitle: 'Recent activity and stage movements',
+                                child: FutureBuilder<List<LeadNoteModel>>(
+                                  future: _notesFuture,
+                                  builder: (context, notesSnapshot) {
+                                    if (notesSnapshot.connectionState ==
+                                            ConnectionState.waiting &&
+                                        !notesSnapshot.hasData) {
+                                      return const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: AppSpacing.md,
+                                          ),
+                                          child: SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                }
+                                      );
+                                    }
 
-                                if (notesSnapshot.hasError) {
-                                  return const _PlaceholderMessage(
-                                    'Unable to load notes',
-                                  );
-                                }
+                                    if (notesSnapshot.hasError) {
+                                      return const _SubtleEmptyState(
+                                        message: 'Unable to load notes',
+                                        icon: Icons.timeline_outlined,
+                                      );
+                                    }
 
-                                final notes = notesSnapshot.data ??
-                                    const <LeadNoteModel>[];
-                                if (notes.isEmpty) {
-                                  return const _PlaceholderMessage(
-                                    'No notes yet',
-                                  );
-                                }
+                                    final notes = notesSnapshot.data ??
+                                        const <LeadNoteModel>[];
+                                    if (notes.isEmpty) {
+                                      return const _SubtleEmptyState(
+                                        message: 'No activity yet',
+                                        icon: Icons.timeline_outlined,
+                                      );
+                                    }
 
-                                return Column(
-                                  children: [
-                                    for (var index = 0;
-                                        index < notes.length;
-                                        index++)
-                                      _TimelineNoteItem(
-                                        note: notes[index],
-                                        isLast: index == notes.length - 1,
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
+                                    return Column(
+                                      children: [
+                                        for (var index = 0;
+                                            index < notes.length;
+                                            index++)
+                                          _TimelineNoteItem(
+                                            note: notes[index],
+                                            isLast: index == notes.length - 1,
+                                          ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xl),
+                              SectionContainer(
+                                title: 'Overview',
+                                subtitle: 'Key deal details at a glance',
+                                child: _LeadOverviewGrid(lead: lead),
+                              ),
+                              const SizedBox(height: AppSpacing.xl),
+                              const SectionContainer(
+                                title: 'Tasks',
+                                subtitle: 'Next follow-ups and owner actions',
+                                child: _SubtleEmptyState(
+                                  message: 'No tasks yet',
+                                  icon: Icons.checklist_rtl_outlined,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xl),
+                              const SectionContainer(
+                                title: 'Quotations',
+                                subtitle: 'Active and historical proposals',
+                                child: _SubtleEmptyState(
+                                  message: 'No quotations yet',
+                                  icon: Icons.receipt_long_outlined,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   );
@@ -381,24 +387,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
   }
 }
 
-class _LeadSummaryStrip extends StatelessWidget {
-  const _LeadSummaryStrip({
+class _LeadDealHeader extends StatelessWidget {
+  const _LeadDealHeader({
     required this.lead,
-    required this.selectedStage,
     required this.isSavingStageChange,
-    required this.stageTransitionError,
-    required this.previousStageBeforeHold,
-    required this.onStageChanged,
     required this.onUpdateStage,
     required this.onAddNote,
   });
 
   final LeadModel lead;
-  final LeadStage selectedStage;
   final bool isSavingStageChange;
-  final String? stageTransitionError;
-  final LeadStage? previousStageBeforeHold;
-  final ValueChanged<LeadStage?> onStageChanged;
   final VoidCallback onUpdateStage;
   final VoidCallback onAddNote;
 
@@ -406,139 +404,491 @@ class _LeadSummaryStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDesktopLayout =
+        ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
+
+    final leftColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _displayValue(lead.clientNameSnapshot),
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: colorScheme.onSurface,
+            height: 1.1,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          '${_displayValue(lead.destination)} • ${_travelDateRange(lead)}',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
+          children: [
+            _HeaderMetaChip(
+              icon: Icons.group_outlined,
+              label:
+                  'Pax ${lead.adultCount}A · ${lead.childCount}C · ${lead.infantCount}I',
+            ),
+            _HeaderMetaChip(
+              icon: Icons.luggage_outlined,
+              label: _travelTypeLabel(lead.travelType),
+            ),
+            _HeaderMetaChip(
+              icon: Icons.sell_outlined,
+              label: 'Budget ${_budgetValue(lead.budget)}',
+            ),
+          ],
+        ),
+      ],
+    );
+
+    final rightColumn = ConstrainedBox(
+      constraints:
+          BoxConstraints(maxWidth: isDesktopLayout ? 340 : double.infinity),
+      child: Column(
+        crossAxisAlignment:
+            isDesktopLayout ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          _StageBadge(stage: lead.leadStage),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            alignment:
+                isDesktopLayout ? WrapAlignment.end : WrapAlignment.start,
+            children: [
+              FilledButton.icon(
+                onPressed: isSavingStageChange ? null : onUpdateStage,
+                icon: const Icon(Icons.swap_horiz_rounded),
+                label: Text(
+                  isSavingStageChange ? 'Saving...' : 'Update Stage',
+                ),
+              ),
+              OutlinedButton.icon(
+                onPressed: onAddNote,
+                icon: const Icon(Icons.note_add_outlined),
+                label: const Text('Add Note'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
 
     return Container(
       width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.surfaceContainerLowest,
+            colorScheme.surfaceContainerLow.withValues(alpha: 0.95),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.06),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: isDesktopLayout
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: leftColumn),
+                const SizedBox(width: AppSpacing.xl),
+                rightColumn,
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                leftColumn,
+                const SizedBox(height: AppSpacing.lg),
+                rightColumn,
+              ],
+            ),
+    );
+  }
+}
+
+class _StageSelectionSheet extends StatelessWidget {
+  const _StageSelectionSheet({
+    required this.currentStage,
+    required this.selectedStage,
+    required this.previousStageBeforeHold,
+    required this.transitionError,
+  });
+
+  final LeadStage currentStage;
+  final LeadStage selectedStage;
+  final LeadStage? previousStageBeforeHold;
+  final String? transitionError;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final allowedStages = LeadStageTransitionRules.allowedTransitions(
+      currentStage,
+      previousStageBeforeHold: previousStageBeforeHold,
+    );
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.shadow.withValues(alpha: 0.14),
+                blurRadius: 32,
+                offset: const Offset(0, 20),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Update Stage',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Choose the next stage for this deal. You can only move to valid stages.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 360),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: LeadStage.values.map((stage) {
+                        final isAllowed =
+                            stage == currentStage || allowedStages.contains(stage);
+                        final isSelected = stage == selectedStage;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: _StageOptionTile(
+                            stage: stage,
+                            isCurrent: stage == currentStage,
+                            isSelected: isSelected,
+                            isEnabled: isAllowed,
+                            onTap: isAllowed
+                                ? () => Navigator.of(context).pop(stage)
+                                : null,
+                          ),
+                        );
+                      }).toList(growable: false),
+                    ),
+                  ),
+                ),
+                if (transitionError != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    transitionError!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.sm),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StageOptionTile extends StatelessWidget {
+  const _StageOptionTile({
+    required this.stage,
+    required this.isCurrent,
+    required this.isSelected,
+    required this.isEnabled,
+    this.onTap,
+  });
+
+  final LeadStage stage;
+  final bool isCurrent;
+  final bool isSelected;
+  final bool isEnabled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: isSelected
+                ? colorScheme.primaryContainer.withValues(alpha: 0.55)
+                : colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? colorScheme.primary.withValues(alpha: 0.35)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.35),
+            ),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _leadStageLabel(stage),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: isEnabled
+                            ? colorScheme.onSurface
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      isCurrent
+                          ? 'Current stage'
+                          : isEnabled
+                              ? 'Select to log a stage change note'
+                              : 'Not available from the current stage',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isCurrent)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'Current',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              else
+                Icon(
+                  isEnabled ? Icons.arrow_forward_rounded : Icons.lock_outline_rounded,
+                  color: isEnabled
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderMetaChip extends StatelessWidget {
+  const _HeaderMetaChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StageBadge extends StatelessWidget {
+  const _StageBadge({required this.stage});
+
+  final LeadStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = _stagePalette(Theme.of(context).colorScheme, stage);
+
+    return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.28),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        color: palette.background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        _leadStageLabel(stage),
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: palette.foreground,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.2,
         ),
       ),
-      child: Row(
+    );
+  }
+}
+
+class _LeadOverviewGrid extends StatelessWidget {
+  const _LeadOverviewGrid({required this.lead});
+
+  final LeadModel lead;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <_OverviewItemData>[
+      _OverviewItemData('Client Name', _displayValue(lead.clientNameSnapshot)),
+      const _OverviewItemData('Phone', '—'),
+      _OverviewItemData('Destination', _displayValue(lead.destination)),
+      _OverviewItemData('Travel Dates', _travelDateRange(lead)),
+      _OverviewItemData('Travel Type', _travelTypeLabel(lead.travelType)),
+      _OverviewItemData('Budget', _budgetValue(lead.budget)),
+      _OverviewItemData('Budget Type', _displayValue(lead.budgetType)),
+      _OverviewItemData('Initial Notes', _displayValue(lead.notes)),
+    ];
+
+    final crossAxisCount =
+        ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context) ? 2 : 1;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: AppSpacing.lg,
+        crossAxisSpacing: AppSpacing.xl,
+        childAspectRatio: crossAxisCount == 2 ? 3.5 : 3.1,
+      ),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return _OverviewCell(item: item);
+      },
+    );
+  }
+}
+
+class _OverviewItemData {
+  const _OverviewItemData(this.label, this.value);
+
+  final String label;
+  final String value;
+}
+
+class _OverviewCell extends StatelessWidget {
+  const _OverviewCell({required this.item});
+
+  final _OverviewItemData item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _displayValue(lead.clientNameSnapshot),
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '${_displayValue(lead.destination)} • ${_travelDateRange(lead)}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Pax: ${lead.adultCount} Adults / ${lead.childCount} Children / ${lead.infantCount} Infants',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.92),
-                    ),
-                  ),
-                ],
-              ),
+          Text(
+            item.label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
           ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Wrap(
-                  alignment: WrapAlignment.end,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withValues(alpha: 0.95),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        _leadStageLabel(lead.leadStage),
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    FilledButton(
-                      onPressed: isSavingStageChange ? null : onUpdateStage,
-                      child: Text(isSavingStageChange ? 'Saving...' : 'Update'),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: onAddNote,
-                      icon: const Icon(Icons.note_add_outlined),
-                      label: const Text('Add Note'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  width: 240,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      DropdownButtonFormField<LeadStage>(
-                        value: selectedStage,
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Lead Stage',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                        ),
-                        items: LeadStage.values
-                            .map(
-                              (stage) => DropdownMenuItem<LeadStage>(
-                                value: stage,
-                                enabled: stage == lead.leadStage ||
-                                    LeadStageTransitionRules.allowedTransitions(
-                                      lead.leadStage,
-                                      previousStageBeforeHold:
-                                          previousStageBeforeHold,
-                                    ).contains(stage),
-                                child: Text(_leadStageLabel(stage)),
-                              ),
-                            )
-                            .toList(growable: false),
-                        onChanged: isSavingStageChange ? null : onStageChanged,
-                      ),
-                      if (stageTransitionError != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: AppSpacing.xs),
-                          child: Text(
-                            stageTransitionError!,
-                            textAlign: TextAlign.right,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.error,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            item.value,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
             ),
           ),
         ],
@@ -553,94 +903,164 @@ class _TimelineNoteItem extends StatelessWidget {
   final LeadNoteModel note;
   final bool isLast;
 
+  bool get _isStageChange => note.noteType == 'stageChange';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final stage = _isStageChange && note.relatedStage != null
+        ? LeadStageX.fromString(note.relatedStage!)
+        : null;
+    final palette = stage == null
+        ? _StagePalette(
+            background: colorScheme.primaryContainer.withValues(alpha: 0.28),
+            foreground: colorScheme.primary,
+          )
+        : _stagePalette(colorScheme, stage);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.lg),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              children: [
+                Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: palette.background,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: palette.foreground.withValues(alpha: 0.9),
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: palette.foreground,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: _isStageChange
+                      ? palette.background.withValues(alpha: 0.28)
+                      : colorScheme.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          _isStageChange
+                              ? 'Stage: ${_leadStageLabel(stage!)}'
+                              : _labelizeNoteType(note.noteType),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          _formatTimelineDateTime(context, note.createdAt),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_isStageChange &&
+                        note.reason != null &&
+                        note.reason!.trim().isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        note.reason!.trim(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.foreground,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.sm),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: _isStageChange ? 0 : AppSpacing.md,
+                      ),
+                      child: Text(
+                        note.noteText.trim(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SubtleEmptyState extends StatelessWidget {
+  const _SubtleEmptyState({required this.message, required this.icon});
+
+  final String message;
+  final IconData icon;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
-      margin: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
-      decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.75)),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 4),
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              color: colorScheme.primary,
-              borderRadius: BorderRadius.circular(999),
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.xs,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      note.noteType == 'stageChange'
-                          ? _leadStageLabel(
-                              LeadStageX.fromString(
-                                note.relatedStage ??
-                                    LeadStage.newLead.firestoreValue,
-                              ),
-                            )
-                          : _labelizeNoteType(note.noteType),
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      _formatTimelineDateTime(context, note.createdAt),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                if (note.noteType == 'stageChange' &&
-                    note.reason != null &&
-                    note.reason!.trim().isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    'Reason: ${note.reason!.trim()}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 6),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    note.noteText.trim(),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -704,75 +1124,50 @@ class _AddNoteDialogState extends State<_AddNoteDialog> {
   }
 }
 
-class _OverviewRow extends StatelessWidget {
-  const _OverviewRow({
-    required this.label,
-    required this.value,
-    this.isLast = false,
-  });
+class _StagePalette {
+  const _StagePalette({required this.background, required this.foreground});
 
-  final String label;
-  final String value;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
-      margin: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
-      decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 124,
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final Color background;
+  final Color foreground;
 }
 
-class _PlaceholderMessage extends StatelessWidget {
-  const _PlaceholderMessage(this.message);
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      message,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-    );
+_StagePalette _stagePalette(ColorScheme colorScheme, LeadStage stage) {
+  switch (stage) {
+    case LeadStage.newLead:
+      return _StagePalette(
+        background: colorScheme.secondaryContainer,
+        foreground: colorScheme.onSecondaryContainer,
+      );
+    case LeadStage.contacted:
+      return _StagePalette(
+        background: colorScheme.primaryContainer,
+        foreground: colorScheme.onPrimaryContainer,
+      );
+    case LeadStage.quotationSent:
+      return _StagePalette(
+        background: Colors.indigo.withValues(alpha: 0.16),
+        foreground: Colors.indigo.shade700,
+      );
+    case LeadStage.negotiation:
+      return _StagePalette(
+        background: Colors.deepPurple.withValues(alpha: 0.14),
+        foreground: Colors.deepPurple.shade700,
+      );
+    case LeadStage.onHold:
+      return _StagePalette(
+        background: Colors.amber.withValues(alpha: 0.20),
+        foreground: Colors.amber.shade900,
+      );
+    case LeadStage.confirmed:
+      return _StagePalette(
+        background: Colors.green.withValues(alpha: 0.18),
+        foreground: Colors.green.shade800,
+      );
+    case LeadStage.lost:
+      return _StagePalette(
+        background: colorScheme.errorContainer,
+        foreground: colorScheme.onErrorContainer,
+      );
   }
 }
 
@@ -790,7 +1185,7 @@ String _budgetValue(int? value) {
     return '—';
   }
 
-  return value.toString();
+  return '₹${value.toString()}';
 }
 
 String _travelDateRange(LeadModel lead) {
