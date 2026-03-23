@@ -7,7 +7,7 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../domain/models/lead_model.dart';
 import 'widgets/create_lead_panel.dart';
-import 'widgets/lead_detail_panel.dart';
+import 'lead_detail_screen.dart';
 import 'widgets/lead_filters_bar.dart';
 import 'widgets/lead_list_header.dart';
 import 'widgets/lead_table.dart';
@@ -39,7 +39,6 @@ class _LeadsScreenState extends State<LeadsScreen> {
   late final TextEditingController _searchController;
   String? _selectedStage;
   String? _selectedTravelType;
-  String? _successMessage;
 
   @override
   void initState() {
@@ -85,27 +84,11 @@ class _LeadsScreenState extends State<LeadsScreen> {
   }
 
   Future<void> _openLeadDetails(LeadModel lead) {
-    return LeadDetailPanel.show(
-      context,
-      lead: lead,
-      onStageUpdated: _showSuccessMessage,
+    return Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => LeadDetailScreen(leadId: lead.id),
+      ),
     );
-  }
-
-  void _showSuccessMessage(String message) {
-    setState(() {
-      _successMessage = message;
-    });
-
-    Future<void>.delayed(const Duration(seconds: 3), () {
-      if (!mounted || _successMessage != message) {
-        return;
-      }
-
-      setState(() {
-        _successMessage = null;
-      });
-    });
   }
 
   @override
@@ -115,10 +98,6 @@ class _LeadsScreenState extends State<LeadsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_successMessage != null) ...[
-            _PageSuccessMessage(message: _successMessage!),
-            const SizedBox(height: AppSpacing.sm),
-          ],
           Expanded(
             child: StreamBuilder<List<LeadModel>>(
               stream: LeadsScreen._leadsStream,
@@ -242,50 +221,6 @@ class _LeadTableLoadingState extends StatelessWidget {
   }
 }
 
-class _PageSuccessMessage extends StatelessWidget {
-  const _PageSuccessMessage({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.check_circle_outline_rounded,
-              size: 18,
-              color: colorScheme.primary,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                message,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _LeadToolbar extends StatelessWidget {
   const _LeadToolbar({
