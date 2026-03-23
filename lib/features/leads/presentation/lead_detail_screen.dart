@@ -413,22 +413,23 @@ class _LeadDealHeader extends StatelessWidget {
         Text(
           _displayValue(lead.clientNameSnapshot),
           style: theme.textTheme.headlineMedium?.copyWith(
+            fontSize: 30,
             fontWeight: FontWeight.w800,
             color: colorScheme.onSurface,
             height: 1.1,
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           '${_displayValue(lead.destination)} • ${_travelDateRange(lead)}',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+            fontWeight: FontWeight.w400,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
         Wrap(
-          spacing: AppSpacing.md,
+          spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
             _HeaderMetaChip(
@@ -453,19 +454,24 @@ class _LeadDealHeader extends StatelessWidget {
       constraints:
           BoxConstraints(maxWidth: isDesktopLayout ? 340 : double.infinity),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment:
             isDesktopLayout ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           _StageBadge(stage: lead.leadStage),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             alignment:
                 isDesktopLayout ? WrapAlignment.end : WrapAlignment.start,
             children: [
               FilledButton.icon(
                 onPressed: isSavingStageChange ? null : onUpdateStage,
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                ),
                 icon: const Icon(Icons.swap_horiz_rounded),
                 label: Text(
                   isSavingStageChange ? 'Saving...' : 'Update Stage',
@@ -473,6 +479,12 @@ class _LeadDealHeader extends StatelessWidget {
               ),
               OutlinedButton.icon(
                 onPressed: onAddNote,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.9),
+                  ),
+                  foregroundColor: colorScheme.onSurfaceVariant,
+                ),
                 icon: const Icon(Icons.note_add_outlined),
                 label: const Text('Add Note'),
               ),
@@ -484,32 +496,35 @@ class _LeadDealHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             colorScheme.surfaceContainerLowest,
-            colorScheme.surfaceContainerLow.withValues(alpha: 0.95),
+            colorScheme.surfaceContainerLow.withValues(alpha: 0.85),
           ],
+        ),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.24),
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.06),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
+            color: colorScheme.shadow.withValues(alpha: 0.035),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: isDesktopLayout
           ? Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(child: leftColumn),
-                const SizedBox(width: AppSpacing.xl),
+                const SizedBox(width: AppSpacing.lg),
                 rightColumn,
               ],
             )
@@ -751,10 +766,10 @@ class _HeaderMetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.55),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -765,8 +780,8 @@ class _HeaderMetaChip extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -787,18 +802,18 @@ class _StageBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+        horizontal: AppSpacing.md,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: palette.background,
+        color: palette.background.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         _leadStageLabel(stage),
-        style: theme.textTheme.labelLarge?.copyWith(
+        style: theme.textTheme.labelMedium?.copyWith(
           color: palette.foreground,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.2,
         ),
       ),
@@ -833,9 +848,9 @@ class _LeadOverviewGrid extends StatelessWidget {
       itemCount: items.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        mainAxisSpacing: AppSpacing.lg,
-        crossAxisSpacing: AppSpacing.xl,
-        childAspectRatio: crossAxisCount == 2 ? 3.5 : 3.1,
+        mainAxisSpacing: AppSpacing.md,
+        crossAxisSpacing: AppSpacing.lg,
+        childAspectRatio: crossAxisCount == 2 ? 3.95 : 3.45,
       ),
       itemBuilder: (context, index) {
         final item = items[index];
@@ -863,10 +878,13 @@ class _OverviewCell extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -874,21 +892,21 @@ class _OverviewCell extends StatelessWidget {
         children: [
           Text(
             item.label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
+              fontWeight: FontWeight.w600,
               letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: 6),
           Text(
             item.value,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-              height: 1.3,
+              fontWeight: FontWeight.w700,
+              height: 1.25,
             ),
           ),
         ],
@@ -920,57 +938,65 @@ class _TimelineNoteItem extends StatelessWidget {
         : _stagePalette(colorScheme, stage);
 
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.lg),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.xl),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              children: [
-                Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: palette.background,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: palette.foreground.withValues(alpha: 0.9),
-                      width: 2,
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Column(
+                children: [
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: palette.background.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: palette.foreground.withValues(alpha: 0.45),
+                        width: 1.5,
+                      ),
                     ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: palette.foreground,
-                        shape: BoxShape.circle,
+                    child: Center(
+                      child: Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: palette.foreground,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (!isLast)
-                  Expanded(
-                    child: Container(
-                      width: 2,
-                      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(999),
+                  if (!isLast)
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(width: AppSpacing.lg),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: _isStageChange
-                      ? palette.background.withValues(alpha: 0.28)
+                      ? palette.background.withValues(alpha: 0.12)
                       : colorScheme.surfaceContainerLowest,
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: _isStageChange
+                        ? palette.foreground.withValues(alpha: 0.08)
+                        : colorScheme.outlineVariant.withValues(alpha: 0.18),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -987,12 +1013,13 @@ class _TimelineNoteItem extends StatelessWidget {
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: colorScheme.onSurface,
                             fontWeight: FontWeight.w700,
+                            height: 1.2,
                           ),
                         ),
                         Text(
                           _formatTimelineDateTime(context, note.createdAt),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.84),
                           ),
                         ),
                       ],
@@ -1004,22 +1031,17 @@ class _TimelineNoteItem extends StatelessWidget {
                       Text(
                         note.reason!.trim(),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.foreground,
-                          fontWeight: FontWeight.w700,
+                          color: palette.foreground.withValues(alpha: 0.92),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                     const SizedBox(height: AppSpacing.sm),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: _isStageChange ? 0 : AppSpacing.md,
-                      ),
-                      child: Text(
-                        note.noteText.trim(),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          height: 1.5,
-                        ),
+                    Text(
+                      note.noteText.trim(),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.92),
+                        height: 1.5,
                       ),
                     ),
                   ],
@@ -1045,18 +1067,22 @@ class _SubtleEmptyState extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.75)),
+            Icon(
+              icon,
+              size: 20,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.48),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               message,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
               ),
             ),
           ],
