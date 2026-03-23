@@ -273,7 +273,9 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                   final horizontalPadding =
                       (ResponsiveUtils.isDesktop(context) ||
                               ResponsiveUtils.isWide(context))
-                          ? (baseHorizontalPadding - 4).clamp(16, double.infinity)
+                          ? (baseHorizontalPadding - 4)
+                              .clamp(16.0, double.infinity)
+                              .toDouble()
                           : baseHorizontalPadding;
                   final baseContentMaxWidth =
                       ResponsiveUtils.contentMaxWidth(context);
