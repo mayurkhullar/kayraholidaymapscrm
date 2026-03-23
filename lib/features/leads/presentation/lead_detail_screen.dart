@@ -7,6 +7,7 @@ import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../data/datasources/firestore_lead_remote_data_source.dart';
 import '../data/repositories/lead_repository_impl.dart';
+import '../domain/lead_stage_transition_rules.dart';
 import '../domain/models/lead_model.dart';
 import '../domain/models/lead_note_model.dart';
 
@@ -24,6 +25,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
   late Future<LeadModel?> _leadFuture;
   late Future<List<LeadNoteModel>> _notesFuture;
   LeadStage? _selectedLeadStage;
+  LeadStage? _previousStageBeforeHold;
+  String? _stageTransitionError;
   bool _isSavingStageChange = false;
 
   @override
@@ -50,6 +53,10 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
 
     setState(() {
       _selectedLeadStage = refreshedLead.leadStage;
+      _previousStageBeforeHold = refreshedLead.leadStage == LeadStage.onHold
+          ? null
+          : refreshedLead.leadStage;
+      _stageTransitionError = null;
     });
   }
 
@@ -66,7 +73,19 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     }
 
     final selectedStage = _selectedLeadStage ?? lead.leadStage;
+    final isAllowedTransition = LeadStageTransitionRules.isAllowedTransition(
+      lead.leadStage,
+      selectedStage,
+      previousStageBeforeHold: _previousStageBeforeHold,
+    );
     if (selectedStage == lead.leadStage) {
+      return;
+    }
+
+    if (!isAllowedTransition) {
+      setState(() {
+        _stageTransitionError = LeadStageTransitionRules.invalidTransitionMessage;
+      });
       return;
     }
 
@@ -194,6 +213,9 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                   }
 
                   _selectedLeadStage ??= lead.leadStage;
+                  _previousStageBeforeHold ??= lead.leadStage == LeadStage.onHold
+                      ? null
+                      : lead.leadStage;
 
                   return SingleChildScrollView(
                     child: Padding(
@@ -206,10 +228,33 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                             selectedStage: _selectedLeadStage ?? lead.leadStage,
                             isSavingStageChange: _isSavingStageChange,
                             onStageChanged: (stage) {
+                              if (stage == null) {
+                                return;
+                              }
+
+                              final isAllowedTransition =
+                                  LeadStageTransitionRules.isAllowedTransition(
+                                lead.leadStage,
+                                stage,
+                                previousStageBeforeHold: _previousStageBeforeHold,
+                              );
+
                               setState(() {
                                 _selectedLeadStage = stage;
+                                _stageTransitionError = isAllowedTransition ||
+                                        stage == lead.leadStage
+                                    ? null
+                                    : LeadStageTransitionRules
+                                        .invalidTransitionMessage;
+
+                                if (stage == LeadStage.onHold &&
+                                    lead.leadStage != LeadStage.onHold) {
+                                  _previousStageBeforeHold = lead.leadStage;
+                                }
                               });
                             },
+                            stageTransitionError: _stageTransitionError,
+                            previousStageBeforeHold: _previousStageBeforeHold,
                             onUpdateStage: () => _updateLeadStage(lead),
                             onAddNote: _showAddNoteDialog,
                           ),
@@ -389,6 +434,8 @@ class _LeadSummaryStrip extends StatelessWidget {
     required this.lead,
     required this.selectedStage,
     required this.isSavingStageChange,
+    required this.stageTransitionError,
+    required this.previousStageBeforeHold,
     required this.onStageChanged,
     required this.onUpdateStage,
     required this.onAddNote,
@@ -397,6 +444,8 @@ class _LeadSummaryStrip extends StatelessWidget {
   final LeadModel lead;
   final LeadStage selectedStage;
   final bool isSavingStageChange;
+  final String? stageTransitionError;
+  final LeadStage? previousStageBeforeHold;
   final ValueChanged<LeadStage?> onStageChanged;
   final VoidCallback onUpdateStage;
   final VoidCallback onAddNote;
@@ -470,23 +519,45 @@ class _LeadSummaryStrip extends StatelessWidget {
             children: [
               SizedBox(
                 width: 220,
-                child: DropdownButtonFormField<LeadStage>(
-                  value: selectedStage,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Lead Stage',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: LeadStage.values
-                      .map(
-                        (stage) => DropdownMenuItem<LeadStage>(
-                          value: stage,
-                          child: Text(_leadStageLabel(stage)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<LeadStage>(
+                      value: selectedStage,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Lead Stage',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      items: LeadStage.values
+                          .map(
+                            (stage) => DropdownMenuItem<LeadStage>(
+                              value: stage,
+                              enabled: stage == lead.leadStage ||
+                                  LeadStageTransitionRules.allowedTransitions(
+                                    lead.leadStage,
+                                    previousStageBeforeHold:
+                                        previousStageBeforeHold,
+                                  ).contains(stage),
+                              child: Text(_leadStageLabel(stage)),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: isSavingStageChange ? null : onStageChanged,
+                    ),
+                    if (stageTransitionError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.xs),
+                        child: Text(
+                          stageTransitionError!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.error,
+                          ),
                         ),
-                      )
-                      .toList(growable: false),
-                  onChanged: isSavingStageChange ? null : onStageChanged,
+                      ),
+                  ],
                 ),
               ),
               FilledButton(

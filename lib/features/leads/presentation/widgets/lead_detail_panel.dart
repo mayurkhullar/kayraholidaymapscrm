@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_enums.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../domain/lead_stage_transition_rules.dart';
 import '../../domain/models/lead_model.dart';
 
 class LeadDetailPanel extends StatefulWidget {
@@ -118,11 +119,12 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
   bool _isUpdatingStage = false;
   _PanelStatus? _status;
   late LeadStage _selectedLeadStage;
+  LeadStage? _previousStageBeforeHold;
 
   @override
   void initState() {
     super.initState();
-    _selectedLeadStage = widget.lead.leadStage;
+    _syncStageSelection();
   }
 
   @override
@@ -131,8 +133,48 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
 
     if (oldWidget.lead.id != widget.lead.id ||
         oldWidget.lead.leadStage != widget.lead.leadStage) {
-      _selectedLeadStage = widget.lead.leadStage;
+      _syncStageSelection();
     }
+  }
+
+
+  void _syncStageSelection() {
+    _selectedLeadStage = widget.lead.leadStage;
+    _previousStageBeforeHold = widget.lead.leadStage == LeadStage.onHold
+        ? null
+        : widget.lead.leadStage;
+  }
+
+  Set<LeadStage> get _allowedStageOptions =>
+      LeadStageTransitionRules.allowedTransitions(
+        widget.lead.leadStage,
+        previousStageBeforeHold: _previousStageBeforeHold,
+      );
+
+  void _handleStageChanged(LeadStage? value) {
+    if (value == null) {
+      return;
+    }
+
+    final currentStage = widget.lead.leadStage;
+    final isAllowed = LeadStageTransitionRules.isAllowedTransition(
+      currentStage,
+      value,
+      previousStageBeforeHold: _previousStageBeforeHold,
+    );
+
+    setState(() {
+      _selectedLeadStage = value;
+      _status = isAllowed || value == currentStage
+          ? null
+          : const _PanelStatus.error(
+              LeadStageTransitionRules.invalidTransitionMessage,
+            );
+
+      if (value == LeadStage.onHold && currentStage != LeadStage.onHold) {
+        _previousStageBeforeHold = currentStage;
+      }
+    });
   }
 
   Future<void> _updateLeadStage() async {
@@ -143,6 +185,21 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
     if (_selectedLeadStage == widget.lead.leadStage) {
       setState(() {
         _status = const _PanelStatus.message('No changes to update');
+      });
+      return;
+    }
+
+    final isAllowedTransition = LeadStageTransitionRules.isAllowedTransition(
+      widget.lead.leadStage,
+      _selectedLeadStage,
+      previousStageBeforeHold: _previousStageBeforeHold,
+    );
+
+    if (!isAllowedTransition) {
+      setState(() {
+        _status = const _PanelStatus.error(
+          LeadStageTransitionRules.invalidTransitionMessage,
+        );
       });
       return;
     }
@@ -401,22 +458,15 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
                                   .map(
                                     (stage) => DropdownMenuItem<LeadStage>(
                                       value: stage,
+                                      enabled: stage == widget.lead.leadStage ||
+                                          _allowedStageOptions.contains(stage),
                                       child: Text(_leadStageLabel(stage)),
                                     ),
                                   )
                                   .toList(growable: false),
                               onChanged: _isUpdatingStage || _isArchiving
                                   ? null
-                                  : (value) {
-                                      if (value == null) {
-                                        return;
-                                      }
-
-                                      setState(() {
-                                        _selectedLeadStage = value;
-                                        _status = null;
-                                      });
-                                    },
+                                  : _handleStageChanged,
                             ),
                             if (_status != null) ...[
                               const SizedBox(height: AppSpacing.md),
