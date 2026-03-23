@@ -21,8 +21,10 @@ class LeadDetailScreen extends StatefulWidget {
 
 class _LeadDetailScreenState extends State<LeadDetailScreen> {
   late final LeadRepositoryImpl _leadRepository;
-  late final Future<LeadModel?> _leadFuture;
+  late Future<LeadModel?> _leadFuture;
   late Future<List<LeadNoteModel>> _notesFuture;
+  LeadStage? _selectedLeadStage;
+  bool _isSavingStageChange = false;
 
   @override
   void initState() {
@@ -36,11 +38,90 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     _notesFuture = _leadRepository.fetchLeadNotes(widget.leadId);
   }
 
+  Future<void> _refreshLead() async {
+    setState(() {
+      _leadFuture = _leadRepository.getLeadById(widget.leadId);
+    });
+
+    final refreshedLead = await _leadFuture;
+    if (!mounted || refreshedLead == null) {
+      return;
+    }
+
+    setState(() {
+      _selectedLeadStage = refreshedLead.leadStage;
+    });
+  }
+
   Future<void> _refreshNotes() async {
     setState(() {
       _notesFuture = _leadRepository.fetchLeadNotes(widget.leadId);
     });
     await _notesFuture;
+  }
+
+  Future<void> _updateLeadStage(LeadModel lead) async {
+    if (_isSavingStageChange) {
+      return;
+    }
+
+    final selectedStage = _selectedLeadStage ?? lead.leadStage;
+    if (selectedStage == lead.leadStage) {
+      return;
+    }
+
+    final noteText = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => _StageChangeNoteDialog(
+        stageLabel: _leadStageLabel(selectedStage),
+      ),
+    );
+
+    if (!mounted || noteText == null) {
+      return;
+    }
+
+    setState(() {
+      _isSavingStageChange = true;
+    });
+
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final leadReference = firestore.collection('leads').doc(widget.leadId);
+      final noteReference = leadReference.collection('notes').doc();
+      final now = Timestamp.now();
+
+      final batch = firestore.batch();
+      batch.update(leadReference, <String, dynamic>{
+        'leadStage': selectedStage.firestoreValue,
+        'updatedAt': now,
+      });
+      batch.set(noteReference, <String, dynamic>{
+        'id': noteReference.id,
+        'leadId': widget.leadId,
+        'noteText': noteText,
+        'noteType': 'stageChange',
+        'relatedStage': selectedStage.firestoreValue,
+        'createdBy': null,
+        'createdAt': now,
+      });
+      await batch.commit();
+
+      if (!mounted) {
+        return;
+      }
+
+      await Future.wait<void>([
+        _refreshLead(),
+        _refreshNotes(),
+      ]);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingStageChange = false;
+        });
+      }
+    }
   }
 
   Future<void> _showAddNoteDialog() async {
@@ -112,6 +193,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     );
                   }
 
+                  _selectedLeadStage ??= lead.leadStage;
+
                   return SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -120,6 +203,14 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                         children: [
                           _LeadSummaryStrip(
                             lead: lead,
+                            selectedStage: _selectedLeadStage ?? lead.leadStage,
+                            isSavingStageChange: _isSavingStageChange,
+                            onStageChanged: (stage) {
+                              setState(() {
+                                _selectedLeadStage = stage;
+                              });
+                            },
+                            onUpdateStage: () => _updateLeadStage(lead),
                             onAddNote: _showAddNoteDialog,
                           ),
                           const SizedBox(height: AppSpacing.md),
@@ -294,9 +385,20 @@ class SectionContainer extends StatelessWidget {
 }
 
 class _LeadSummaryStrip extends StatelessWidget {
-  const _LeadSummaryStrip({required this.lead, required this.onAddNote});
+  const _LeadSummaryStrip({
+    required this.lead,
+    required this.selectedStage,
+    required this.isSavingStageChange,
+    required this.onStageChanged,
+    required this.onUpdateStage,
+    required this.onAddNote,
+  });
 
   final LeadModel lead;
+  final LeadStage selectedStage;
+  final bool isSavingStageChange;
+  final ValueChanged<LeadStage?> onStageChanged;
+  final VoidCallback onUpdateStage;
   final VoidCallback onAddNote;
 
   @override
@@ -361,13 +463,44 @@ class _LeadSummaryStrip extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              onPressed: onAddNote,
-              icon: const Icon(Icons.note_add_outlined),
-              label: const Text('Add Note'),
-            ),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SizedBox(
+                width: 220,
+                child: DropdownButtonFormField<LeadStage>(
+                  value: selectedStage,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Lead Stage',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: LeadStage.values
+                      .map(
+                        (stage) => DropdownMenuItem<LeadStage>(
+                          value: stage,
+                          child: Text(_leadStageLabel(stage)),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: isSavingStageChange ? null : onStageChanged,
+                ),
+              ),
+              FilledButton(
+                onPressed: isSavingStageChange ? null : onUpdateStage,
+                child: Text(
+                  isSavingStageChange ? 'Saving...' : 'Update',
+                ),
+              ),
+              OutlinedButton.icon(
+                onPressed: onAddNote,
+                icon: const Icon(Icons.note_add_outlined),
+                label: const Text('Add Note'),
+              ),
+            ],
           ),
         ],
       ),
@@ -448,6 +581,79 @@ class _TimelineNoteItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StageChangeNoteDialog extends StatefulWidget {
+  const _StageChangeNoteDialog({required this.stageLabel});
+
+  final String stageLabel;
+
+  @override
+  State<_StageChangeNoteDialog> createState() => _StageChangeNoteDialogState();
+}
+
+class _StageChangeNoteDialogState extends State<_StageChangeNoteDialog> {
+  final TextEditingController _controller = TextEditingController();
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final value = _controller.text.trim();
+    if (value.isEmpty) {
+      setState(() {
+        _errorText = 'A note is required';
+      });
+      return;
+    }
+
+    Navigator.of(context).pop(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Update Stage to ${widget.stageLabel}'),
+      content: SizedBox(
+        width: 420,
+        child: TextField(
+          controller: _controller,
+          autofocus: true,
+          minLines: 4,
+          maxLines: 6,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            labelText: 'Note',
+            hintText: 'Add context for this stage change',
+            border: const OutlineInputBorder(),
+            errorText: _errorText,
+          ),
+          onChanged: (_) {
+            if (_errorText != null) {
+              setState(() {
+                _errorText = null;
+              });
+            }
+          },
+          onSubmitted: (_) => _save(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }
@@ -655,7 +861,12 @@ String _labelizeNoteType(String noteType) {
     return 'General';
   }
 
-  final words = trimmedValue.split(RegExp(r'[_\s]+'));
+  final words = trimmedValue
+      .replaceAllMapped(
+        RegExp(r'([a-z])([A-Z])'),
+        (match) => '${match.group(1)} ${match.group(2)}',
+      )
+      .split(RegExp(r'[_\s]+'));
   return words
       .where((word) => word.isNotEmpty)
       .map(
