@@ -851,8 +851,10 @@ class _LeadOverviewGrid extends StatelessWidget {
 
     final isDesktopLayout =
         ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
+    const rowGapByIndex = <double>[0, 14, 10, 14];
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var index = 0; index < overviewRows.length; index++) ...[
           if (isDesktopLayout)
@@ -870,28 +872,19 @@ class _LeadOverviewGrid extends StatelessWidget {
             )
           else
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (var columnIndex = 0;
                     columnIndex < overviewRows[index].length;
                     columnIndex++) ...[
                   _OverviewCell(item: overviewRows[index][columnIndex]),
                   if (columnIndex < overviewRows[index].length - 1)
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: 10),
                 ],
               ],
             ),
-          if (index < overviewRows.length - 1) ...[
-            const SizedBox(height: AppSpacing.md),
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withValues(alpha: 0.28),
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
+          if (index < overviewRows.length - 1)
+            SizedBox(height: rowGapByIndex[index + 1]),
         ],
       ],
     );
@@ -915,34 +908,33 @@ class _OverviewCell extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: 11,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.15,
-              height: 1.15,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          item.label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontSize: 10.5,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.64),
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.12,
+            height: 1.05,
           ),
-          const SizedBox(height: 4),
-          Text(
-            item.value,
-            maxLines: item.label == 'Initial Notes' ? 4 : 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-              height: 1.25,
-            ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          item.value,
+          maxLines: item.label == 'Initial Notes' ? 4 : 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontSize: 15,
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -1127,8 +1119,8 @@ class _SubtleEmptyState extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        top: alignToStart ? AppSpacing.xs : AppSpacing.md,
-        bottom: AppSpacing.sm,
+        top: alignToStart ? 2 : AppSpacing.sm,
+        bottom: alignToStart ? 2 : AppSpacing.sm,
       ),
       child: alignToStart ? content : Center(child: content),
     );
