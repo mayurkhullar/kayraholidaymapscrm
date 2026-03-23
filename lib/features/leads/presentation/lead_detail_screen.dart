@@ -10,6 +10,7 @@ import '../data/repositories/lead_repository_impl.dart';
 import '../domain/lead_stage_transition_rules.dart';
 import '../domain/models/lead_model.dart';
 import '../domain/models/lead_note_model.dart';
+import 'widgets/section_container.dart';
 import 'widgets/stage_change_dialog.dart';
 
 class LeadDetailScreen extends StatefulWidget {
@@ -262,7 +263,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                             onUpdateStage: () => _updateLeadStage(lead),
                             onAddNote: _showAddNoteDialog,
                           ),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
                           SectionContainer(
                             title: 'Overview',
                             child: Column(
@@ -303,17 +304,17 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
                           const SectionContainer(
                             title: 'Quotations',
                             child: _PlaceholderMessage('No quotations yet'),
                           ),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
                           const SectionContainer(
                             title: 'Tasks / Follow-ups',
                             child: _PlaceholderMessage('No tasks yet'),
                           ),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
                           SectionContainer(
                             title: 'Timeline',
                             child: FutureBuilder<List<LeadNoteModel>>(
@@ -380,59 +381,6 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
   }
 }
 
-class SectionContainer extends StatelessWidget {
-  const SectionContainer({
-    required this.title,
-    required this.child,
-    this.trailing,
-    super.key,
-  });
-
-  final String title;
-  final Widget child;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ),
-              if (trailing != null) ...[
-                const SizedBox(width: AppSpacing.sm),
-                trailing!,
-              ],
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
 class _LeadSummaryStrip extends StatelessWidget {
   const _LeadSummaryStrip({
     required this.lead,
@@ -461,121 +409,137 @@ class _LeadSummaryStrip extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colorScheme.outlineVariant),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
       ),
-      child: Column(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  _displayValue(lead.clientNameSnapshot),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  _leadStageLabel(lead.leadStage),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            '${_displayValue(lead.destination)} • ${_travelDateRange(lead)}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Pax: ${lead.adultCount} Adults / ${lead.childCount} Children / ${lead.infantCount} Infants',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              SizedBox(
-                width: 220,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DropdownButtonFormField<LeadStage>(
-                      value: selectedStage,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Lead Stage',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      items: LeadStage.values
-                          .map(
-                            (stage) => DropdownMenuItem<LeadStage>(
-                              value: stage,
-                              enabled: stage == lead.leadStage ||
-                                  LeadStageTransitionRules.allowedTransitions(
-                                    lead.leadStage,
-                                    previousStageBeforeHold:
-                                        previousStageBeforeHold,
-                                  ).contains(stage),
-                              child: Text(_leadStageLabel(stage)),
-                            ),
-                          )
-                          .toList(growable: false),
-                      onChanged: isSavingStageChange ? null : onStageChanged,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _displayValue(lead.clientNameSnapshot),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onSurface,
                     ),
-                    if (stageTransitionError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.xs),
-                        child: Text(
-                          stageTransitionError!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.error,
-                          ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${_displayValue(lead.destination)} • ${_travelDateRange(lead)}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Pax: ${lead.adultCount} Adults / ${lead.childCount} Children / ${lead.infantCount} Infants',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.92),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _leadStageLabel(lead.leadStage),
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
+                    ),
+                    FilledButton(
+                      onPressed: isSavingStageChange ? null : onUpdateStage,
+                      child: Text(isSavingStageChange ? 'Saving...' : 'Update'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: onAddNote,
+                      icon: const Icon(Icons.note_add_outlined),
+                      label: const Text('Add Note'),
+                    ),
                   ],
                 ),
-              ),
-              FilledButton(
-                onPressed: isSavingStageChange ? null : onUpdateStage,
-                child: Text(
-                  isSavingStageChange ? 'Saving...' : 'Update',
+                const SizedBox(height: AppSpacing.md),
+                SizedBox(
+                  width: 240,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      DropdownButtonFormField<LeadStage>(
+                        value: selectedStage,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Lead Stage',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        items: LeadStage.values
+                            .map(
+                              (stage) => DropdownMenuItem<LeadStage>(
+                                value: stage,
+                                enabled: stage == lead.leadStage ||
+                                    LeadStageTransitionRules.allowedTransitions(
+                                      lead.leadStage,
+                                      previousStageBeforeHold:
+                                          previousStageBeforeHold,
+                                    ).contains(stage),
+                                child: Text(_leadStageLabel(stage)),
+                              ),
+                            )
+                            .toList(growable: false),
+                        onChanged: isSavingStageChange ? null : onStageChanged,
+                      ),
+                      if (stageTransitionError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.xs),
+                          child: Text(
+                            stageTransitionError!,
+                            textAlign: TextAlign.right,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.error,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              OutlinedButton.icon(
-                onPressed: onAddNote,
-                icon: const Icon(Icons.note_add_outlined),
-                label: const Text('Add Note'),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -595,8 +559,8 @@ class _TimelineNoteItem extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
-      margin: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
+      margin: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
       decoration: BoxDecoration(
         border: isLast
             ? null
@@ -618,7 +582,7 @@ class _TimelineNoteItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,12 +626,15 @@ class _TimelineNoteItem extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  note.noteText.trim(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    height: 1.4,
+                const SizedBox(height: 6),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    note.noteText.trim(),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -754,8 +721,8 @@ class _OverviewRow extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
-      margin: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
+      margin: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
       decoration: BoxDecoration(
         border: isLast
             ? null
@@ -778,7 +745,7 @@ class _OverviewRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               value,
