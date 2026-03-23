@@ -46,7 +46,7 @@ class _AppShellState extends State<AppShell> {
 
     final isDesktopLayout =
         ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
-    final shellTopPadding = isDesktopLayout ? AppSpacing.sm : AppSpacing.xs;
+    final shellTopPadding = AppSpacing.xs;
     final shellBottomPadding = isDesktopLayout ? AppSpacing.sm : AppSpacing.sm;
     final contentPadding = isDesktopLayout ? 20.0 : 16.0;
 
