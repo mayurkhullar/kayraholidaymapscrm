@@ -5,6 +5,7 @@ import '../../../../core/constants/app_enums.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/lead_stage_transition_rules.dart';
 import '../../domain/models/lead_model.dart';
+import 'stage_change_dialog.dart';
 
 class LeadDetailPanel extends StatefulWidget {
   const LeadDetailPanel({
@@ -137,7 +138,6 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
     }
   }
 
-
   void _syncStageSelection() {
     _selectedLeadStage = widget.lead.leadStage;
     _previousStageBeforeHold = widget.lead.leadStage == LeadStage.onHold
@@ -204,19 +204,46 @@ class _LeadDetailPanelState extends State<LeadDetailPanel> {
       return;
     }
 
+    final stageChangeInput = await showDialog<StageChangeInput>(
+      context: context,
+      builder: (dialogContext) => StageChangeDialog(
+        stage: _selectedLeadStage,
+        stageLabel: _leadStageLabel(_selectedLeadStage),
+      ),
+    );
+
+    if (!mounted || stageChangeInput == null) {
+      return;
+    }
+
     setState(() {
       _isUpdatingStage = true;
       _status = null;
     });
 
     try {
-      await FirebaseFirestore.instance
-          .collection('leads')
-          .doc(widget.lead.id)
-          .update({
-            'leadStage': _selectedLeadStage.firestoreValue,
-            'updatedAt': Timestamp.now(),
-          });
+      final firestore = FirebaseFirestore.instance;
+      final leadReference = firestore.collection('leads').doc(widget.lead.id);
+      final noteReference = leadReference.collection('notes').doc();
+      final now = Timestamp.now();
+
+      final batch = firestore.batch();
+      batch.update(leadReference, {
+        'leadStage': _selectedLeadStage.firestoreValue,
+        'stageReason': stageChangeInput.reason,
+        'updatedAt': now,
+      });
+      batch.set(noteReference, {
+        'id': noteReference.id,
+        'leadId': widget.lead.id,
+        'noteText': stageChangeInput.noteText,
+        'noteType': 'stageChange',
+        'relatedStage': _selectedLeadStage.firestoreValue,
+        'reason': stageChangeInput.reason,
+        'createdBy': null,
+        'createdAt': now,
+      });
+      await batch.commit();
 
       if (!mounted) {
         return;

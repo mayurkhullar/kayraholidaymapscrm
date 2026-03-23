@@ -7,6 +7,7 @@ class LeadNoteModel {
     required this.noteText,
     required this.noteType,
     this.relatedStage,
+    this.reason,
     this.createdBy,
     required this.createdAt,
   });
@@ -16,6 +17,7 @@ class LeadNoteModel {
   final String noteText;
   final String noteType;
   final String? relatedStage;
+  final String? reason;
   final String? createdBy;
   final DateTime createdAt;
 
@@ -26,6 +28,7 @@ class LeadNoteModel {
       noteText: (map['noteText'] as String?) ?? '',
       noteType: (map['noteType'] as String?) ?? 'general',
       relatedStage: map['relatedStage'] as String?,
+      reason: map['reason'] as String?,
       createdBy: map['createdBy'] as String?,
       createdAt: _dateTimeFromDynamic(map['createdAt']) ?? DateTime.now(),
     );
@@ -38,6 +41,7 @@ class LeadNoteModel {
       'noteText': noteText,
       'noteType': noteType,
       'relatedStage': relatedStage,
+      'reason': reason,
       'createdBy': createdBy,
       'createdAt': createdAt,
     };
@@ -49,6 +53,7 @@ class LeadNoteModel {
     String? noteText,
     String? noteType,
     String? relatedStage,
+    String? reason,
     String? createdBy,
     DateTime? createdAt,
   }) {
@@ -58,6 +63,7 @@ class LeadNoteModel {
       noteText: noteText ?? this.noteText,
       noteType: noteType ?? this.noteType,
       relatedStage: relatedStage ?? this.relatedStage,
+      reason: reason ?? this.reason,
       createdBy: createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
     );

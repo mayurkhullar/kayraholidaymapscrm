@@ -29,6 +29,7 @@ class LeadModel {
     required this.leadStage,
     this.leadHealth,
     this.onHoldReason,
+    this.stageReason,
     this.nextFollowUpDate,
     this.lostReasonCode,
     this.lostNote,
@@ -79,6 +80,7 @@ class LeadModel {
   final LeadStage leadStage;
   final LeadHealthModel? leadHealth;
   final String? onHoldReason;
+  final String? stageReason;
   final DateTime? nextFollowUpDate;
   final String? lostReasonCode;
   final String? lostNote;
@@ -141,6 +143,9 @@ class LeadModel {
       leadStage: _leadStageFromDynamic(map['leadStage']),
       leadHealth: _leadHealthFromDynamic(map['leadHealth']),
       onHoldReason: map['onHoldReason'] as String?,
+      stageReason: map['stageReason'] as String? ??
+          map['onHoldReason'] as String? ??
+          map['lostReasonCode'] as String?,
       nextFollowUpDate: _dateTimeFromDynamic(map['nextFollowUpDate']),
       lostReasonCode: map['lostReasonCode'] as String?,
       lostNote: map['lostNote'] as String?,
@@ -202,6 +207,7 @@ class LeadModel {
       'leadStage': leadStage.firestoreValue,
       'leadHealth': leadHealth?.toMap(),
       'onHoldReason': onHoldReason,
+      'stageReason': stageReason,
       'nextFollowUpDate': nextFollowUpDate,
       'lostReasonCode': lostReasonCode,
       'lostNote': lostNote,
@@ -254,6 +260,7 @@ class LeadModel {
     LeadStage? leadStage,
     LeadHealthModel? leadHealth,
     String? onHoldReason,
+    String? stageReason,
     DateTime? nextFollowUpDate,
     String? lostReasonCode,
     String? lostNote,
@@ -304,6 +311,7 @@ class LeadModel {
       leadStage: leadStage ?? this.leadStage,
       leadHealth: leadHealth ?? this.leadHealth,
       onHoldReason: onHoldReason ?? this.onHoldReason,
+      stageReason: stageReason ?? this.stageReason,
       nextFollowUpDate: nextFollowUpDate ?? this.nextFollowUpDate,
       lostReasonCode: lostReasonCode ?? this.lostReasonCode,
       lostNote: lostNote ?? this.lostNote,

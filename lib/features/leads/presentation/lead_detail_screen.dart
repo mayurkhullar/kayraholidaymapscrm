@@ -10,6 +10,7 @@ import '../data/repositories/lead_repository_impl.dart';
 import '../domain/lead_stage_transition_rules.dart';
 import '../domain/models/lead_model.dart';
 import '../domain/models/lead_note_model.dart';
+import 'widgets/stage_change_dialog.dart';
 
 class LeadDetailScreen extends StatefulWidget {
   const LeadDetailScreen({required this.leadId, super.key});
@@ -89,14 +90,15 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       return;
     }
 
-    final noteText = await showDialog<String>(
+    final stageChangeInput = await showDialog<StageChangeInput>(
       context: context,
-      builder: (dialogContext) => _StageChangeNoteDialog(
+      builder: (dialogContext) => StageChangeDialog(
+        stage: selectedStage,
         stageLabel: _leadStageLabel(selectedStage),
       ),
     );
 
-    if (!mounted || noteText == null) {
+    if (!mounted || stageChangeInput == null) {
       return;
     }
 
@@ -113,14 +115,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       final batch = firestore.batch();
       batch.update(leadReference, <String, dynamic>{
         'leadStage': selectedStage.firestoreValue,
+        'stageReason': stageChangeInput.reason,
         'updatedAt': now,
       });
       batch.set(noteReference, <String, dynamic>{
         'id': noteReference.id,
         'leadId': widget.leadId,
-        'noteText': noteText,
+        'noteText': stageChangeInput.noteText,
         'noteType': 'stageChange',
         'relatedStage': selectedStage.firestoreValue,
+        'reason': stageChangeInput.reason,
         'createdBy': null,
         'createdAt': now,
       });
@@ -625,7 +629,14 @@ class _TimelineNoteItem extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      _labelizeNoteType(note.noteType),
+                      note.noteType == 'stageChange'
+                          ? _leadStageLabel(
+                              LeadStageX.fromString(
+                                note.relatedStage ??
+                                    LeadStage.newLead.firestoreValue,
+                              ),
+                            )
+                          : _labelizeNoteType(note.noteType),
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: colorScheme.onSurface,
                         fontWeight: FontWeight.w700,
@@ -639,6 +650,18 @@ class _TimelineNoteItem extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (note.noteType == 'stageChange' &&
+                    note.reason != null &&
+                    note.reason!.trim().isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Reason: ${note.reason!.trim()}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   note.noteText.trim(),
@@ -652,79 +675,6 @@ class _TimelineNoteItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _StageChangeNoteDialog extends StatefulWidget {
-  const _StageChangeNoteDialog({required this.stageLabel});
-
-  final String stageLabel;
-
-  @override
-  State<_StageChangeNoteDialog> createState() => _StageChangeNoteDialogState();
-}
-
-class _StageChangeNoteDialogState extends State<_StageChangeNoteDialog> {
-  final TextEditingController _controller = TextEditingController();
-  String? _errorText;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _save() {
-    final value = _controller.text.trim();
-    if (value.isEmpty) {
-      setState(() {
-        _errorText = 'A note is required';
-      });
-      return;
-    }
-
-    Navigator.of(context).pop(value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Update Stage to ${widget.stageLabel}'),
-      content: SizedBox(
-        width: 420,
-        child: TextField(
-          controller: _controller,
-          autofocus: true,
-          minLines: 4,
-          maxLines: 6,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(
-            labelText: 'Note',
-            hintText: 'Add context for this stage change',
-            border: const OutlineInputBorder(),
-            errorText: _errorText,
-          ),
-          onChanged: (_) {
-            if (_errorText != null) {
-              setState(() {
-                _errorText = null;
-              });
-            }
-          },
-          onSubmitted: (_) => _save(),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _save,
-          child: const Text('Save'),
-        ),
-      ],
     );
   }
 }

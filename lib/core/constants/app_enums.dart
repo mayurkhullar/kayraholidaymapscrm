@@ -23,6 +23,22 @@ enum LeadStage {
   lost,
 }
 
+enum LeadLostReason {
+  priceTooHigh,
+  clientNotResponding,
+  bookedElsewhere,
+  planDropped,
+  other,
+}
+
+enum LeadOnHoldReason {
+  clientDelayedDecision,
+  waitingForInternalApproval,
+  budgetNotFinalized,
+  travelPostponed,
+  other,
+}
+
 enum TravelType {
   fit,
   corporate,
@@ -236,5 +252,39 @@ extension StatusTagTypeX on StatusTagType {
 
   static StatusTagType fromString(String value) {
     return _enumFromString(value, StatusTagType.values);
+  }
+}
+
+extension LeadLostReasonX on LeadLostReason {
+  String get label {
+    switch (this) {
+      case LeadLostReason.priceTooHigh:
+        return 'Price too high';
+      case LeadLostReason.clientNotResponding:
+        return 'Client not responding';
+      case LeadLostReason.bookedElsewhere:
+        return 'Booked elsewhere';
+      case LeadLostReason.planDropped:
+        return 'Plan dropped';
+      case LeadLostReason.other:
+        return 'Other';
+    }
+  }
+}
+
+extension LeadOnHoldReasonX on LeadOnHoldReason {
+  String get label {
+    switch (this) {
+      case LeadOnHoldReason.clientDelayedDecision:
+        return 'Client delayed decision';
+      case LeadOnHoldReason.waitingForInternalApproval:
+        return 'Waiting for internal approval';
+      case LeadOnHoldReason.budgetNotFinalized:
+        return 'Budget not finalized';
+      case LeadOnHoldReason.travelPostponed:
+        return 'Travel postponed';
+      case LeadOnHoldReason.other:
+        return 'Other';
+    }
   }
 }
