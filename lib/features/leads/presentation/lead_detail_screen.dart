@@ -291,7 +291,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                 onUpdateStage: () => _showStageUpdateModal(lead),
                                 onAddNote: _showAddNoteDialog,
                               ),
-                              const SizedBox(height: AppSpacing.xl),
+                              const SizedBox(height: AppSpacing.lg),
                               SectionContainer(
                                 title: 'Timeline',
                                 subtitle: 'Recent activity and stage movements',
@@ -347,28 +347,30 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                   },
                                 ),
                               ),
-                              const SizedBox(height: AppSpacing.xl),
+                              const SizedBox(height: AppSpacing.lg),
                               SectionContainer(
                                 title: 'Overview',
                                 subtitle: 'Key deal details at a glance',
                                 child: _LeadOverviewGrid(lead: lead),
                               ),
-                              const SizedBox(height: AppSpacing.xl),
+                              const SizedBox(height: AppSpacing.lg),
                               const SectionContainer(
                                 title: 'Tasks',
                                 subtitle: 'Next follow-ups and owner actions',
                                 child: _SubtleEmptyState(
                                   message: 'No tasks yet',
                                   icon: Icons.checklist_rtl_outlined,
+                                  alignToStart: true,
                                 ),
                               ),
-                              const SizedBox(height: AppSpacing.xl),
+                              const SizedBox(height: AppSpacing.lg),
                               const SectionContainer(
                                 title: 'Quotations',
                                 subtitle: 'Active and historical proposals',
                                 child: _SubtleEmptyState(
                                   message: 'No quotations yet',
                                   icon: Icons.receipt_long_outlined,
+                                  alignToStart: true,
                                 ),
                               ),
                             ],
@@ -828,34 +830,70 @@ class _LeadOverviewGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = <_OverviewItemData>[
-      _OverviewItemData('Client Name', _displayValue(lead.clientNameSnapshot)),
-      const _OverviewItemData('Phone', '—'),
-      _OverviewItemData('Destination', _displayValue(lead.destination)),
-      _OverviewItemData('Travel Dates', _travelDateRange(lead)),
-      _OverviewItemData('Travel Type', _travelTypeLabel(lead.travelType)),
-      _OverviewItemData('Budget', _budgetValue(lead.budget)),
-      _OverviewItemData('Budget Type', _displayValue(lead.budgetType)),
-      _OverviewItemData('Initial Notes', _displayValue(lead.notes)),
+    final overviewRows = <List<_OverviewItemData>>[
+      [
+        _OverviewItemData('Client Name', _displayValue(lead.clientNameSnapshot)),
+        const _OverviewItemData('Phone', '—'),
+      ],
+      [
+        _OverviewItemData('Destination', _displayValue(lead.destination)),
+        _OverviewItemData('Travel Dates', _travelDateRange(lead)),
+      ],
+      [
+        _OverviewItemData('Travel Type', _travelTypeLabel(lead.travelType)),
+        _OverviewItemData('Budget', _budgetValue(lead.budget)),
+      ],
+      [
+        _OverviewItemData('Budget Type', _displayValue(lead.budgetType)),
+        _OverviewItemData('Initial Notes', _displayValue(lead.notes)),
+      ],
     ];
 
-    final crossAxisCount =
-        ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context) ? 2 : 1;
+    final isDesktopLayout =
+        ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.lg,
-        childAspectRatio: crossAxisCount == 2 ? 3.95 : 3.45,
-      ),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return _OverviewCell(item: item);
-      },
+    return Column(
+      children: [
+        for (var index = 0; index < overviewRows.length; index++) ...[
+          if (isDesktopLayout)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var columnIndex = 0;
+                    columnIndex < overviewRows[index].length;
+                    columnIndex++) ...[
+                  Expanded(child: _OverviewCell(item: overviewRows[index][columnIndex])),
+                  if (columnIndex < overviewRows[index].length - 1)
+                    const SizedBox(width: AppSpacing.xl),
+                ],
+              ],
+            )
+          else
+            Column(
+              children: [
+                for (var columnIndex = 0;
+                    columnIndex < overviewRows[index].length;
+                    columnIndex++) ...[
+                  _OverviewCell(item: overviewRows[index][columnIndex]),
+                  if (columnIndex < overviewRows[index].length - 1)
+                    const SizedBox(height: AppSpacing.md),
+                ],
+              ],
+            ),
+          if (index < overviewRows.length - 1) ...[
+            const SizedBox(height: AppSpacing.md),
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: Theme.of(context)
+                  .colorScheme
+                  .outlineVariant
+                  .withValues(alpha: 0.28),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ],
+      ],
     );
   }
 }
@@ -877,35 +915,29 @@ class _OverviewCell extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(18),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             item.label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.86),
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
+              fontSize: 11,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.15,
+              height: 1.15,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             item.value,
-            maxLines: 3,
+            maxLines: item.label == 'Initial Notes' ? 4 : 2,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               height: 1.25,
             ),
           ),
@@ -1056,38 +1088,49 @@ class _TimelineNoteItem extends StatelessWidget {
 }
 
 class _SubtleEmptyState extends StatelessWidget {
-  const _SubtleEmptyState({required this.message, required this.icon});
+  const _SubtleEmptyState({
+    required this.message,
+    required this.icon,
+    this.alignToStart = false,
+  });
 
   final String message;
   final IconData icon;
+  final bool alignToStart;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.48),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-              ),
-            ),
-          ],
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment:
+          alignToStart ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.48),
         ),
+        const SizedBox(height: 10),
+        Text(
+          message,
+          textAlign: alignToStart ? TextAlign.left : TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+            height: 1.3,
+          ),
+        ),
+      ],
+    );
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top: alignToStart ? AppSpacing.xs : AppSpacing.md,
+        bottom: AppSpacing.sm,
       ),
+      child: alignToStart ? content : Center(child: content),
     );
   }
 }
