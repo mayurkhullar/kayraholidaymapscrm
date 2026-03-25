@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/clients/presentation/client_detail_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/leads/presentation/leads_screen.dart';
 import '../widgets/app_shell.dart';
@@ -10,6 +11,7 @@ class AppRouter {
   static const String dashboardRoute = '/dashboard';
   static const String leadsRoute = '/leads';
   static const String clientsRoute = '/clients';
+  static const String clientDetailRoute = '/clients/detail';
   static const String companiesRoute = '/companies';
   static const String travelersRoute = '/travelers';
   static const String travelFilesRoute = '/travel-files';
@@ -35,6 +37,18 @@ class AppRouter {
         );
       case clientsRoute:
         return _placeholderRoute(settings, title: 'Clients');
+      case clientDetailRoute:
+        final clientId = settings.arguments is String
+            ? (settings.arguments as String).trim()
+            : '';
+        if (clientId.isEmpty) {
+          return _placeholderRoute(settings, title: 'Client not found');
+        }
+
+        return MaterialPageRoute<void>(
+          builder: (_) => ClientDetailScreen(clientId: clientId),
+          settings: settings,
+        );
       case companiesRoute:
         return _placeholderRoute(settings, title: 'Companies');
       case travelersRoute:

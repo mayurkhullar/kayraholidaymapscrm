@@ -39,6 +39,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
   late final TextEditingController _searchController;
   String? _selectedStage;
   String? _selectedTravelType;
+  List<LeadModel> _cachedLeads = const <LeadModel>[];
 
   @override
   void initState() {
@@ -111,12 +112,16 @@ class _LeadsScreenState extends State<LeadsScreen> {
                   );
                 }
 
+                if (snapshot.hasData) {
+                  _cachedLeads = snapshot.data!;
+                }
+
                 if (snapshot.connectionState == ConnectionState.waiting &&
-                    !snapshot.hasData) {
+                    _cachedLeads.isEmpty) {
                   return const _LeadTableLoadingState();
                 }
 
-                final leads = snapshot.data ?? const <LeadModel>[];
+                final leads = snapshot.data ?? _cachedLeads;
 
                 if (leads.isEmpty) {
                   return const EmptyStateView(

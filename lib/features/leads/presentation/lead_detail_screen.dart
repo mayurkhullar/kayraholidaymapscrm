@@ -319,11 +319,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                     return;
                                   }
 
-                                  debugPrint(
-                                    'Navigating to client detail for clientId: $clientId',
-                                  );
                                   Navigator.of(context).pushNamed(
-                                    AppRouter.clientsRoute,
+                                    AppRouter.clientDetailRoute,
                                     arguments: clientId,
                                   );
                                 },
