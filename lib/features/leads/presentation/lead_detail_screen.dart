@@ -5,7 +5,6 @@ import '../../../core/constants/app_enums.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/app_router.dart';
 import '../../../core/utils/responsive_utils.dart';
-import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../data/datasources/firestore_lead_remote_data_source.dart';
 import '../data/repositories/lead_repository_impl.dart';
@@ -235,17 +234,9 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const AppTopBar(pageTitle: 'Lead Details'),
-            Expanded(
-              child: FutureBuilder<LeadModel?>(
-                future: _leadFuture,
-                builder: (context, snapshot) {
+    return FutureBuilder<LeadModel?>(
+      future: _leadFuture,
+      builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -320,8 +311,9 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                   }
 
                                   Navigator.of(context).pushNamed(
-                                    AppRouter.clientDetailRoute,
-                                    arguments: clientId,
+                                    AppRouter.clientDetailRoute(
+                                      Uri.encodeComponent(clientId),
+                                    ),
                                   );
                                 },
                                 onAddNote: _showAddNoteDialog,
@@ -418,12 +410,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                       ),
                     ),
                   );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+      },
     );
   }
 }

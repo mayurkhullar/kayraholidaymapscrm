@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/stat_card.dart';
@@ -38,24 +37,21 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppShell(
-      pageTitle: 'Dashboard',
-      child: SingleChildScrollView(
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _DashboardStatGrid(),
-            SizedBox(height: AppSpacing.xxl),
-            SectionHeader(title: 'Recent Activity'),
-            SizedBox(height: AppSpacing.lg),
-            EmptyStateView(
-              title: 'No activity yet',
-              message: 'Recent updates, timeline items, and system events will appear here once modules are connected.',
-              icon: Icons.history_toggle_off_rounded,
-            ),
-          ],
-        ),
+    return SingleChildScrollView(
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _DashboardStatGrid(),
+          SizedBox(height: AppSpacing.xxl),
+          SectionHeader(title: 'Recent Activity'),
+          SizedBox(height: AppSpacing.lg),
+          EmptyStateView(
+            title: 'No activity yet',
+            message: 'Recent updates, timeline items, and system events will appear here once modules are connected.',
+            icon: Icons.history_toggle_off_rounded,
+          ),
+        ],
       ),
     );
   }

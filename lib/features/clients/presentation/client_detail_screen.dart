@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/responsive_utils.dart';
-import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../leads/presentation/widgets/section_container.dart';
 import '../data/datasources/firestore_client_remote_data_source.dart';
@@ -36,17 +35,9 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const AppTopBar(pageTitle: 'Client Details'),
-            Expanded(
-              child: FutureBuilder<ClientModel?>(
-                future: _clientFuture,
-                builder: (context, snapshot) {
+    return FutureBuilder<ClientModel?>(
+      future: _clientFuture,
+      builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -128,12 +119,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
                       ),
                     ),
                   );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+      },
     );
   }
 }

@@ -10,11 +10,13 @@ class AppShell extends StatefulWidget {
   const AppShell({
     required this.pageTitle,
     required this.child,
+    this.currentRoute,
     super.key,
   });
 
   final String pageTitle;
   final Widget child;
+  final String? currentRoute;
   @override
   State<AppShell> createState() => _AppShellState();
 }
@@ -42,7 +44,7 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final routeName = ModalRoute.of(context)?.settings.name ?? '';
+    final routeName = widget.currentRoute ?? ModalRoute.of(context)?.settings.name ?? '';
 
     final isDesktopLayout =
         ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
