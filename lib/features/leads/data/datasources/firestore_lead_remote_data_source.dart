@@ -54,20 +54,38 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
   Future<List<LeadModel>> fetchLeadsByClientId(String clientId) async {
     final normalizedClientId = clientId.trim();
     if (normalizedClientId.isEmpty) {
+      print('fetchLeadsByClientId skipped: clientId is empty');
       return const <LeadModel>[];
     }
 
-    final querySnapshot = await _leadsCollection
+    print('fetchLeadsByClientId clientId: $normalizedClientId');
+    final QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await _leadsCollection
         .where('clientId', isEqualTo: normalizedClientId)
         .orderBy('updatedAt', descending: true)
         .get();
 
-    return querySnapshot.docs
-        .map((doc) => LeadModel.fromMap(<String, dynamic>{
-              ...doc.data(),
+    final leads = querySnapshot.docs
+        .map((doc) {
+          final data = doc.data();
+          if (data.isEmpty) {
+            return null;
+          }
+
+          try {
+            return LeadModel.fromMap(<String, dynamic>{
+              ...data,
               'id': doc.id,
-            }))
+            });
+          } catch (_) {
+            return null;
+          }
+        })
+        .whereType<LeadModel>()
         .toList(growable: false);
+
+    print('fetchLeadsByClientId fetched leads: ${leads.length}');
+    return leads;
   }
 
   @override

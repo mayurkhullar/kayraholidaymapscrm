@@ -30,6 +30,21 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
   late Future<ClientModel?> _clientFuture;
   late Future<List<LeadModel>> _bookingsFuture;
 
+  Future<List<LeadModel>> _loadBookings(String? clientId) async {
+    final normalizedClientId = clientId?.trim();
+    if (normalizedClientId == null || normalizedClientId.isEmpty) {
+      debugPrint('ClientDetail bookings query skipped: clientId is null/empty');
+      return const <LeadModel>[];
+    }
+
+    debugPrint('ClientDetail bookings query clientId: $normalizedClientId');
+    final leads = await _leadRepository.fetchLeadsByClientId(
+      normalizedClientId,
+    );
+    debugPrint('ClientDetail bookings fetched leads: ${leads.length}');
+    return leads;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -44,7 +59,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
       ),
     );
     _clientFuture = _clientRepository.getClientById(widget.clientId);
-    _bookingsFuture = _leadRepository.fetchLeadsByClientId(widget.clientId);
+    _bookingsFuture = _loadBookings(widget.clientId);
   }
 
   @override
@@ -485,7 +500,7 @@ class _BookingsContainer extends StatelessWidget {
 
           if (snapshot.hasError) {
             return Text(
-              'Unable to load bookings',
+              'Failed to load bookings: ${snapshot.error}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.error,
               ),
