@@ -164,12 +164,15 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             _stringFromDynamic(existingLead['companyName']) ??
             lead.companyNameSnapshot;
 
-        if (leadPhone != null && leadPhone.isNotEmpty) {
-          final duplicateClientQuery = await transaction.get(
-            clientsCollection.where('phone', isEqualTo: leadPhone).limit(1),
-          );
-          if (duplicateClientQuery.docs.isNotEmpty) {
-            convertedClientId = duplicateClientQuery.docs.first.id;
+        if (leadPhone.isNotEmpty) {
+          final QuerySnapshot<Map<String, dynamic>> querySnapshot =
+              await clientsCollection
+                  .where('phone', isEqualTo: leadPhone)
+                  .limit(1)
+                  .get();
+
+          if (querySnapshot.docs.isNotEmpty) {
+            convertedClientId = querySnapshot.docs.first.id;
           }
         }
 
@@ -180,7 +183,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             clientCode: await _nextClientCode(transaction),
             name: leadName,
             email: leadEmail ?? '',
-            phone: leadPhone ?? '',
+            phone: leadPhone,
             destination: lead.destination,
             travelType: lead.travelType.firestoreValue,
             budget: lead.budget,
