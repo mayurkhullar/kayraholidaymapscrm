@@ -61,12 +61,14 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
               : client.createdAt,
         );
 
-    await documentReference.set(clientToCreate.toMap());
+    await documentReference.set(_normalizeClientContactFields(clientToCreate.toMap()));
   }
 
   @override
   Future<void> updateClient(ClientModel client) {
-    return _clientsCollection.doc(client.id).update(client.toMap());
+    return _clientsCollection
+        .doc(client.id)
+        .update(_normalizeClientContactFields(client.toMap()));
   }
 
   @override
@@ -94,4 +96,23 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
       return 'CL-2026-${next.toString().padLeft(4, '0')}';
     });
   }
+}
+
+Map<String, dynamic> _normalizeClientContactFields(Map<String, dynamic> map) {
+  final normalized = Map<String, dynamic>.from(map);
+  normalized['phone'] = ((normalized['phone'] as String?) ?? '').trim();
+  normalized['whatsappNumber'] = _optionalTrimmedString(
+    normalized['whatsappNumber'],
+  );
+  normalized['email'] = _optionalTrimmedString(normalized['email']);
+  return normalized;
+}
+
+String? _optionalTrimmedString(dynamic value) {
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  return null;
 }

@@ -161,6 +161,9 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             _stringFromDynamic(existingLead['email']) ??
             _stringFromDynamic(existingLead['clientEmail']) ??
             lead.email;
+        final leadWhatsappNumber =
+            _stringFromDynamic(existingLead['whatsappNumber']) ??
+            lead.whatsappNumber;
         final leadCompanyName =
             _stringFromDynamic(existingLead['companyName']) ??
             lead.companyNameSnapshot;
@@ -174,6 +177,29 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
 
           if (querySnapshot.docs.isNotEmpty) {
             convertedClientId = querySnapshot.docs.first.id;
+            final existingClientData = querySnapshot.docs.first.data();
+            final existingClientWhatsapp = _stringFromDynamic(
+              existingClientData['whatsappNumber'],
+            );
+            final existingClientEmail = _stringFromDynamic(
+              existingClientData['email'],
+            );
+            final hasLeadWhatsapp = leadWhatsappNumber != null;
+            final hasLeadEmail = leadEmail != null;
+
+            if ((existingClientWhatsapp == null && hasLeadWhatsapp) ||
+                (existingClientEmail == null && hasLeadEmail)) {
+              transaction.update(
+                querySnapshot.docs.first.reference,
+                <String, dynamic>{
+                  if (existingClientWhatsapp == null && hasLeadWhatsapp)
+                    'whatsappNumber': leadWhatsappNumber,
+                  if (existingClientEmail == null && hasLeadEmail)
+                    'email': leadEmail,
+                  'updatedAt': Timestamp.fromDate(now),
+                },
+              );
+            }
           }
         }
 
@@ -183,8 +209,9 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             id: newClientReference.id,
             clientCode: await _nextClientCode(transaction),
             name: leadName,
-            email: leadEmail ?? '',
             phone: leadPhone,
+            whatsappNumber: leadWhatsappNumber,
+            email: leadEmail,
             destination: lead.destination,
             travelType: lead.travelType.firestoreValue,
             budget: lead.budget,

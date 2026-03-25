@@ -5,8 +5,9 @@ class ClientModel {
     required this.id,
     required this.clientCode,
     required this.name,
-    required this.email,
     required this.phone,
+    this.whatsappNumber,
+    this.email,
     this.destination,
     this.travelType,
     this.budget,
@@ -20,8 +21,9 @@ class ClientModel {
   final String id;
   final String clientCode;
   final String name;
-  final String email;
   final String phone;
+  final String? whatsappNumber;
+  final String? email;
   final String? destination;
   final String? travelType;
   final int? budget;
@@ -36,8 +38,9 @@ class ClientModel {
       id: id,
       clientCode: (map['clientCode'] as String?) ?? '',
       name: (map['name'] as String?) ?? '',
-      email: (map['email'] as String?) ?? '',
       phone: (map['phone'] as String?) ?? '',
+      whatsappNumber: _stringFromDynamic(map['whatsappNumber']),
+      email: _stringFromDynamic(map['email']),
       destination: map['destination'] as String?,
       travelType: map['travelType'] as String?,
       budget: _intFromDynamic(map['budget']),
@@ -61,8 +64,9 @@ class ClientModel {
     String? id,
     String? clientCode,
     String? name,
-    String? email,
     String? phone,
+    String? whatsappNumber,
+    String? email,
     String? destination,
     String? travelType,
     int? budget,
@@ -76,8 +80,9 @@ class ClientModel {
       id: id ?? this.id,
       clientCode: clientCode ?? this.clientCode,
       name: name ?? this.name,
-      email: email ?? this.email,
       phone: phone ?? this.phone,
+      whatsappNumber: whatsappNumber ?? this.whatsappNumber,
+      email: email ?? this.email,
       destination: destination ?? this.destination,
       travelType: travelType ?? this.travelType,
       budget: budget ?? this.budget,
@@ -93,8 +98,9 @@ class ClientModel {
     return <String, dynamic>{
       'clientCode': clientCode,
       'name': name,
-      'email': email,
       'phone': phone,
+      'whatsappNumber': whatsappNumber,
+      'email': email,
       'destination': destination,
       'travelType': travelType,
       'budget': budget,
@@ -105,6 +111,15 @@ class ClientModel {
       'isActive': isActive,
     };
   }
+}
+
+String? _stringFromDynamic(dynamic value) {
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  return null;
 }
 
 int? _intFromDynamic(dynamic value) {
