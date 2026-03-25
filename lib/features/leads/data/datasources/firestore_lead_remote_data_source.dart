@@ -132,15 +132,13 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
           (existingLead['isConverted'] as bool?) ?? false;
 
       final isNowConfirmed = lead.leadStage == LeadStage.confirmed;
-      final shouldConvert =
-          isNowConfirmed &&
-          !lead.isConverted &&
-          !wasAlreadyConverted &&
-          existingClientId.isEmpty;
+      final isAlreadyConverted = lead.isConverted || wasAlreadyConverted;
+      final shouldAttemptConversion = isNowConfirmed && !isAlreadyConverted;
 
       var convertedClientId = existingClientId;
+      var didConvertLead = false;
 
-      if (shouldConvert) {
+      if (shouldAttemptConversion) {
         final now = DateTime.now();
         final travelersCount = lead.passengerCount?.totalPax ??
             _travelersFromLeadCounts(
@@ -168,7 +166,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             _stringFromDynamic(existingLead['companyName']) ??
             lead.companyNameSnapshot;
 
-        if (leadPhone.isNotEmpty) {
+        if (convertedClientId.isEmpty && leadPhone.isNotEmpty) {
           final QuerySnapshot<Map<String, dynamic>> querySnapshot =
               await clientsCollection
                   .where('phone', isEqualTo: leadPhone)
@@ -217,7 +215,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             budget: lead.budget,
             travelers: travelersCount,
             companyName: leadCompanyName,
-            createdAt: now,
+            createdAt: lead.createdAt ?? now,
             updatedAt: now,
             isActive: true,
           );
@@ -226,23 +224,30 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
           convertedClientId = newClientReference.id;
         }
 
-        final timelineReference = _leadNotesCollection(lead.id).doc();
-        transaction.set(timelineReference, <String, dynamic>{
-          'id': timelineReference.id,
-          'leadId': lead.id,
-          'noteText': 'Lead converted to client',
-          'noteType': 'system',
-          'relatedStage': LeadStage.confirmed.firestoreValue,
-          'createdBy': null,
-          'createdAt': now,
-        });
+        didConvertLead = convertedClientId.isNotEmpty;
+
+        if (didConvertLead) {
+          final timelineReference = _leadNotesCollection(lead.id).doc();
+          transaction.set(timelineReference, <String, dynamic>{
+            'id': timelineReference.id,
+            'leadId': lead.id,
+            'noteText': 'Lead converted to client',
+            'noteType': 'system',
+            'relatedStage': LeadStage.confirmed.firestoreValue,
+            'createdBy': null,
+            'createdAt': now,
+          });
+        }
       }
 
       final leadToUpdate = lead.copyWith(
         clientId: convertedClientId.isNotEmpty
             ? convertedClientId
             : lead.clientId,
-        isConverted: shouldConvert || wasAlreadyConverted || lead.isConverted,
+        isConverted:
+            isAlreadyConverted ||
+            (isNowConfirmed && convertedClientId.isNotEmpty) ||
+            didConvertLead,
         updatedAt: DateTime.now(),
       );
 

@@ -177,6 +177,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       });
       await batch.commit();
 
+      if (selectedStage == LeadStage.confirmed) {
+        await _leadRepository.updateLead(
+          lead.copyWith(
+            leadStage: selectedStage,
+            stageReason: stageChangeInput.reason,
+            updatedAt: DateTime.now(),
+          ),
+        );
+      }
+
       if (!mounted) {
         return;
       }
