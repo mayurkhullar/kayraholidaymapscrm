@@ -1,9 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_enums.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/app_router.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../shared/models/passenger_count_model.dart';
+import '../../leads/data/datasources/firestore_lead_remote_data_source.dart';
+import '../../leads/data/repositories/lead_repository_impl.dart';
+import '../../leads/domain/models/lead_model.dart';
 import '../../leads/presentation/widgets/section_container.dart';
 import '../data/datasources/firestore_client_remote_data_source.dart';
 import '../data/repositories/client_repository_impl.dart';
@@ -20,7 +26,9 @@ class ClientDetailScreen extends StatefulWidget {
 
 class _ClientDetailScreenState extends State<ClientDetailScreen> {
   late final ClientRepositoryImpl _clientRepository;
+  late final LeadRepositoryImpl _leadRepository;
   late Future<ClientModel?> _clientFuture;
+  late Future<List<LeadModel>> _bookingsFuture;
 
   @override
   void initState() {
@@ -30,7 +38,13 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
         firestore: FirebaseFirestore.instance,
       ),
     );
+    _leadRepository = LeadRepositoryImpl(
+      remoteDataSource: FirestoreLeadRemoteDataSource(
+        firestore: FirebaseFirestore.instance,
+      ),
+    );
     _clientFuture = _clientRepository.getClientById(widget.clientId);
+    _bookingsFuture = _leadRepository.fetchLeadsByClientId(widget.clientId);
   }
 
   @override
@@ -107,11 +121,13 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.xl),
-                              const SectionContainer(
-                                title: 'Bookings / Trips',
-                                subtitle: 'Client travel activity',
+                              SectionContainer(
+                                title: 'Bookings',
+                                subtitle: 'Linked lead bookings for this client',
                                 bodyTopSpacing: AppSpacing.lg,
-                                child: _BookingsContainer(),
+                                child: _BookingsContainer(
+                                  bookingsFuture: _bookingsFuture,
+                                ),
                               ),
                             ],
                           ),
@@ -442,7 +458,9 @@ class _OverviewCell extends StatelessWidget {
 }
 
 class _BookingsContainer extends StatelessWidget {
-  const _BookingsContainer();
+  const _BookingsContainer({required this.bookingsFuture});
+
+  final Future<List<LeadModel>> bookingsFuture;
 
   @override
   Widget build(BuildContext context) {
@@ -458,23 +476,186 @@ class _BookingsContainer extends StatelessWidget {
           color: colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
       ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.flight_takeoff_rounded,
-            size: 26,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'No bookings yet',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+      child: FutureBuilder<List<LeadModel>>(
+        future: bookingsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Text(
+              'Unable to load bookings',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.error,
+              ),
+            );
+          }
+
+          final leads = snapshot.data ?? const <LeadModel>[];
+          if (leads.isEmpty) {
+            return Text(
+              'No bookings yet',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            );
+          }
+
+          return Column(
+            children: [
+              for (var index = 0; index < leads.length; index++) ...[
+                _BookingRow(lead: leads[index]),
+                if (index != leads.length - 1)
+                  Divider(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+                    height: AppSpacing.lg,
+                  ),
+              ],
+            ],
+          );
+        },
       ),
+    );
+  }
+}
+
+class _BookingRow extends StatelessWidget {
+  const _BookingRow({required this.lead});
+
+  final LeadModel lead;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 760;
+        return InkWell(
+          onTap: () {
+            if (lead.id.trim().isEmpty) {
+              return;
+            }
+            Navigator.of(
+              context,
+            ).pushNamed(AppRouter.leadsDetailRoute(lead.id.trim()));
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.sm,
+              horizontal: AppSpacing.xs,
+            ),
+            child: isCompact
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _displayValue(lead.leadCode),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _displayValue(lead.destination),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _travelDatesLabel(context, lead),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          Text(_paxSummary(lead), style: theme.textTheme.bodySmall),
+                          Text(
+                            _leadStageLabel(lead),
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          Text(
+                            _updatedAtLabel(context, lead.updatedAt),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _displayValue(lead.leadCode),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              _displayValue(lead.destination),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          _travelDatesLabel(context, lead),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          _paxSummary(lead),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          _leadStageLabel(lead),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          _updatedAtLabel(context, lead.updatedAt),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }
@@ -491,4 +672,57 @@ String _optionalValue(String? value) {
 
 bool _hasValue(String? value) {
   return value?.trim().isNotEmpty ?? false;
+}
+
+String _travelDatesLabel(BuildContext context, LeadModel lead) {
+  final startDate = lead.travelDates?.startDate;
+  final endDate = lead.travelDates?.endDate;
+  final localizations = MaterialLocalizations.of(context);
+
+  if (startDate == null && endDate == null) {
+    return 'Dates not set';
+  }
+
+  if (startDate != null && endDate != null) {
+    return '${localizations.formatMediumDate(startDate)} - '
+        '${localizations.formatMediumDate(endDate)}';
+  }
+
+  final singleDate = startDate ?? endDate!;
+  return localizations.formatMediumDate(singleDate);
+}
+
+String _paxSummary(LeadModel lead) {
+  final PassengerCountModel? passengerCount = lead.passengerCount;
+  final adults = passengerCount?.adults ?? lead.adultCount;
+  final children = passengerCount?.children ?? lead.childCount;
+  final infants = passengerCount?.infants ?? lead.infantCount;
+
+  return '${adults}A / ${children}C / ${infants}I';
+}
+
+String _leadStageLabel(LeadModel lead) {
+  switch (lead.leadStage) {
+    case LeadStage.newLead:
+      return 'New';
+    case LeadStage.contacted:
+      return 'Contacted';
+    case LeadStage.quotationSent:
+      return 'Quotation Sent';
+    case LeadStage.negotiation:
+      return 'Negotiation';
+    case LeadStage.onHold:
+      return 'On Hold';
+    case LeadStage.confirmed:
+      return 'Confirmed';
+    case LeadStage.lost:
+      return 'Lost';
+  }
+}
+
+String _updatedAtLabel(BuildContext context, DateTime? updatedAt) {
+  if (updatedAt == null) {
+    return '—';
+  }
+  return MaterialLocalizations.of(context).formatMediumDate(updatedAt);
 }

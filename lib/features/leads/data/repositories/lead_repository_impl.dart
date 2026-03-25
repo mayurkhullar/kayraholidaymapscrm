@@ -15,6 +15,11 @@ class LeadRepositoryImpl implements LeadRepository {
   }
 
   @override
+  Future<List<LeadModel>> fetchLeadsByClientId(String clientId) {
+    return _remoteDataSource.fetchLeadsByClientId(clientId);
+  }
+
+  @override
   Future<LeadModel?> getLeadById(String id) {
     return _remoteDataSource.getLeadById(id);
   }

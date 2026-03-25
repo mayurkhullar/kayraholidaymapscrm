@@ -3,6 +3,7 @@ import '../models/lead_note_model.dart';
 
 abstract class LeadRepository {
   Future<List<LeadModel>> fetchLeads();
+  Future<List<LeadModel>> fetchLeadsByClientId(String clientId);
   Future<LeadModel?> getLeadById(String id);
   Future<void> createLead(LeadModel lead);
   Future<void> updateLead(LeadModel lead);
