@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../core/constants/app_enums.dart';
 import '../../../../core/constants/firestore_collections.dart';
+import '../../../clients/domain/models/client_model.dart';
 import '../../../../shared/models/passenger_count_model.dart';
 import '../../domain/models/lead_model.dart';
 import '../../domain/models/lead_note_model.dart';
@@ -117,8 +119,85 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
   }
 
   @override
-  Future<void> updateLead(LeadModel lead) {
-    return _leadsCollection.doc(lead.id).update(lead.toMap());
+  Future<void> updateLead(LeadModel lead) async {
+    final leadReference = _leadsCollection.doc(lead.id);
+    final clientsCollection = _firestore.collection(FirestoreCollections.clients);
+
+    await _firestore.runTransaction((transaction) async {
+      final leadSnapshot = await transaction.get(leadReference);
+      final existingLead = leadSnapshot.data() ?? const <String, dynamic>{};
+      final existingClientId =
+          (existingLead['clientId'] as String?)?.trim() ?? '';
+      final wasAlreadyConverted =
+          (existingLead['isConverted'] as bool?) ?? false;
+
+      final isNowConfirmed = lead.leadStage == LeadStage.confirmed;
+      final shouldConvert =
+          isNowConfirmed &&
+          !lead.isConverted &&
+          !wasAlreadyConverted &&
+          existingClientId.isEmpty;
+
+      var convertedClientId = existingClientId;
+
+      if (shouldConvert) {
+        final now = DateTime.now();
+        final newClientReference = clientsCollection.doc();
+        final travelersCount = lead.passengerCount?.totalPax ??
+            _travelersFromLeadCounts(
+              adults: lead.adultCount,
+              children: lead.childCount,
+              infants: lead.infantCount,
+            );
+        final leadName =
+            _stringFromDynamic(existingLead['name']) ??
+            _stringFromDynamic(existingLead['clientName']) ??
+            lead.clientNameSnapshot ??
+            '';
+        final leadPhone =
+            _stringFromDynamic(existingLead['phone']) ??
+            _stringFromDynamic(existingLead['clientPhone']) ??
+            '';
+
+        final client = ClientModel(
+          id: newClientReference.id,
+          clientCode: await _nextClientCode(transaction),
+          name: leadName,
+          email: _stringFromDynamic(existingLead['email']) ?? '',
+          phone: leadPhone,
+          destination: lead.destination,
+          travelType: lead.travelType.firestoreValue,
+          budget: lead.budget,
+          travelers: travelersCount,
+          companyName: lead.companyNameSnapshot,
+          createdAt: now,
+          updatedAt: now,
+          isActive: true,
+        );
+
+        transaction.set(newClientReference, client.toMap());
+        convertedClientId = newClientReference.id;
+
+        final timelineReference = _leadNotesCollection(lead.id).doc();
+        transaction.set(timelineReference, <String, dynamic>{
+          'id': timelineReference.id,
+          'leadId': lead.id,
+          'noteText': 'Lead converted to client',
+          'noteType': 'timeline',
+          'relatedStage': LeadStage.confirmed.firestoreValue,
+          'createdBy': null,
+          'createdAt': now,
+        });
+      }
+
+      final leadToUpdate = lead.copyWith(
+        clientId: convertedClientId.isNotEmpty ? convertedClientId : lead.clientId,
+        isConverted: shouldConvert || wasAlreadyConverted || lead.isConverted,
+        updatedAt: DateTime.now(),
+      );
+
+      transaction.update(leadReference, leadToUpdate.toMap());
+    });
   }
 
   @override
@@ -159,4 +238,37 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
 
     await documentReference.set(noteToCreate.toMap());
   }
+
+  Future<String> _nextClientCode(Transaction transaction) async {
+    final counterReference = _firestore.collection('counters').doc('client_2026');
+    final counterSnapshot = await transaction.get(counterReference);
+    final current = (counterSnapshot.data()?['current'] as num?)?.toInt() ?? 0;
+    final next = current + 1;
+
+    if (counterSnapshot.exists) {
+      transaction.update(counterReference, <String, dynamic>{'current': next});
+    } else {
+      transaction.set(counterReference, <String, dynamic>{'current': next});
+    }
+
+    return 'CL-2026-${next.toString().padLeft(4, '0')}';
+  }
+}
+
+int? _travelersFromLeadCounts({
+  required int adults,
+  required int children,
+  required int infants,
+}) {
+  final total = adults + children + infants;
+  return total > 0 ? total : null;
+}
+
+String? _stringFromDynamic(dynamic value) {
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  return null;
 }

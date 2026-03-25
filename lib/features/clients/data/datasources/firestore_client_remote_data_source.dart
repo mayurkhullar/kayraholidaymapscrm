@@ -47,9 +47,19 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
     final documentReference = client.id.isEmpty
         ? _clientsCollection.doc()
         : _clientsCollection.doc(client.id);
-    final clientToCreate = client.id.isEmpty
-        ? client.copyWith(id: documentReference.id)
-        : client;
+    final now = DateTime.now();
+    final clientToCreate = (client.id.isEmpty
+            ? client.copyWith(id: documentReference.id)
+            : client)
+        .copyWith(
+          clientCode: client.clientCode.trim().isEmpty
+              ? await _nextClientCode()
+              : client.clientCode,
+          updatedAt: now,
+          createdAt: client.createdAt == DateTime.fromMillisecondsSinceEpoch(0)
+              ? now
+              : client.createdAt,
+        );
 
     await documentReference.set(clientToCreate.toMap());
   }
@@ -64,6 +74,24 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
     return _clientsCollection.doc(id).update(<String, dynamic>{
       'isArchived': true,
       'archivedAt': DateTime.now(),
+    });
+  }
+
+  Future<String> _nextClientCode() async {
+    final counterReference = _firestore.collection('counters').doc('client_2026');
+
+    return _firestore.runTransaction((transaction) async {
+      final counterSnapshot = await transaction.get(counterReference);
+      final current = (counterSnapshot.data()?['current'] as num?)?.toInt() ?? 0;
+      final next = current + 1;
+
+      if (counterSnapshot.exists) {
+        transaction.update(counterReference, <String, dynamic>{'current': next});
+      } else {
+        transaction.set(counterReference, <String, dynamic>{'current': next});
+      }
+
+      return 'CL-2026-${next.toString().padLeft(4, '0')}';
     });
   }
 }

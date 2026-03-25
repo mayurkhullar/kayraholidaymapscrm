@@ -43,6 +43,7 @@ class LeadModel {
     this.lastMeaningfulActivityAt,
     this.hasActiveQuotation = false,
     this.activeQuotationId,
+    this.isConverted = false,
     this.duplicateWarningShown = false,
     this.clientNameSnapshot,
     this.companyNameSnapshot,
@@ -94,6 +95,7 @@ class LeadModel {
   final DateTime? lastMeaningfulActivityAt;
   final bool hasActiveQuotation;
   final String? activeQuotationId;
+  final bool isConverted;
   final bool duplicateWarningShown;
   final String? clientNameSnapshot;
   final String? companyNameSnapshot;
@@ -160,6 +162,7 @@ class LeadModel {
           _dateTimeFromDynamic(map['lastMeaningfulActivityAt']),
       hasActiveQuotation: (map['hasActiveQuotation'] as bool?) ?? false,
       activeQuotationId: map['activeQuotationId'] as String?,
+      isConverted: (map['isConverted'] as bool?) ?? false,
       duplicateWarningShown:
           (map['duplicateWarningShown'] as bool?) ?? false,
       clientNameSnapshot: map['clientNameSnapshot'] as String?,
@@ -221,6 +224,7 @@ class LeadModel {
       'lastMeaningfulActivityAt': lastMeaningfulActivityAt,
       'hasActiveQuotation': hasActiveQuotation,
       'activeQuotationId': activeQuotationId,
+      'isConverted': isConverted,
       'duplicateWarningShown': duplicateWarningShown,
       'clientNameSnapshot': clientNameSnapshot,
       'companyNameSnapshot': companyNameSnapshot,
@@ -274,6 +278,7 @@ class LeadModel {
     DateTime? lastMeaningfulActivityAt,
     bool? hasActiveQuotation,
     String? activeQuotationId,
+    bool? isConverted,
     bool? duplicateWarningShown,
     String? clientNameSnapshot,
     String? companyNameSnapshot,
@@ -326,6 +331,7 @@ class LeadModel {
           lastMeaningfulActivityAt ?? this.lastMeaningfulActivityAt,
       hasActiveQuotation: hasActiveQuotation ?? this.hasActiveQuotation,
       activeQuotationId: activeQuotationId ?? this.activeQuotationId,
+      isConverted: isConverted ?? this.isConverted,
       duplicateWarningShown:
           duplicateWarningShown ?? this.duplicateWarningShown,
       clientNameSnapshot: clientNameSnapshot ?? this.clientNameSnapshot,
