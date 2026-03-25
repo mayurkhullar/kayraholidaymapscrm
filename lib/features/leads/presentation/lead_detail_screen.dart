@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_enums.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/app_router.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/empty_state_view.dart';
@@ -302,6 +303,20 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                 lead: lead,
                                 isSavingStageChange: _isSavingStageChange,
                                 onUpdateStage: () => _showStageUpdateModal(lead),
+                                onViewClient: () {
+                                  final clientId = lead.clientId?.trim();
+                                  if (clientId == null || clientId.isEmpty) {
+                                    return;
+                                  }
+
+                                  debugPrint(
+                                    'Navigating to client detail for clientId: $clientId',
+                                  );
+                                  Navigator.of(context).pushNamed(
+                                    AppRouter.clientsRoute,
+                                    arguments: clientId,
+                                  );
+                                },
                                 onAddNote: _showAddNoteDialog,
                               ),
                               const SizedBox(height: AppSpacing.xl),
@@ -411,12 +426,14 @@ class _LeadDealHeader extends StatelessWidget {
     required this.lead,
     required this.isSavingStageChange,
     required this.onUpdateStage,
+    required this.onViewClient,
     required this.onAddNote,
   });
 
   final LeadModel lead;
   final bool isSavingStageChange;
   final VoidCallback onUpdateStage;
+  final VoidCallback onViewClient;
   final VoidCallback onAddNote;
 
   @override
@@ -477,7 +494,15 @@ class _LeadDealHeader extends StatelessWidget {
         crossAxisAlignment:
             isDesktopLayout ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          _StageBadge(stage: lead.leadStage),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _StageBadge(stage: lead.leadStage),
+              if (lead.isConverted) const _ConvertedClientBadge(),
+            ],
+          ),
           const SizedBox(height: AppSpacing.lg),
           Wrap(
             spacing: AppSpacing.sm,
@@ -485,17 +510,29 @@ class _LeadDealHeader extends StatelessWidget {
             alignment:
                 isDesktopLayout ? WrapAlignment.end : WrapAlignment.start,
             children: [
-              FilledButton.icon(
-                onPressed: isSavingStageChange ? null : onUpdateStage,
-                style: FilledButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
+              if (!lead.isConverted)
+                FilledButton.icon(
+                  onPressed: isSavingStageChange ? null : onUpdateStage,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                  ),
+                  icon: const Icon(Icons.swap_horiz_rounded),
+                  label: Text(
+                    isSavingStageChange ? 'Saving...' : 'Update Stage',
+                  ),
                 ),
-                icon: const Icon(Icons.swap_horiz_rounded),
-                label: Text(
-                  isSavingStageChange ? 'Saving...' : 'Update Stage',
+              if (lead.isConverted &&
+                  (lead.clientId?.trim().isNotEmpty ?? false))
+                FilledButton.icon(
+                  onPressed: onViewClient,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                  ),
+                  icon: const Icon(Icons.person_search_rounded),
+                  label: const Text('View Client'),
                 ),
-              ),
               OutlinedButton.icon(
                 onPressed: onAddNote,
                 style: OutlinedButton.styleFrom(
@@ -555,6 +592,37 @@ class _LeadDealHeader extends StatelessWidget {
                 rightColumn,
               ],
             ),
+    );
+  }
+}
+
+class _ConvertedClientBadge extends StatelessWidget {
+  const _ConvertedClientBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.green.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Colors.green.withValues(alpha: 0.28),
+        ),
+      ),
+      child: Text(
+        'Converted to Client',
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }
