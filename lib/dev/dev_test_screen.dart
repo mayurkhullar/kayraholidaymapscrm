@@ -70,6 +70,7 @@ class _DevTestScreenState extends State<DevTestScreen> {
       clientId: '',
       leadOwnerId: '',
       destination: 'Dubai',
+      phone: '+10000000000',
       travelType: TravelType.fit,
       tripScope: TripScope.international,
       leadStage: LeadStage.newLead,

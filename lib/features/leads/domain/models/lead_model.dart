@@ -18,6 +18,9 @@ class LeadModel {
     required this.travelType,
     required this.tripScope,
     this.destination,
+    required this.phone,
+    this.whatsappNumber,
+    this.email,
     this.travelDates,
     this.passengerCount,
     this.adultCount = 0,
@@ -70,6 +73,9 @@ class LeadModel {
   final TravelType travelType;
   final TripScope tripScope;
   final String? destination;
+  final String phone;
+  final String? whatsappNumber;
+  final String? email;
   final LeadTravelDatesModel? travelDates;
   final PassengerCountModel? passengerCount;
   final int adultCount;
@@ -125,6 +131,12 @@ class LeadModel {
       travelType: _travelTypeFromDynamic(map['travelType']),
       tripScope: _tripScopeFromDynamic(map['tripScope']),
       destination: map['destination'] as String?,
+      phone: _requiredStringFromDynamic(
+        map['phone'],
+        fallback: map['clientPhone'],
+      ),
+      whatsappNumber: _optionalTrimmedStringFromDynamic(map['whatsappNumber']),
+      email: _optionalTrimmedStringFromDynamic(map['email']),
       travelDates: _leadTravelDatesFromDynamic(map['travelDates']),
       passengerCount: _passengerCountFromDynamic(passengerCountMap),
       adultCount: _intFromDynamic(
@@ -193,6 +205,9 @@ class LeadModel {
       'travelType': travelType.firestoreValue,
       'tripScope': tripScope.firestoreValue,
       'destination': destination,
+      'phone': phone,
+      'whatsappNumber': whatsappNumber,
+      'email': email,
       'travelDates': travelDates?.toMap(),
       'passengerCount': (passengerCount ??
               PassengerCountModel.calculate(
@@ -253,6 +268,9 @@ class LeadModel {
     TravelType? travelType,
     TripScope? tripScope,
     String? destination,
+    String? phone,
+    String? whatsappNumber,
+    String? email,
     LeadTravelDatesModel? travelDates,
     PassengerCountModel? passengerCount,
     int? adultCount,
@@ -305,6 +323,9 @@ class LeadModel {
       travelType: travelType ?? this.travelType,
       tripScope: tripScope ?? this.tripScope,
       destination: destination ?? this.destination,
+      phone: phone ?? this.phone,
+      whatsappNumber: whatsappNumber ?? this.whatsappNumber,
+      email: email ?? this.email,
       travelDates: travelDates ?? this.travelDates,
       passengerCount: passengerCount ?? this.passengerCount,
       adultCount: adultCount ?? this.adultCount,
@@ -350,6 +371,25 @@ class LeadModel {
       archivedAt: archivedAt ?? this.archivedAt,
     );
   }
+}
+
+String _requiredStringFromDynamic(dynamic value, {dynamic fallback}) {
+  final primary = _optionalTrimmedStringFromDynamic(value);
+  if (primary != null) {
+    return primary;
+  }
+
+  final fallbackValue = _optionalTrimmedStringFromDynamic(fallback);
+  return fallbackValue ?? '';
+}
+
+String? _optionalTrimmedStringFromDynamic(dynamic value) {
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  return null;
 }
 
 DateTime? _dateTimeFromDynamic(dynamic value) {

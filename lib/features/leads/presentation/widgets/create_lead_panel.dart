@@ -83,6 +83,9 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
   final _formKey = GlobalKey<FormState>();
   final _clientNameController = TextEditingController();
   final _destinationController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _whatsAppNumberController = TextEditingController();
+  final _emailController = TextEditingController();
   final _budgetController = TextEditingController();
   final _adultCountController = TextEditingController(text: '1');
   final _childCountController = TextEditingController(text: '0');
@@ -121,6 +124,9 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
   void dispose() {
     _clientNameController.dispose();
     _destinationController.dispose();
+    _phoneController.dispose();
+    _whatsAppNumberController.dispose();
+    _emailController.dispose();
     _budgetController.dispose();
     _adultCountController.dispose();
     _childCountController.dispose();
@@ -136,9 +142,14 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
     }
 
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     final clientName = _clientNameController.text.trim();
     final destination = _destinationController.text.trim();
+    final phone = _phoneController.text.trim();
+    final whatsappNumberValue = _whatsAppNumberController.text.trim();
+    final whatsappNumber =
+        whatsappNumberValue.isEmpty ? null : whatsappNumberValue;
+    final emailValue = _emailController.text.trim();
+    final email = emailValue.isEmpty ? null : emailValue;
     final normalizedDestination = destination.toLowerCase();
     final budgetValue = _budgetController.text.trim();
     final budget = budgetValue.isEmpty ? null : int.tryParse(budgetValue);
@@ -180,6 +191,9 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
           'leadCode': leadCode,
           'clientNameSnapshot': clientName,
           'destination': destination,
+          'phone': phone,
+          'whatsappNumber': whatsappNumber,
+          'email': email,
           'destinationSearch': normalizedDestination,
           'normalizedDestination': normalizedDestination,
           'travelType': _travelType,
@@ -210,21 +224,10 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
       }
 
       navigator.pop();
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Lead created successfully'),
-        ),
-      );
     } catch (_) {
       if (!mounted) {
         return;
       }
-
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Unable to create lead right now'),
-        ),
-      );
     } finally {
       if (mounted) {
         setState(() {
@@ -386,6 +389,58 @@ class _CreateLeadPanelState extends State<CreateLeadPanel> {
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Destination is required';
+                              }
+
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _phoneController,
+                            enabled: !_isSubmitting,
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.next,
+                            decoration: const InputDecoration(
+                              labelText: 'Phone Number',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Phone Number is required';
+                              }
+
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _whatsAppNumberController,
+                            enabled: !_isSubmitting,
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.next,
+                            decoration: const InputDecoration(
+                              labelText: 'WhatsApp Number (optional)',
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _emailController,
+                            enabled: !_isSubmitting,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            decoration: const InputDecoration(
+                              labelText: 'Email (optional)',
+                            ),
+                            validator: (value) {
+                              final normalizedValue = value?.trim() ?? '';
+                              if (normalizedValue.isEmpty) {
+                                return null;
+                              }
+
+                              final emailRegex = RegExp(
+                                r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                              );
+                              if (!emailRegex.hasMatch(normalizedValue)) {
+                                return 'Enter a valid email address';
                               }
 
                               return null;

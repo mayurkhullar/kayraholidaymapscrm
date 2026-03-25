@@ -874,8 +874,20 @@ class _LeadOverviewGrid extends StatelessWidget {
     final overviewRows = <List<_OverviewItemData>>[
       [
         _OverviewItemData('Client Name', _displayValue(lead.clientNameSnapshot)),
-        const _OverviewItemData('Phone', '—'),
+        _OverviewItemData('Phone', _displayValue(lead.phone)),
       ],
+      if (lead.whatsappNumber != null && lead.whatsappNumber!.trim().isNotEmpty)
+        [
+          _OverviewItemData(
+            'WhatsApp Number',
+            _displayValue(lead.whatsappNumber),
+          ),
+          _OverviewItemData('Email', _displayValue(lead.email)),
+        ]
+      else if (lead.email != null && lead.email!.trim().isNotEmpty)
+        [
+          _OverviewItemData('Email', _displayValue(lead.email)),
+        ],
       [
         _OverviewItemData('Destination', _displayValue(lead.destination)),
         _OverviewItemData('Travel Dates', _travelDateRange(lead)),
@@ -892,7 +904,6 @@ class _LeadOverviewGrid extends StatelessWidget {
 
     final isDesktopLayout =
         ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isWide(context);
-    const rowGapByIndex = <double>[0, 16, 12, 16];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -925,7 +936,7 @@ class _LeadOverviewGrid extends StatelessWidget {
               ],
             ),
           if (index < overviewRows.length - 1)
-            SizedBox(height: rowGapByIndex[index + 1]),
+            const SizedBox(height: 16),
         ],
       ],
     );

@@ -156,10 +156,11 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
         final leadPhone =
             _stringFromDynamic(existingLead['phone']) ??
             _stringFromDynamic(existingLead['clientPhone']) ??
-            '';
+            lead.phone;
         final leadEmail =
             _stringFromDynamic(existingLead['email']) ??
-            _stringFromDynamic(existingLead['clientEmail']);
+            _stringFromDynamic(existingLead['clientEmail']) ??
+            lead.email;
         final leadCompanyName =
             _stringFromDynamic(existingLead['companyName']) ??
             lead.companyNameSnapshot;
