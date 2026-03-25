@@ -4,6 +4,20 @@ import '../../../../core/constants/firestore_collections.dart';
 import '../../domain/models/client_model.dart';
 import 'client_remote_data_source.dart';
 
+
+class ClientWithActivityRecord {
+  const ClientWithActivityRecord({
+    required this.client,
+    required this.totalLeads,
+    required this.latestActivityDate,
+  });
+
+  final ClientModel client;
+  final int totalLeads;
+  final DateTime? latestActivityDate;
+}
+
+
 class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
   FirestoreClientRemoteDataSource({required FirebaseFirestore firestore})
     : _firestore = firestore;
@@ -17,6 +31,7 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
   Future<List<ClientModel>> fetchClients() async {
     final querySnapshot = await _clientsCollection
         .where('isArchived', isEqualTo: false)
+        .orderBy('createdAt', descending: true)
         .get();
 
     return querySnapshot.docs
@@ -24,6 +39,52 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
           (doc) => ClientModel.fromMap(doc.data(), doc.id),
         )
         .toList(growable: false);
+  }
+
+
+  Future<List<ClientWithActivityRecord>> fetchClientsWithActivity() async {
+    final results = await Future.wait([
+      _clientsCollection
+          .where('isArchived', isEqualTo: false)
+          .orderBy('createdAt', descending: true)
+          .get(),
+      _firestore
+          .collection(FirestoreCollections.leads)
+          .where('isArchived', isEqualTo: false)
+          .get(),
+    ]);
+
+    final clientsSnapshot = results[0] as QuerySnapshot<Map<String, dynamic>>;
+    final leadsSnapshot = results[1] as QuerySnapshot<Map<String, dynamic>>;
+
+    final statsByClientId = <String, _ClientLeadStats>{};
+
+    for (final leadDoc in leadsSnapshot.docs) {
+      final leadData = leadDoc.data();
+      final clientId = (leadData['clientId'] as String?)?.trim();
+      if (clientId == null || clientId.isEmpty) {
+        continue;
+      }
+
+      final updatedAt = _dateTimeFromDynamic(leadData['updatedAt']);
+      final current = statsByClientId[clientId] ?? const _ClientLeadStats();
+
+      statsByClientId[clientId] = _ClientLeadStats(
+        totalLeads: current.totalLeads + 1,
+        latestActivityDate: _maxDate(current.latestActivityDate, updatedAt),
+      );
+    }
+
+    return clientsSnapshot.docs.map((doc) {
+      final client = ClientModel.fromMap(doc.data(), doc.id);
+      final stats = statsByClientId[doc.id] ?? const _ClientLeadStats();
+
+      return ClientWithActivityRecord(
+        client: client,
+        totalLeads: stats.totalLeads,
+        latestActivityDate: stats.latestActivityDate,
+      );
+    }).toList(growable: false);
   }
 
   @override
@@ -115,4 +176,38 @@ String? _optionalTrimmedString(dynamic value) {
   }
 
   return null;
+}
+
+class _ClientLeadStats {
+  const _ClientLeadStats({
+    this.totalLeads = 0,
+    this.latestActivityDate,
+  });
+
+  final int totalLeads;
+  final DateTime? latestActivityDate;
+}
+
+DateTime? _dateTimeFromDynamic(dynamic value) {
+  if (value is Timestamp) {
+    return value.toDate();
+  }
+
+  if (value is DateTime) {
+    return value;
+  }
+
+  return null;
+}
+
+DateTime? _maxDate(DateTime? left, DateTime? right) {
+  if (left == null) {
+    return right;
+  }
+
+  if (right == null) {
+    return left;
+  }
+
+  return left.isAfter(right) ? left : right;
 }
