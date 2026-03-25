@@ -237,8 +237,6 @@ class _ActiveBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
@@ -273,7 +271,6 @@ class _HeaderInfoChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
@@ -409,7 +406,6 @@ class _OverviewCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -452,7 +448,6 @@ class _BookingsContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),

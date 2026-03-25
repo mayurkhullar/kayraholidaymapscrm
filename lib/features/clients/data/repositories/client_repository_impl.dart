@@ -29,8 +29,9 @@ class ClientRepositoryImpl implements ClientRepository {
           .toList(growable: false);
     }
 
-    final records = await (_remoteDataSource as FirestoreClientRemoteDataSource)
-        .fetchClientsWithActivity();
+    final firestoreRemoteDataSource =
+        _remoteDataSource as FirestoreClientRemoteDataSource;
+    final records = await firestoreRemoteDataSource.fetchClientsWithActivity();
 
     return records
         .map(
