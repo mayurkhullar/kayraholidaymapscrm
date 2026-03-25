@@ -10,7 +10,7 @@ class LeadModel {
   const LeadModel({
     required this.id,
     required this.leadCode,
-    required this.clientId,
+    this.clientId,
     this.companyId,
     required this.leadOwnerId,
     this.teamId,
@@ -62,7 +62,7 @@ class LeadModel {
 
   final String id;
   final String leadCode;
-  final String clientId;
+  final String? clientId;
   final String? companyId;
   final String leadOwnerId;
   final String? teamId;
@@ -117,7 +117,7 @@ class LeadModel {
     return LeadModel(
       id: (map['id'] as String?) ?? '',
       leadCode: (map['leadCode'] as String?) ?? '',
-      clientId: (map['clientId'] as String?) ?? '',
+      clientId: map['clientId'] as String?,
       companyId: map['companyId'] as String?,
       leadOwnerId: (map['leadOwnerId'] as String?) ?? '',
       teamId: map['teamId'] as String?,

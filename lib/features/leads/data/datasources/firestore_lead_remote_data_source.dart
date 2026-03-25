@@ -142,7 +142,6 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
 
       if (shouldConvert) {
         final now = DateTime.now();
-        final newClientReference = clientsCollection.doc();
         final travelersCount = lead.passengerCount?.totalPax ??
             _travelersFromLeadCounts(
               adults: lead.adultCount,
@@ -158,32 +157,50 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             _stringFromDynamic(existingLead['phone']) ??
             _stringFromDynamic(existingLead['clientPhone']) ??
             '';
+        final leadEmail =
+            _stringFromDynamic(existingLead['email']) ??
+            _stringFromDynamic(existingLead['clientEmail']);
+        final leadCompanyName =
+            _stringFromDynamic(existingLead['companyName']) ??
+            lead.companyNameSnapshot;
 
-        final client = ClientModel(
-          id: newClientReference.id,
-          clientCode: await _nextClientCode(transaction),
-          name: leadName,
-          email: _stringFromDynamic(existingLead['email']) ?? '',
-          phone: leadPhone,
-          destination: lead.destination,
-          travelType: lead.travelType.firestoreValue,
-          budget: lead.budget,
-          travelers: travelersCount,
-          companyName: lead.companyNameSnapshot,
-          createdAt: now,
-          updatedAt: now,
-          isActive: true,
-        );
+        if (leadPhone != null && leadPhone.isNotEmpty) {
+          final duplicateClientQuery = await transaction.get(
+            clientsCollection.where('phone', isEqualTo: leadPhone).limit(1),
+          );
+          if (duplicateClientQuery.docs.isNotEmpty) {
+            convertedClientId = duplicateClientQuery.docs.first.id;
+          }
+        }
 
-        transaction.set(newClientReference, client.toMap());
-        convertedClientId = newClientReference.id;
+        if (convertedClientId.isEmpty) {
+          final newClientReference = clientsCollection.doc();
+          final client = ClientModel(
+            id: newClientReference.id,
+            clientCode: await _nextClientCode(transaction),
+            name: leadName,
+            email: leadEmail ?? '',
+            phone: leadPhone ?? '',
+            destination: lead.destination,
+            travelType: lead.travelType.firestoreValue,
+            budget: lead.budget,
+            travelers: travelersCount,
+            companyName: leadCompanyName,
+            createdAt: now,
+            updatedAt: now,
+            isActive: true,
+          );
+
+          transaction.set(newClientReference, client.toMap());
+          convertedClientId = newClientReference.id;
+        }
 
         final timelineReference = _leadNotesCollection(lead.id).doc();
         transaction.set(timelineReference, <String, dynamic>{
           'id': timelineReference.id,
           'leadId': lead.id,
           'noteText': 'Lead converted to client',
-          'noteType': 'timeline',
+          'noteType': 'system',
           'relatedStage': LeadStage.confirmed.firestoreValue,
           'createdBy': null,
           'createdAt': now,
@@ -191,7 +208,9 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
       }
 
       final leadToUpdate = lead.copyWith(
-        clientId: convertedClientId.isNotEmpty ? convertedClientId : lead.clientId,
+        clientId: convertedClientId.isNotEmpty
+            ? convertedClientId
+            : lead.clientId,
         isConverted: shouldConvert || wasAlreadyConverted || lead.isConverted,
         updatedAt: DateTime.now(),
       );
