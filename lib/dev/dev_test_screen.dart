@@ -51,11 +51,12 @@ class _DevTestScreenState extends State<DevTestScreen> {
     final traveler = TravelerModel(
       id: '',
       travelerCode: now.millisecondsSinceEpoch.toString(),
-      firstName: 'Test',
-      lastName: now.toIso8601String(),
-      displayName: 'Test User',
+      clientId: 'TEST_CLIENT',
+      fullName: 'Test ${now.toIso8601String()}',
+      travelerType: 'Adult',
       createdAt: now,
       updatedAt: now,
+      isActive: true,
     );
 
     await _travelerRepository.createTraveler(traveler);
@@ -90,7 +91,7 @@ class _DevTestScreenState extends State<DevTestScreen> {
     final fsStart = DateTime.now();
     final snapshot = await FirebaseFirestore.instance
         .collection('travelers')
-        .where('isArchived', isEqualTo: false)
+        .where('isActive', isEqualTo: true)
         .limit(20)
         .get();
     final fsEnd = DateTime.now();
@@ -169,7 +170,7 @@ class _DevTestScreenState extends State<DevTestScreen> {
     final stopwatch = Stopwatch()..start();
     final snapshot = await _firestore
         .collection('travelers')
-        .where('isArchived', isEqualTo: false)
+        .where('isActive', isEqualTo: true)
         .limit(20)
         .get();
     stopwatch.stop();
@@ -203,7 +204,7 @@ class _DevTestScreenState extends State<DevTestScreen> {
     _logMessage('Traveler stream started');
     _travelerSubscription = _firestore
         .collection('travelers')
-        .where('isArchived', isEqualTo: false)
+        .where('isActive', isEqualTo: true)
         .limit(20)
         .snapshots()
         .listen((snapshot) {
