@@ -1,97 +1,56 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'passport_details_model.dart';
-import 'traveler_trip_stats_model.dart';
-
 class TravelerModel {
   const TravelerModel({
     required this.id,
     required this.travelerCode,
-    this.title,
-    this.firstName,
-    this.middleName,
-    this.lastName,
-    this.displayName,
-    this.phone,
-    this.alternatePhones = const <String>[],
-    this.email,
-    this.companyId,
-    this.dateOfBirth,
+    required this.clientId,
+    this.leadId,
+    required this.fullName,
+    required this.travelerType,
     this.gender,
-    this.nationality,
-    this.passport,
-    this.passportValidityDays,
-    this.passportValidityStatus,
-    this.passportNameMatchesTravelerName = true,
-    this.tripStats,
-    this.searchTokens = const <String>[],
-    this.createdBy,
-    this.createdAt,
-    this.updatedBy,
-    this.updatedAt,
-    this.isArchived = false,
-    this.archivedBy,
-    this.archivedAt,
+    this.age,
+    this.phone,
+    this.email,
+    this.notes,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isActive = true,
   });
 
   final String id;
   final String travelerCode;
-  final String? title;
-  final String? firstName;
-  final String? middleName;
-  final String? lastName;
-  final String? displayName;
-  final String? phone;
-  final List<String> alternatePhones;
-  final String? email;
-  final String? companyId;
-  final DateTime? dateOfBirth;
+  final String clientId;
+  final String? leadId;
+  final String fullName;
+  final String travelerType;
   final String? gender;
-  final String? nationality;
-  final PassportDetailsModel? passport;
-  final int? passportValidityDays;
-  final String? passportValidityStatus;
-  final bool passportNameMatchesTravelerName;
-  final TravelerTripStatsModel? tripStats;
-  final List<String> searchTokens;
-  final String? createdBy;
-  final DateTime? createdAt;
-  final String? updatedBy;
-  final DateTime? updatedAt;
-  final bool isArchived;
-  final String? archivedBy;
-  final DateTime? archivedAt;
+  final int? age;
+  final String? phone;
+  final String? email;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isActive;
 
   factory TravelerModel.fromMap(Map<String, dynamic> map) {
     return TravelerModel(
       id: (map['id'] as String?) ?? '',
       travelerCode: (map['travelerCode'] as String?) ?? '',
-      title: map['title'] as String?,
-      firstName: map['firstName'] as String?,
-      middleName: map['middleName'] as String?,
-      lastName: map['lastName'] as String?,
-      displayName: map['displayName'] as String?,
-      phone: map['phone'] as String?,
-      alternatePhones: _stringListFromDynamic(map['alternatePhones']),
-      email: map['email'] as String?,
-      companyId: map['companyId'] as String?,
-      dateOfBirth: _dateTimeFromDynamic(map['dateOfBirth']),
-      gender: map['gender'] as String?,
-      nationality: map['nationality'] as String?,
-      passport: _passportFromDynamic(map['passport']),
-      passportValidityDays: _nullableIntFromDynamic(map['passportValidityDays']),
-      passportValidityStatus: map['passportValidityStatus'] as String?,
-      passportNameMatchesTravelerName:
-          (map['passportNameMatchesTravelerName'] as bool?) ?? true,
-      tripStats: _tripStatsFromDynamic(map['tripStats']),
-      searchTokens: _stringListFromDynamic(map['searchTokens']),
-      createdBy: map['createdBy'] as String?,
-      createdAt: _dateTimeFromDynamic(map['createdAt']),
-      updatedBy: map['updatedBy'] as String?,
-      updatedAt: _dateTimeFromDynamic(map['updatedAt']),
-      isArchived: (map['isArchived'] as bool?) ?? false,
-      archivedBy: map['archivedBy'] as String?,
-      archivedAt: _dateTimeFromDynamic(map['archivedAt']),
+      clientId: (map['clientId'] as String?) ?? '',
+      leadId: _optionalTrimmedStringFromDynamic(map['leadId']),
+      fullName: (map['fullName'] as String?) ?? '',
+      travelerType: (map['travelerType'] as String?) ?? 'Adult',
+      gender: _optionalTrimmedStringFromDynamic(map['gender']),
+      age: _nullableIntFromDynamic(map['age']),
+      phone: _optionalTrimmedStringFromDynamic(map['phone']),
+      email: _optionalTrimmedStringFromDynamic(map['email']),
+      notes: _optionalTrimmedStringFromDynamic(map['notes']),
+      createdAt: _dateTimeFromDynamic(map['createdAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt: _dateTimeFromDynamic(map['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      isActive: (map['isActive'] as bool?) ?? true,
     );
   }
 
@@ -99,94 +58,58 @@ class TravelerModel {
     return <String, dynamic>{
       'id': id,
       'travelerCode': travelerCode,
-      'title': title,
-      'firstName': firstName,
-      'middleName': middleName,
-      'lastName': lastName,
-      'displayName': displayName,
-      'phone': phone,
-      'alternatePhones': alternatePhones,
-      'email': email,
-      'companyId': companyId,
-      'dateOfBirth': dateOfBirth,
+      'clientId': clientId,
+      'leadId': leadId,
+      'fullName': fullName,
+      'travelerType': travelerType,
       'gender': gender,
-      'nationality': nationality,
-      'passport': passport?.toMap(),
-      'passportValidityDays': passportValidityDays,
-      'passportValidityStatus': passportValidityStatus,
-      'passportNameMatchesTravelerName': passportNameMatchesTravelerName,
-      'tripStats': tripStats?.toMap(),
-      'searchTokens': searchTokens,
-      'createdBy': createdBy,
-      'createdAt': createdAt,
-      'updatedBy': updatedBy,
-      'updatedAt': updatedAt,
-      'isArchived': isArchived,
-      'archivedBy': archivedBy,
-      'archivedAt': archivedAt,
+      'age': age,
+      'phone': phone,
+      'email': email,
+      'notes': notes,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
+      'isActive': isActive,
     };
   }
 
   TravelerModel copyWith({
     String? id,
     String? travelerCode,
-    String? title,
-    String? firstName,
-    String? middleName,
-    String? lastName,
-    String? displayName,
-    String? phone,
-    List<String>? alternatePhones,
-    String? email,
-    String? companyId,
-    DateTime? dateOfBirth,
+    String? clientId,
+    String? leadId,
+    bool clearLeadId = false,
+    String? fullName,
+    String? travelerType,
     String? gender,
-    String? nationality,
-    PassportDetailsModel? passport,
-    int? passportValidityDays,
-    String? passportValidityStatus,
-    bool? passportNameMatchesTravelerName,
-    TravelerTripStatsModel? tripStats,
-    List<String>? searchTokens,
-    String? createdBy,
+    bool clearGender = false,
+    int? age,
+    bool clearAge = false,
+    String? phone,
+    bool clearPhone = false,
+    String? email,
+    bool clearEmail = false,
+    String? notes,
+    bool clearNotes = false,
     DateTime? createdAt,
-    String? updatedBy,
     DateTime? updatedAt,
-    bool? isArchived,
-    String? archivedBy,
-    DateTime? archivedAt,
+    bool? isActive,
   }) {
     return TravelerModel(
       id: id ?? this.id,
       travelerCode: travelerCode ?? this.travelerCode,
-      title: title ?? this.title,
-      firstName: firstName ?? this.firstName,
-      middleName: middleName ?? this.middleName,
-      lastName: lastName ?? this.lastName,
-      displayName: displayName ?? this.displayName,
-      phone: phone ?? this.phone,
-      alternatePhones: alternatePhones ?? this.alternatePhones,
-      email: email ?? this.email,
-      companyId: companyId ?? this.companyId,
-      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
-      gender: gender ?? this.gender,
-      nationality: nationality ?? this.nationality,
-      passport: passport ?? this.passport,
-      passportValidityDays: passportValidityDays ?? this.passportValidityDays,
-      passportValidityStatus:
-          passportValidityStatus ?? this.passportValidityStatus,
-      passportNameMatchesTravelerName:
-          passportNameMatchesTravelerName ??
-          this.passportNameMatchesTravelerName,
-      tripStats: tripStats ?? this.tripStats,
-      searchTokens: searchTokens ?? this.searchTokens,
-      createdBy: createdBy ?? this.createdBy,
+      clientId: clientId ?? this.clientId,
+      leadId: clearLeadId ? null : (leadId ?? this.leadId),
+      fullName: fullName ?? this.fullName,
+      travelerType: travelerType ?? this.travelerType,
+      gender: clearGender ? null : (gender ?? this.gender),
+      age: clearAge ? null : (age ?? this.age),
+      phone: clearPhone ? null : (phone ?? this.phone),
+      email: clearEmail ? null : (email ?? this.email),
+      notes: clearNotes ? null : (notes ?? this.notes),
       createdAt: createdAt ?? this.createdAt,
-      updatedBy: updatedBy ?? this.updatedBy,
       updatedAt: updatedAt ?? this.updatedAt,
-      isArchived: isArchived ?? this.isArchived,
-      archivedBy: archivedBy ?? this.archivedBy,
-      archivedAt: archivedAt ?? this.archivedAt,
+      isActive: isActive ?? this.isActive,
     );
   }
 }
@@ -211,14 +134,6 @@ DateTime? _dateTimeFromDynamic(dynamic value) {
   return null;
 }
 
-List<String> _stringListFromDynamic(dynamic value) {
-  if (value is Iterable) {
-    return value.whereType<String>().toList(growable: false);
-  }
-
-  return const <String>[];
-}
-
 int? _nullableIntFromDynamic(dynamic value) {
   if (value is int) {
     return value;
@@ -229,35 +144,16 @@ int? _nullableIntFromDynamic(dynamic value) {
   }
 
   if (value is String) {
-    return int.tryParse(value);
+    return int.tryParse(value.trim());
   }
 
   return null;
 }
 
-PassportDetailsModel? _passportFromDynamic(dynamic value) {
-  if (value is Map<String, dynamic>) {
-    return PassportDetailsModel.fromMap(value);
-  }
-
-  if (value is Map) {
-    return PassportDetailsModel.fromMap(
-      value.map((key, dynamic nestedValue) => MapEntry('$key', nestedValue)),
-    );
-  }
-
-  return null;
-}
-
-TravelerTripStatsModel? _tripStatsFromDynamic(dynamic value) {
-  if (value is Map<String, dynamic>) {
-    return TravelerTripStatsModel.fromMap(value);
-  }
-
-  if (value is Map) {
-    return TravelerTripStatsModel.fromMap(
-      value.map((key, dynamic nestedValue) => MapEntry('$key', nestedValue)),
-    );
+String? _optionalTrimmedStringFromDynamic(dynamic value) {
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   return null;
