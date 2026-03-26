@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_enums.dart';
@@ -499,11 +500,17 @@ class _BookingsContainer extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
+            if (kDebugMode) {
+              debugPrint('ClientDetail bookings load error: ${snapshot.error}');
+              debugPrintStack(stackTrace: snapshot.stackTrace);
+            }
             return Text(
-              'Failed to load bookings: ${snapshot.error}',
+              'Unable to load bookings. Please try again.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.error,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             );
           }
 
