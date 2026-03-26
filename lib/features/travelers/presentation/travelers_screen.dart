@@ -210,34 +210,45 @@ class _TravelersScreenState extends State<TravelersScreen> {
 
         final filteredRows = _applyFilters(data);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _TravelerToolbar(
-              searchController: _searchController,
-              selectedClientId: _selectedClientId,
-              selectedTravelerType: _selectedTravelerType,
-              clients: data.clients,
-              onClientChanged:
-                  (value) => setState(() => _selectedClientId = value),
-              onTravelerTypeChanged:
-                  (value) => setState(() => _selectedTravelerType = value),
-              onClearFilters: _clearFilters,
-              onCreateTraveler: () => _openCreateTravelerPanel(data),
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Theme.of(
+                context,
+              ).colorScheme.outlineVariant.withValues(alpha: 0.68),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Expanded(
-              child:
-                  filteredRows.isEmpty
-                      ? const EmptyStateView(
-                        title: 'No matching travelers',
-                        message:
-                            'Try adjusting your search, client, or traveler type filters.',
-                        icon: Icons.filter_alt_off_rounded,
-                      )
-                      : _TravelersTable(rows: filteredRows),
-            ),
-          ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _TravelerToolbar(
+                searchController: _searchController,
+                selectedClientId: _selectedClientId,
+                selectedTravelerType: _selectedTravelerType,
+                clients: data.clients,
+                onClientChanged:
+                    (value) => setState(() => _selectedClientId = value),
+                onTravelerTypeChanged:
+                    (value) => setState(() => _selectedTravelerType = value),
+                onClearFilters: _clearFilters,
+                onCreateTraveler: () => _openCreateTravelerPanel(data),
+              ),
+              Expanded(
+                child:
+                    filteredRows.isEmpty
+                        ? const EmptyStateView(
+                          title: 'No matching travelers',
+                          message:
+                              'Try adjusting your search, client, or traveler type filters.',
+                          icon: Icons.filter_alt_off_rounded,
+                        )
+                        : _TravelersTable(rows: filteredRows),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -299,146 +310,119 @@ class _TravelerToolbar extends StatelessWidget {
       ),
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: FilledButton.icon(
-            onPressed: onCreateTraveler,
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('New Traveler'),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 10, AppSpacing.md, 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        border: Border(
+          bottom: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.72),
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isCompact = constraints.maxWidth < 760;
-            final compactFieldWidth =
-                constraints.maxWidth - (AppSpacing.md * 2);
-            final searchWidth = isCompact ? compactFieldWidth : 320.0;
-            final clientWidth = isCompact ? compactFieldWidth : 220.0;
-            final typeWidth = isCompact ? compactFieldWidth : 180.0;
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isCompact = constraints.maxWidth < 1120;
+          final compactFieldWidth = constraints.maxWidth - (AppSpacing.md * 2);
+          final searchWidth = isCompact ? compactFieldWidth : 320.0;
+          final clientWidth = isCompact ? compactFieldWidth : 210.0;
+          final typeWidth = isCompact ? compactFieldWidth : 170.0;
 
-            return Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: colorScheme.outlineVariant),
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: 8,
-              ),
-              child: Theme(
-                data: controlTheme,
-                child: Wrap(
-                  runSpacing: AppSpacing.sm,
-                  spacing: AppSpacing.sm,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: searchWidth.clamp(0.0, 320.0).toDouble(),
-                      child: TextField(
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          hintText:
-                              'Search travelers by name, phone, email, or code',
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            size: 18,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          isDense: true,
-                        ),
+          return Theme(
+            data: controlTheme,
+            child: Wrap(
+              runSpacing: AppSpacing.sm,
+              spacing: AppSpacing.sm,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SizedBox(
+                  width: searchWidth.clamp(0.0, 320.0).toDouble(),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search travelers by name, phone, email, or code',
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        size: 18,
+                        color: colorScheme.onSurfaceVariant,
                       ),
+                      isDense: true,
                     ),
-                    SizedBox(
-                      width: clientWidth.clamp(0.0, 220.0).toDouble(),
-                      child: DropdownButtonFormField<String?>(
-                        value: selectedClientId,
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Client',
-                          isDense: true,
-                        ),
-                        items: [
-                          const DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text('All Clients'),
-                          ),
-                          ...clients
-                              .map(
-                                (client) => DropdownMenuItem<String?>(
-                                  value: client.id,
-                                  child: Text(client.name),
-                                ),
-                              )
-                              .toList(growable: false),
-                        ],
-                        onChanged: onClientChanged,
-                      ),
-                    ),
-                    SizedBox(
-                      width: typeWidth.clamp(0.0, 180.0).toDouble(),
-                      child: DropdownButtonFormField<String?>(
-                        value: selectedTravelerType,
-                        decoration: const InputDecoration(
-                          labelText: 'Traveler Type',
-                          isDense: true,
-                        ),
-                        items: const [
-                          DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text('All Types'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Adult',
-                            child: Text('Adult'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Child',
-                            child: Text('Child'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Infant',
-                            child: Text('Infant'),
-                          ),
-                        ],
-                        onChanged: onTravelerTypeChanged,
-                      ),
-                    ),
-                    SizedBox(
-                      width: isCompact ? compactFieldWidth : null,
-                      child: OutlinedButton.icon(
-                        onPressed: onClearFilters,
-                        icon: const Icon(Icons.restart_alt_rounded, size: 16),
-                        label: const Text('Clear Filters'),
-                        style: OutlinedButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          minimumSize: Size(
-                            isCompact ? compactFieldWidth : 0,
-                            40,
-                          ),
-                          backgroundColor: colorScheme.surface,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: 10,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      ],
+                SizedBox(
+                  width: clientWidth.clamp(0.0, 210.0).toDouble(),
+                  child: DropdownButtonFormField<String?>(
+                    value: selectedClientId,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Client',
+                      isDense: true,
+                    ),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('All Clients'),
+                      ),
+                      ...clients
+                          .map(
+                            (client) => DropdownMenuItem<String?>(
+                              value: client.id,
+                              child: Text(client.name),
+                            ),
+                          )
+                          .toList(growable: false),
+                    ],
+                    onChanged: onClientChanged,
+                  ),
+                ),
+                SizedBox(
+                  width: typeWidth.clamp(0.0, 170.0).toDouble(),
+                  child: DropdownButtonFormField<String?>(
+                    value: selectedTravelerType,
+                    decoration: const InputDecoration(
+                      labelText: 'Traveler Type',
+                      isDense: true,
+                    ),
+                    items: const [
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('All Types'),
+                      ),
+                      DropdownMenuItem(value: 'Adult', child: Text('Adult')),
+                      DropdownMenuItem(value: 'Child', child: Text('Child')),
+                      DropdownMenuItem(value: 'Infant', child: Text('Infant')),
+                    ],
+                    onChanged: onTravelerTypeChanged,
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: onClearFilters,
+                  icon: const Icon(Icons.restart_alt_rounded, size: 16),
+                  label: const Text('Clear Filters'),
+                  style: OutlinedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    minimumSize: const Size(0, 40),
+                    backgroundColor: colorScheme.surface,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                FilledButton.icon(
+                  onPressed: onCreateTraveler,
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('New Traveler'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -484,85 +468,69 @@ class _TravelersTableState extends State<_TravelersTable> {
           _TravelersTable._minTableWidth,
         );
 
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.68),
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x050F172A),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Scrollbar(
+        return Scrollbar(
+          controller: _horizontalController,
+          thumbVisibility: tableWidth > viewportWidth,
+          trackVisibility: tableWidth > viewportWidth,
+          child: SingleChildScrollView(
             controller: _horizontalController,
-            thumbVisibility: tableWidth > viewportWidth,
-            trackVisibility: tableWidth > viewportWidth,
-            child: SingleChildScrollView(
-              controller: _horizontalController,
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: tableWidth,
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: tableWidth,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.52,
                       ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.82,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: colorScheme.outlineVariant.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
-                        border: Border(
-                          bottom: BorderSide(
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        _HeaderCell(label: 'Traveler Code', width: 160),
+                        _HeaderCell(label: 'Full Name', width: 220),
+                        _HeaderCell(label: 'Traveler Type', width: 140),
+                        _HeaderCell(label: 'Client', width: 220),
+                        _HeaderCell(label: 'Linked Booking', width: 160),
+                        _HeaderCell(label: 'Phone', width: 150),
+                        _HeaderCell(
+                          label: 'Updated Date',
+                          width: 140,
+                          isLast: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: EdgeInsets.zero,
+                      itemCount: widget.rows.length,
+                      separatorBuilder:
+                          (context, index) => Divider(
+                            height: 1,
+                            thickness: 1,
                             color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.7,
+                              alpha: 0.35,
                             ),
                           ),
-                        ),
-                      ),
-                      child: const Row(
-                        children: [
-                          _HeaderCell(label: 'Traveler Code', width: 160),
-                          _HeaderCell(label: 'Full Name', width: 220),
-                          _HeaderCell(label: 'Traveler Type', width: 140),
-                          _HeaderCell(label: 'Client', width: 220),
-                          _HeaderCell(label: 'Linked Booking', width: 160),
-                          _HeaderCell(label: 'Phone', width: 150),
-                          _HeaderCell(
-                            label: 'Updated Date',
-                            width: 140,
-                            isLast: true,
-                          ),
-                        ],
-                      ),
+                      itemBuilder: (context, index) {
+                        final item = widget.rows[index];
+                        return _TravelerRow(item: item, index: index);
+                      },
                     ),
-                    Expanded(
-                      child: ListView.separated(
-                        itemCount: widget.rows.length,
-                        separatorBuilder:
-                            (context, index) => Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: colorScheme.outlineVariant.withValues(
-                                alpha: 0.35,
-                              ),
-                            ),
-                        itemBuilder: (context, index) {
-                          final item = widget.rows[index];
-                          return _TravelerRow(item: item, index: index);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -641,7 +609,7 @@ class _TravelerRowState extends State<_TravelerRow> {
                   ),
                 ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
                   _BodyCell(width: 160, value: item.traveler.travelerCode),
@@ -741,7 +709,7 @@ class CreateTravelerPanel extends StatefulWidget {
           (context) => Dialog(
             insetPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
+              vertical: AppSpacing.sm,
             ),
             child: Padding(
               padding: EdgeInsets.only(
@@ -751,8 +719,8 @@ class CreateTravelerPanel extends StatefulWidget {
                 constraints: BoxConstraints(
                   maxWidth: 720,
                   maxHeight: math.min(
-                    MediaQuery.sizeOf(context).height * 0.82,
-                    760,
+                    MediaQuery.sizeOf(context).height * 0.74,
+                    640,
                   ),
                 ),
                 child: CreateTravelerPanel(
@@ -864,21 +832,24 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
     );
 
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, AppSpacing.xs, 20, AppSpacing.md),
-        child: Theme(
-          data: theme.copyWith(
-            inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-              labelStyle: labelStyle,
-              floatingLabelStyle: labelStyle,
-            ),
+      child: Theme(
+        data: theme.copyWith(
+          inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+            labelStyle: labelStyle,
+            floatingLabelStyle: labelStyle,
           ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 6, 20, AppSpacing.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                 Text(
                   'New Traveler',
                   style: theme.textTheme.titleLarge?.copyWith(
@@ -1042,8 +1013,28 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                   maxLines: 4,
                   decoration: const InputDecoration(labelText: 'Notes'),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Align(
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  AppSpacing.xs,
+                  20,
+                  AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.55,
+                      ),
+                    ),
+                  ),
+                ),
+                child: Align(
                   alignment: Alignment.centerRight,
                   child: FilledButton(
                     onPressed: _canCreateTraveler ? _createTraveler : null,
@@ -1057,8 +1048,8 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                             : const Text('Save Traveler'),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
