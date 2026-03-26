@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/app_router.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../../core/widgets/two_axis_table_viewport.dart';
 import '../../clients/data/datasources/firestore_client_remote_data_source.dart';
 import '../../clients/data/repositories/client_repository_impl.dart';
 import '../../clients/domain/models/client_model.dart';
@@ -440,7 +441,6 @@ class _TravelersTable extends StatefulWidget {
 
   final List<_TravelerListItem> rows;
 
-  static const double _minTableWidth = 900;
   static const double _horizontalPadding = 16;
   static const double _columnGap = AppSpacing.md;
 
@@ -449,17 +449,17 @@ class _TravelersTable extends StatefulWidget {
 }
 
 class _TravelersTableState extends State<_TravelersTable> {
-  late final ScrollController _horizontalController;
+  late final ScrollController _verticalController;
 
   @override
   void initState() {
     super.initState();
-    _horizontalController = ScrollController();
+    _verticalController = ScrollController();
   }
 
   @override
   void dispose() {
-    _horizontalController.dispose();
+    _verticalController.dispose();
     super.dispose();
   }
 
@@ -472,137 +472,109 @@ class _TravelersTableState extends State<_TravelersTable> {
         const specs = <_TableColumnSpec>[
           _TableColumnSpec(
             label: 'Traveler Code',
-            minWidth: 110,
-            maxWidth: 140,
-            flex: 1.0,
+            minWidth: 124,
+            maxWidth: 124,
+            flex: 0,
           ),
           _TableColumnSpec(
             label: 'Full Name',
-            minWidth: 170,
-            maxWidth: 320,
-            flex: 2.2,
+            minWidth: 220,
+            maxWidth: 420,
+            flex: 2.3,
           ),
           _TableColumnSpec(
             label: 'Traveler Type',
-            minWidth: 120,
-            maxWidth: 150,
-            flex: 1.0,
+            minWidth: 136,
+            maxWidth: 136,
+            flex: 0,
           ),
           _TableColumnSpec(
             label: 'Client',
-            minWidth: 170,
-            maxWidth: 280,
-            flex: 1.9,
+            minWidth: 200,
+            maxWidth: 360,
+            flex: 1.8,
           ),
           _TableColumnSpec(
             label: 'Linked Booking',
-            minWidth: 130,
-            maxWidth: 180,
-            flex: 1.2,
+            minWidth: 160,
+            maxWidth: 160,
+            flex: 0,
           ),
           _TableColumnSpec(
             label: 'Phone',
-            minWidth: 130,
-            maxWidth: 170,
-            flex: 1.2,
+            minWidth: 170,
+            maxWidth: 240,
+            flex: 1.0,
           ),
           _TableColumnSpec(
             label: 'Updated Date',
-            minWidth: 110,
-            maxWidth: 140,
-            flex: 1.0,
+            minWidth: 138,
+            maxWidth: 138,
+            flex: 0,
           ),
         ];
 
-        final totalMinWidth =
-            specs.fold<double>(
+        final minContentWidth = specs.fold<double>(
               0,
               (sum, spec) => sum + spec.minWidth,
             ) +
             (_TravelersTable._columnGap * (specs.length - 1)) +
             (_TravelersTable._horizontalPadding * 2);
-        final viewportWidth =
-            constraints.maxWidth.isFinite
-                ? constraints.maxWidth.clamp(
-                  _TravelersTable._minTableWidth,
-                  double.infinity,
-                ).toDouble()
-                : _TravelersTable._minTableWidth;
-        final shouldScroll = viewportWidth < totalMinWidth;
-        final tableWidth = shouldScroll ? totalMinWidth : viewportWidth;
+        final tableWidth = constraints.maxWidth.isFinite
+            ? math.max(constraints.maxWidth, minContentWidth)
+            : minContentWidth;
         final columnWidths = _computeColumnWidths(
           tableWidth: tableWidth,
           specs: specs,
         );
 
-        return Scrollbar(
-          controller: _horizontalController,
-          thumbVisibility: shouldScroll,
-          trackVisibility: shouldScroll,
-          child: SizedBox(
-            width: viewportWidth,
-            child: SingleChildScrollView(
-              controller: _horizontalController,
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: tableWidth,
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: _TravelersTable._horizontalPadding,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.58,
-                        ),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.75,
-                            ),
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: List.generate(specs.length, (index) {
-                          final spec = specs[index];
-                          return _HeaderCell(
-                            label: spec.label,
-                            width: columnWidths[index],
-                            isLast: index == specs.length - 1,
-                          );
-                        }),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        color: colorScheme.surface,
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          itemCount: widget.rows.length,
-                          separatorBuilder:
-                              (context, index) => Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.35,
-                                ),
-                              ),
-                          itemBuilder: (context, index) {
-                            final item = widget.rows[index];
-                            return _TravelerRow(
-                              item: item,
-                              index: index,
-                              columnWidths: columnWidths,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+        return TwoAxisTableViewport(
+          minContentWidth: minContentWidth,
+          header: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: _TravelersTable._horizontalPadding,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.58),
+              border: Border(
+                bottom: BorderSide(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.75),
                 ),
+              ),
+            ),
+            child: Row(
+              children: List.generate(specs.length, (index) {
+                final spec = specs[index];
+                return _HeaderCell(
+                  label: spec.label,
+                  width: columnWidths[index],
+                  isLast: index == specs.length - 1,
+                );
+              }),
+            ),
+          ),
+          body: Container(
+            color: colorScheme.surface,
+            child: Scrollbar(
+              controller: _verticalController,
+              child: ListView.separated(
+                controller: _verticalController,
+                padding: EdgeInsets.zero,
+                itemCount: widget.rows.length,
+                separatorBuilder: (context, index) => Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+                ),
+                itemBuilder: (context, index) {
+                  final item = widget.rows[index];
+                  return _TravelerRow(
+                    item: item,
+                    index: index,
+                    columnWidths: columnWidths,
+                  );
+                },
               ),
             ),
           ),
@@ -615,16 +587,52 @@ class _TravelersTableState extends State<_TravelersTable> {
     required double tableWidth,
     required List<_TableColumnSpec> specs,
   }) {
-    final contentWidth =
+    final availableContentWidth =
         tableWidth -
         (_TravelersTable._horizontalPadding * 2) -
         (_TravelersTable._columnGap * (specs.length - 1));
-    final totalFlex = specs.fold<double>(0, (sum, spec) => sum + spec.flex);
+    final minContentWidth = specs.fold<double>(
+      0,
+      (sum, spec) => sum + spec.minWidth,
+    );
+    var remainingWidth = math.max(0.0, availableContentWidth - minContentWidth);
+    final widths = specs.map((spec) => spec.minWidth).toList(growable: false);
+    final flexibleIndices = <int>[
+      for (var i = 0; i < specs.length; i++)
+        if (specs[i].flex > 0 && specs[i].maxWidth > specs[i].minWidth) i,
+    ];
 
-    return specs.map((spec) {
-      final target = contentWidth * (spec.flex / totalFlex);
-      return target.clamp(spec.minWidth, spec.maxWidth);
-    }).toList(growable: false);
+    while (remainingWidth > 0.1 && flexibleIndices.isNotEmpty) {
+      final totalFlex = flexibleIndices.fold<double>(
+        0,
+        (sum, index) => sum + specs[index].flex,
+      );
+      if (totalFlex <= 0) {
+        break;
+      }
+
+      var distributedAny = false;
+      for (final index in flexibleIndices.toList(growable: false)) {
+        final spec = specs[index];
+        final desired = remainingWidth * (spec.flex / totalFlex);
+        final allowedGrowth = spec.maxWidth - widths[index];
+        final growth = math.min(desired, allowedGrowth);
+        if (growth > 0) {
+          widths[index] += growth;
+          remainingWidth -= growth;
+          distributedAny = true;
+        }
+        if ((spec.maxWidth - widths[index]) <= 0.1) {
+          flexibleIndices.remove(index);
+        }
+      }
+
+      if (!distributedAny) {
+        break;
+      }
+    }
+
+    return widths;
   }
 }
 
