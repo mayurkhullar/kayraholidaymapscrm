@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/app_router.dart';
 import '../../../core/widgets/empty_state_view.dart';
+import '../../clients/data/datasources/firestore_client_remote_data_source.dart';
+import '../../clients/data/repositories/client_repository_impl.dart';
 import '../../clients/domain/models/client_model.dart';
+import '../../clients/domain/repositories/client_repository.dart';
 import '../../leads/domain/models/lead_model.dart';
 import '../data/datasources/firestore_traveler_remote_data_source.dart';
 import '../data/repositories/traveler_repository_impl.dart';
@@ -22,6 +25,7 @@ class TravelersScreen extends StatefulWidget {
 
 class _TravelersScreenState extends State<TravelersScreen> {
   late final TravelerRepository _travelerRepository;
+  late final ClientRepository _clientRepository;
   late final TextEditingController _searchController;
   String? _selectedClientId;
   String? _selectedTravelerType;
@@ -32,6 +36,11 @@ class _TravelersScreenState extends State<TravelersScreen> {
     super.initState();
     _travelerRepository = TravelerRepositoryImpl(
       remoteDataSource: FirestoreTravelerRemoteDataSource(
+        firestore: FirebaseFirestore.instance,
+      ),
+    );
+    _clientRepository = ClientRepositoryImpl(
+      remoteDataSource: FirestoreClientRemoteDataSource(
         firestore: FirebaseFirestore.instance,
       ),
     );
@@ -53,23 +62,23 @@ class _TravelersScreenState extends State<TravelersScreen> {
     final firestore = FirebaseFirestore.instance;
 
     final travelersFuture = _travelerRepository.fetchTravelers();
-    final clientsFuture =
-        firestore
-            .collection('clients')
-            .where('isArchived', isEqualTo: false)
-            .get();
     final leadsFuture =
         firestore
             .collection('leads')
             .where('isArchived', isEqualTo: false)
             .get();
 
-    final (travelers, clientsSnapshot, leadsSnapshot) =
-        await (travelersFuture, clientsFuture, leadsFuture).wait;
+    final (travelers, leadsSnapshot) = await (travelersFuture, leadsFuture).wait;
 
-    final clients = clientsSnapshot.docs
-        .map((doc) => ClientModel.fromMap(doc.data(), doc.id))
-        .toList(growable: false);
+    List<ClientModel> clients = const [];
+    var hasClientLoadError = false;
+    try {
+      clients = await _clientRepository.fetchClients();
+    } catch (error, stackTrace) {
+      debugPrint('Failed to load clients for traveler creation: $error');
+      debugPrint('$stackTrace');
+      hasClientLoadError = true;
+    }
 
     final leads = leadsSnapshot.docs
         .map(
@@ -82,6 +91,7 @@ class _TravelersScreenState extends State<TravelersScreen> {
       travelers: travelers,
       clients: clients,
       leads: leads,
+      hasClientLoadError: hasClientLoadError,
     );
   }
 
@@ -138,6 +148,7 @@ class _TravelersScreenState extends State<TravelersScreen> {
       context,
       clients: data.clients,
       leads: data.leads,
+      hasClientLoadError: data.hasClientLoadError,
       travelerRepository: _travelerRepository,
     );
 
@@ -693,29 +704,34 @@ class _TravelersViewData {
     required this.travelers,
     required this.clients,
     required this.leads,
+    this.hasClientLoadError = false,
   });
 
   final List<TravelerModel> travelers;
   final List<ClientModel> clients;
   final List<LeadModel> leads;
+  final bool hasClientLoadError;
 }
 
 class CreateTravelerPanel extends StatefulWidget {
   const CreateTravelerPanel({
     required this.clients,
     required this.leads,
+    required this.hasClientLoadError,
     required this.travelerRepository,
     super.key,
   });
 
   final List<ClientModel> clients;
   final List<LeadModel> leads;
+  final bool hasClientLoadError;
   final TravelerRepository travelerRepository;
 
   static Future<bool?> show(
     BuildContext context, {
     required List<ClientModel> clients,
     required List<LeadModel> leads,
+    required bool hasClientLoadError,
     required TravelerRepository travelerRepository,
   }) {
     return showModalBottomSheet<bool>(
@@ -737,6 +753,7 @@ class CreateTravelerPanel extends StatefulWidget {
                 child: CreateTravelerPanel(
                   clients: clients,
                   leads: leads,
+                  hasClientLoadError: hasClientLoadError,
                   travelerRepository: travelerRepository,
                 ),
               ),
@@ -763,6 +780,10 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
   String? _gender;
   bool _isSaving = false;
 
+  bool get _hasClients => widget.clients.isNotEmpty;
+  bool get _canCreateTraveler =>
+      _hasClients && !widget.hasClientLoadError && !_isSaving;
+
   @override
   void dispose() {
     _fullNameController.dispose();
@@ -774,6 +795,10 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
   }
 
   Future<void> _createTraveler() async {
+    if (!_hasClients || widget.hasClientLoadError) {
+      return;
+    }
+
     final form = _formKey.currentState;
     if (form == null || !form.validate()) {
       return;
@@ -865,7 +890,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                       .map(
                         (client) => DropdownMenuItem<String?>(
                           value: client.id,
-                          child: Text(client.name),
+                          child: Text(_clientLabel(client)),
                         ),
                       )
                       .toList(growable: false),
@@ -875,7 +900,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                               ? 'Client is required'
                               : null,
                   onChanged:
-                      _isSaving
+                      !_canCreateTraveler
                           ? null
                           : (value) {
                             setState(() {
@@ -889,6 +914,23 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                             });
                           },
                 ),
+                if (widget.hasClientLoadError) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Unable to load clients. Please try again.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                ] else if (!_hasClients) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'No clients available. Convert a lead to a client first.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String?>(
                   value: _leadId,
@@ -909,14 +951,14 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                     ),
                   ],
                   onChanged:
-                      _isSaving
+                      !_canCreateTraveler
                           ? null
                           : (value) => setState(() => _leadId = value),
                 ),
                 const _PanelSectionLabel(label: 'Traveler Info'),
                 TextFormField(
                   controller: _fullNameController,
-                  enabled: !_isSaving,
+                  enabled: _canCreateTraveler,
                   decoration: const InputDecoration(labelText: 'Full Name'),
                   validator:
                       (value) =>
@@ -939,7 +981,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                               ? 'Traveler type is required'
                               : null,
                   onChanged:
-                      _isSaving
+                      !_canCreateTraveler
                           ? null
                           : (value) =>
                               setState(() => _travelerType = value ?? 'Adult'),
@@ -955,14 +997,14 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                     DropdownMenuItem(value: 'Other', child: Text('Other')),
                   ],
                   onChanged:
-                      _isSaving
+                      !_canCreateTraveler
                           ? null
                           : (value) => setState(() => _gender = value),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _ageController,
-                  enabled: !_isSaving,
+                  enabled: _canCreateTraveler,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(labelText: 'Age'),
                   validator: (value) {
@@ -978,19 +1020,19 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 const _PanelSectionLabel(label: 'Contact Info'),
                 TextFormField(
                   controller: _phoneController,
-                  enabled: !_isSaving,
+                  enabled: _canCreateTraveler,
                   decoration: const InputDecoration(labelText: 'Phone'),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _emailController,
-                  enabled: !_isSaving,
+                  enabled: _canCreateTraveler,
                   decoration: const InputDecoration(labelText: 'Email'),
                 ),
                 const _PanelSectionLabel(label: 'Notes'),
                 TextFormField(
                   controller: _notesController,
-                  enabled: !_isSaving,
+                  enabled: _canCreateTraveler,
                   minLines: 2,
                   maxLines: 4,
                   decoration: const InputDecoration(labelText: 'Notes'),
@@ -999,7 +1041,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: FilledButton(
-                    onPressed: _isSaving ? null : _createTraveler,
+                    onPressed: _canCreateTraveler ? _createTraveler : null,
                     child:
                         _isSaving
                             ? const SizedBox(
@@ -1017,6 +1059,17 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
       ),
     );
   }
+}
+
+String _clientLabel(ClientModel client) {
+  final name = client.name.trim();
+  final code = client.clientCode.trim();
+  final phone = client.phone.trim();
+  final primary = name.isNotEmpty ? name : (code.isNotEmpty ? code : 'Unnamed');
+  if (phone.isEmpty) {
+    return primary;
+  }
+  return '$primary — $phone';
 }
 
 class _PanelSectionLabel extends StatelessWidget {
