@@ -324,7 +324,8 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             adults: lead.adultCount,
             children: lead.childCount,
             infants: lead.infantCount,
-          ),
+          ) ??
+          0,
       notes: lead.notes,
     );
   }
