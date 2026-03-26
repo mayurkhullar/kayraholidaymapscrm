@@ -24,16 +24,19 @@ class TwoAxisTableViewport extends StatefulWidget {
 
 class _TwoAxisTableViewportState extends State<TwoAxisTableViewport> {
   late final ScrollController _horizontalController;
+  late final ScrollController _verticalController;
 
   @override
   void initState() {
     super.initState();
     _horizontalController = ScrollController();
+    _verticalController = ScrollController();
   }
 
   @override
   void dispose() {
     _horizontalController.dispose();
+    _verticalController.dispose();
     super.dispose();
   }
 
@@ -53,22 +56,39 @@ class _TwoAxisTableViewportState extends State<TwoAxisTableViewport> {
             : viewportWidth;
         final shouldScrollHorizontally = contentWidth > viewportWidth;
 
-        return Scrollbar(
-          controller: _horizontalController,
-          thumbVisibility: shouldScrollHorizontally,
-          trackVisibility: shouldScrollHorizontally,
-          child: SingleChildScrollView(
+        return ClipRect(
+          child: Scrollbar(
             controller: _horizontalController,
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: contentWidth,
-              height: viewportHeight,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  widget.header,
-                  Expanded(child: widget.body),
-                ],
+            thumbVisibility: shouldScrollHorizontally,
+            trackVisibility: shouldScrollHorizontally,
+            notificationPredicate:
+                (notification) => notification.metrics.axis == Axis.horizontal,
+            child: SingleChildScrollView(
+              controller: _horizontalController,
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: contentWidth,
+                height: viewportHeight,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    widget.header,
+                    Expanded(
+                      child: Scrollbar(
+                        controller: _verticalController,
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        notificationPredicate:
+                            (notification) =>
+                                notification.metrics.axis == Axis.vertical,
+                        child: PrimaryScrollController(
+                          controller: _verticalController,
+                          child: widget.body,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -211,53 +211,45 @@ class _TravelersScreenState extends State<TravelersScreen> {
 
         final filteredRows = _applyFilters(data);
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              height: constraints.maxHeight,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outlineVariant.withValues(alpha: 0.68),
-                  ),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _TravelerToolbar(
-                      searchController: _searchController,
-                      selectedClientId: _selectedClientId,
-                      selectedTravelerType: _selectedTravelerType,
-                      clients: data.clients,
-                      onClientChanged:
-                          (value) => setState(() => _selectedClientId = value),
-                      onTravelerTypeChanged:
-                          (value) =>
-                              setState(() => _selectedTravelerType = value),
-                      onClearFilters: _clearFilters,
-                      onCreateTraveler: () => _openCreateTravelerPanel(data),
-                    ),
-                    Expanded(
-                      child:
-                          filteredRows.isEmpty
-                              ? const EmptyStateView(
-                                title: 'No matching travelers',
-                                message:
-                                    'Try adjusting your search, client, or traveler type filters.',
-                                icon: Icons.filter_alt_off_rounded,
-                              )
-                              : _TravelersTable(rows: filteredRows),
-                    ),
-                  ],
-                ),
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Theme.of(
+                context,
+              ).colorScheme.outlineVariant.withValues(alpha: 0.68),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _TravelerToolbar(
+                searchController: _searchController,
+                selectedClientId: _selectedClientId,
+                selectedTravelerType: _selectedTravelerType,
+                clients: data.clients,
+                onClientChanged:
+                    (value) => setState(() => _selectedClientId = value),
+                onTravelerTypeChanged:
+                    (value) => setState(() => _selectedTravelerType = value),
+                onClearFilters: _clearFilters,
+                onCreateTraveler: () => _openCreateTravelerPanel(data),
               ),
-            );
-          },
+              Expanded(
+                child:
+                    filteredRows.isEmpty
+                        ? const EmptyStateView(
+                          title: 'No matching travelers',
+                          message:
+                              'Try adjusting your search, client, or traveler type filters.',
+                          icon: Icons.filter_alt_off_rounded,
+                        )
+                        : _TravelersTable(rows: filteredRows),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -449,20 +441,6 @@ class _TravelersTable extends StatefulWidget {
 }
 
 class _TravelersTableState extends State<_TravelersTable> {
-  late final ScrollController _verticalController;
-
-  @override
-  void initState() {
-    super.initState();
-    _verticalController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _verticalController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -554,12 +532,11 @@ class _TravelersTableState extends State<_TravelersTable> {
               }),
             ),
           ),
-          body: Container(
-            color: colorScheme.surface,
-            child: Scrollbar(
-              controller: _verticalController,
+          body: ClipRect(
+            child: ColoredBox(
+              color: colorScheme.surface,
               child: ListView.separated(
-                controller: _verticalController,
+                primary: true,
                 padding: EdgeInsets.zero,
                 itemCount: widget.rows.length,
                 separatorBuilder: (context, index) => Divider(
