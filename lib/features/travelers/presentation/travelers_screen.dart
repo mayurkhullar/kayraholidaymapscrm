@@ -734,21 +734,25 @@ class CreateTravelerPanel extends StatefulWidget {
     required bool hasClientLoadError,
     required TravelerRepository travelerRepository,
   }) {
-    return showModalBottomSheet<bool>(
+    return showDialog<bool>(
       context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
       builder:
-          (context) => Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+          (context) => Dialog(
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
             ),
-            child: Align(
-              alignment: Alignment.center,
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: 760,
-                  maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+                  maxWidth: 720,
+                  maxHeight: math.min(
+                    MediaQuery.sizeOf(context).height * 0.82,
+                    760,
+                  ),
                 ),
                 child: CreateTravelerPanel(
                   clients: clients,
@@ -955,7 +959,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                           ? null
                           : (value) => setState(() => _leadId = value),
                 ),
-                const _PanelSectionLabel(label: 'Traveler Info'),
+                const _PanelSectionLabel(label: 'Traveler Information'),
                 TextFormField(
                   controller: _fullNameController,
                   enabled: _canCreateTraveler,
@@ -1017,7 +1021,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                     return null;
                   },
                 ),
-                const _PanelSectionLabel(label: 'Contact Info'),
+                const _PanelSectionLabel(label: 'Contact Information'),
                 TextFormField(
                   controller: _phoneController,
                   enabled: _canCreateTraveler,

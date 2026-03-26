@@ -29,16 +29,14 @@ class FirestoreClientRemoteDataSource implements ClientRemoteDataSource {
 
   @override
   Future<List<ClientModel>> fetchClients() async {
-    final querySnapshot = await _clientsCollection
-        .where('isArchived', isEqualTo: false)
-        .orderBy('createdAt', descending: true)
-        .get();
-
-    return querySnapshot.docs
-        .map(
-          (doc) => ClientModel.fromMap(doc.data(), doc.id),
-        )
+    final querySnapshot = await _clientsCollection.get();
+    final clients = querySnapshot.docs
+        .where((doc) => doc.data()['isArchived'] != true)
+        .map((doc) => ClientModel.fromMap(doc.data(), doc.id))
         .toList(growable: false);
+
+    clients.sort((left, right) => right.createdAt.compareTo(left.createdAt));
+    return clients;
   }
 
 
