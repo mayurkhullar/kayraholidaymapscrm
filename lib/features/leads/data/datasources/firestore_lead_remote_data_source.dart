@@ -25,6 +25,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
     Map<String, dynamic> leadData,
     String leadId,
   ) async {
+    print('DEBUG HELPER CALLED for leadId=' + leadId);
     final firestore = FirebaseFirestore.instance;
 
     final existing = await firestore
@@ -351,6 +352,11 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
       leadData['passengerCount'] = leadData['passengerCount'] ?? <String, dynamic>{};
       updatedLeadData = leadData;
 
+      print('DEBUG START leadId=' + lead.id);
+      print('DEBUG leadData=' + leadData.toString());
+      print(
+        'DEBUG leadStage raw=' + (leadData['leadStage'] ?? '').toString(),
+      );
       transaction.update(leadReference, leadData);
     });
 
@@ -359,8 +365,15 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
       return;
     }
 
-    if (leadData['leadStage'] == 'CONFIRMED') {
+    print('DEBUG UPDATE COMPLETE leadId=' + lead.id);
+    final stageValue = (leadData['leadStage'] ?? '').toString().trim().toUpperCase();
+    print('DEBUG stageValue normalized=' + stageValue);
+
+    if (stageValue == 'CONFIRMED') {
+      print('DEBUG TRIGGER MATCHED for leadId=' + lead.id);
       await _createTravelFileIfNotExists(leadData, lead.id);
+    } else {
+      print('DEBUG TRIGGER NOT MATCHED for leadId=' + lead.id);
     }
   }
 
