@@ -38,12 +38,25 @@ class _TravelFileDetailScreenState extends State<TravelFileDetailScreen> {
   }
 
   Future<_TravelFileDetailData?> _loadDetail() async {
-    final travelFile = await _repository.getTravelFileById(widget.travelFileId);
-    if (travelFile == null) {
+    final firestore = FirebaseFirestore.instance;
+    final travelFileId = widget.travelFileId.trim();
+    print("DEBUG travelFileId route param = " + travelFileId);
+
+    final snapshot = await firestore
+        .collection('travelFiles')
+        .doc(travelFileId)
+        .get();
+    print("DEBUG travel file doc exists = " + snapshot.exists.toString());
+
+    if (!snapshot.exists || snapshot.data() == null) {
       return null;
     }
 
-    final firestore = FirebaseFirestore.instance;
+    print("DEBUG travel file data = " + snapshot.data().toString());
+    final travelFile = TravelFileModel.fromMap(<String, dynamic>{
+      ...snapshot.data()!,
+      'id': snapshot.id,
+    });
     final leadFuture = firestore.collection('leads').doc(travelFile.leadId).get();
     final clientFuture = firestore.collection('clients').doc(travelFile.clientId).get();
     final travelersFuture = _repository.fetchTravelersByLeadId(travelFile.leadId);
