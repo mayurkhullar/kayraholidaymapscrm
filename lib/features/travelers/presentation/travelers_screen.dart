@@ -728,9 +728,12 @@ class CreateTravelerPanel extends StatefulWidget {
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: Alignment.center,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
+                constraints: BoxConstraints(
+                  maxWidth: 760,
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+                ),
                 child: CreateTravelerPanel(
                   clients: clients,
                   leads: leads,
@@ -824,178 +827,191 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'New Traveler',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _PanelSectionLabel(label: 'Client & Booking'),
-              DropdownButtonFormField<String?>(
-                value: _clientId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Client'),
-                items: widget.clients
-                    .map(
-                      (client) => DropdownMenuItem<String?>(
-                        value: client.id,
-                        child: Text(client.name),
-                      ),
-                    )
-                    .toList(growable: false),
-                validator:
-                    (value) =>
-                        (value == null || value.isEmpty)
-                            ? 'Client is required'
-                            : null,
-                onChanged:
-                    _isSaving
-                        ? null
-                        : (value) {
-                          setState(() {
-                            _clientId = value;
-                            if (_leadId != null &&
-                                !_leadOptions.any(
-                                  (lead) => lead.id == _leadId,
-                                )) {
-                              _leadId = null;
-                            }
-                          });
-                        },
-              ),
-              const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<String?>(
-                value: _leadId,
-                isExpanded: true,
-                decoration: const InputDecoration(
-                  labelText: 'Linked Booking / Lead',
+        padding: const EdgeInsets.fromLTRB(20, AppSpacing.sm, 20, AppSpacing.xl),
+        child: Theme(
+          data: theme.copyWith(
+            inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+              labelStyle: labelStyle,
+              floatingLabelStyle: labelStyle,
+            ),
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'New Traveler',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('None'),
-                  ),
-                  ..._leadOptions.map(
-                    (lead) => DropdownMenuItem<String?>(
-                      value: lead.id,
-                      child: Text(lead.leadCode),
-                    ),
-                  ),
-                ],
-                onChanged:
-                    _isSaving
-                        ? null
-                        : (value) => setState(() => _leadId = value),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _PanelSectionLabel(label: 'Traveler Info'),
-              TextFormField(
-                controller: _fullNameController,
-                enabled: !_isSaving,
-                decoration: const InputDecoration(labelText: 'Full Name'),
-                validator:
-                    (value) =>
-                        (value == null || value.trim().isEmpty)
-                            ? 'Full name is required'
-                            : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<String>(
-                value: _travelerType,
-                decoration: const InputDecoration(labelText: 'Traveler Type'),
-                items: const [
-                  DropdownMenuItem(value: 'Adult', child: Text('Adult')),
-                  DropdownMenuItem(value: 'Child', child: Text('Child')),
-                  DropdownMenuItem(value: 'Infant', child: Text('Infant')),
-                ],
-                validator:
-                    (value) =>
-                        (value == null || value.isEmpty)
-                            ? 'Traveler type is required'
-                            : null,
-                onChanged:
-                    _isSaving
-                        ? null
-                        : (value) =>
-                            setState(() => _travelerType = value ?? 'Adult'),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<String?>(
-                value: _gender,
-                decoration: const InputDecoration(labelText: 'Gender'),
-                items: const [
-                  DropdownMenuItem(value: null, child: Text('Not provided')),
-                  DropdownMenuItem(value: 'Male', child: Text('Male')),
-                  DropdownMenuItem(value: 'Female', child: Text('Female')),
-                  DropdownMenuItem(value: 'Other', child: Text('Other')),
-                ],
-                onChanged:
-                    _isSaving
-                        ? null
-                        : (value) => setState(() => _gender = value),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _ageController,
-                enabled: !_isSaving,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Age'),
-                validator: (value) {
-                  final normalized = value?.trim() ?? '';
-                  if (normalized.isEmpty) return null;
-                  final parsed = int.tryParse(normalized);
-                  if (parsed == null || parsed < 0) {
-                    return 'Enter a valid age';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _PanelSectionLabel(label: 'Contact Info'),
-              TextFormField(
-                controller: _phoneController,
-                enabled: !_isSaving,
-                decoration: const InputDecoration(labelText: 'Phone'),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _emailController,
-                enabled: !_isSaving,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _PanelSectionLabel(label: 'Notes'),
-              TextFormField(
-                controller: _notesController,
-                enabled: !_isSaving,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Notes'),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  onPressed: _isSaving ? null : _createTraveler,
-                  child:
+                const SizedBox(height: AppSpacing.sm),
+                const _PanelSectionLabel(label: 'Client & Booking', isFirst: true),
+                DropdownButtonFormField<String?>(
+                  value: _clientId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Client'),
+                  items: widget.clients
+                      .map(
+                        (client) => DropdownMenuItem<String?>(
+                          value: client.id,
+                          child: Text(client.name),
+                        ),
+                      )
+                      .toList(growable: false),
+                  validator:
+                      (value) =>
+                          (value == null || value.isEmpty)
+                              ? 'Client is required'
+                              : null,
+                  onChanged:
                       _isSaving
-                          ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : const Text('Save Traveler'),
+                          ? null
+                          : (value) {
+                            setState(() {
+                              _clientId = value;
+                              if (_leadId != null &&
+                                  !_leadOptions.any(
+                                    (lead) => lead.id == _leadId,
+                                  )) {
+                                _leadId = null;
+                              }
+                            });
+                          },
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.md),
+                DropdownButtonFormField<String?>(
+                  value: _leadId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Linked Booking / Lead',
+                  ),
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('None'),
+                    ),
+                    ..._leadOptions.map(
+                      (lead) => DropdownMenuItem<String?>(
+                        value: lead.id,
+                        child: Text(lead.leadCode),
+                      ),
+                    ),
+                  ],
+                  onChanged:
+                      _isSaving
+                          ? null
+                          : (value) => setState(() => _leadId = value),
+                ),
+                const _PanelSectionLabel(label: 'Traveler Info'),
+                TextFormField(
+                  controller: _fullNameController,
+                  enabled: !_isSaving,
+                  decoration: const InputDecoration(labelText: 'Full Name'),
+                  validator:
+                      (value) =>
+                          (value == null || value.trim().isEmpty)
+                              ? 'Full name is required'
+                              : null,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                DropdownButtonFormField<String>(
+                  value: _travelerType,
+                  decoration: const InputDecoration(labelText: 'Traveler Type'),
+                  items: const [
+                    DropdownMenuItem(value: 'Adult', child: Text('Adult')),
+                    DropdownMenuItem(value: 'Child', child: Text('Child')),
+                    DropdownMenuItem(value: 'Infant', child: Text('Infant')),
+                  ],
+                  validator:
+                      (value) =>
+                          (value == null || value.isEmpty)
+                              ? 'Traveler type is required'
+                              : null,
+                  onChanged:
+                      _isSaving
+                          ? null
+                          : (value) =>
+                              setState(() => _travelerType = value ?? 'Adult'),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                DropdownButtonFormField<String?>(
+                  value: _gender,
+                  decoration: const InputDecoration(labelText: 'Gender'),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('Not provided')),
+                    DropdownMenuItem(value: 'Male', child: Text('Male')),
+                    DropdownMenuItem(value: 'Female', child: Text('Female')),
+                    DropdownMenuItem(value: 'Other', child: Text('Other')),
+                  ],
+                  onChanged:
+                      _isSaving
+                          ? null
+                          : (value) => setState(() => _gender = value),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _ageController,
+                  enabled: !_isSaving,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Age'),
+                  validator: (value) {
+                    final normalized = value?.trim() ?? '';
+                    if (normalized.isEmpty) return null;
+                    final parsed = int.tryParse(normalized);
+                    if (parsed == null || parsed < 0) {
+                      return 'Enter a valid age';
+                    }
+                    return null;
+                  },
+                ),
+                const _PanelSectionLabel(label: 'Contact Info'),
+                TextFormField(
+                  controller: _phoneController,
+                  enabled: !_isSaving,
+                  decoration: const InputDecoration(labelText: 'Phone'),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _emailController,
+                  enabled: !_isSaving,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                ),
+                const _PanelSectionLabel(label: 'Notes'),
+                TextFormField(
+                  controller: _notesController,
+                  enabled: !_isSaving,
+                  minLines: 2,
+                  maxLines: 4,
+                  decoration: const InputDecoration(labelText: 'Notes'),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: FilledButton(
+                    onPressed: _isSaving ? null : _createTraveler,
+                    child:
+                        _isSaving
+                            ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Text('Save Traveler'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1004,19 +1020,23 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
 }
 
 class _PanelSectionLabel extends StatelessWidget {
-  const _PanelSectionLabel({required this.label});
+  const _PanelSectionLabel({required this.label, this.isFirst = false});
 
   final String label;
+  final bool isFirst;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: EdgeInsets.only(
+        top: isFirst ? 0 : AppSpacing.lg,
+        bottom: AppSpacing.xs,
+      ),
       child: Text(
         label,
         style: Theme.of(
           context,
-        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
