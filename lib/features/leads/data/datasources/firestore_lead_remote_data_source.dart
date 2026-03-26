@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_enums.dart';
 import '../../../../core/constants/firestore_collections.dart';
 import '../../../clients/domain/models/client_model.dart';
+import '../../../travel_files/data/datasources/firestore_travel_file_remote_data_source.dart';
+import '../../../travel_files/data/repositories/travel_file_repository_impl.dart';
 import '../../../../shared/models/passenger_count_model.dart';
 import '../../domain/models/lead_model.dart';
 import '../../domain/models/lead_note_model.dart';
@@ -161,13 +163,14 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
     final leadReference = _leadsCollection.doc(lead.id);
     final clientsCollection = _firestore.collection(FirestoreCollections.clients);
 
+    String resolvedClientId = (lead.clientId ?? '').trim();
+    var shouldEnsureTravelFile = false;
+
     await _firestore.runTransaction((transaction) async {
       final leadSnapshot = await transaction.get(leadReference);
       final existingLead = leadSnapshot.data() ?? const <String, dynamic>{};
-      final existingClientId =
-          (existingLead['clientId'] as String?)?.trim() ?? '';
-      final wasAlreadyConverted =
-          (existingLead['isConverted'] as bool?) ?? false;
+      final existingClientId = (existingLead['clientId'] as String?)?.trim() ?? '';
+      final wasAlreadyConverted = (existingLead['isConverted'] as bool?) ?? false;
 
       final isNowConfirmed = lead.leadStage == LeadStage.confirmed;
       final isAlreadyConverted = lead.isConverted || wasAlreadyConverted;
@@ -205,11 +208,10 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
             lead.companyNameSnapshot;
 
         if (convertedClientId.isEmpty && leadPhone.isNotEmpty) {
-          final QuerySnapshot<Map<String, dynamic>> querySnapshot =
-              await clientsCollection
-                  .where('phone', isEqualTo: leadPhone)
-                  .limit(1)
-                  .get();
+          final QuerySnapshot<Map<String, dynamic>> querySnapshot = await clientsCollection
+              .where('phone', isEqualTo: leadPhone)
+              .limit(1)
+              .get();
 
           if (querySnapshot.docs.isNotEmpty) {
             convertedClientId = querySnapshot.docs.first.id;
@@ -230,8 +232,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
                 <String, dynamic>{
                   if (existingClientWhatsapp == null && hasLeadWhatsapp)
                     'whatsappNumber': leadWhatsappNumber,
-                  if (existingClientEmail == null && hasLeadEmail)
-                    'email': leadEmail,
+                  if (existingClientEmail == null && hasLeadEmail) 'email': leadEmail,
                   'updatedAt': Timestamp.fromDate(now),
                 },
               );
@@ -279,9 +280,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
       }
 
       final leadToUpdate = lead.copyWith(
-        clientId: convertedClientId.isNotEmpty
-            ? convertedClientId
-            : lead.clientId,
+        clientId: convertedClientId.isNotEmpty ? convertedClientId : lead.clientId,
         isConverted:
             isAlreadyConverted ||
             (isNowConfirmed && convertedClientId.isNotEmpty) ||
@@ -289,8 +288,45 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
         updatedAt: DateTime.now(),
       );
 
+      resolvedClientId =
+          (leadToUpdate.clientId ?? '').trim().isNotEmpty ? (leadToUpdate.clientId ?? '').trim() : existingClientId;
+      shouldEnsureTravelFile =
+          leadToUpdate.leadStage == LeadStage.confirmed && leadToUpdate.isConverted && resolvedClientId.isNotEmpty;
+
       transaction.update(leadReference, leadToUpdate.toMap());
     });
+
+    if (!shouldEnsureTravelFile) {
+      return;
+    }
+
+    final travelFileRepository = TravelFileRepositoryImpl(
+      remoteDataSource: FirestoreTravelFileRemoteDataSource(
+        firestore: _firestore,
+      ),
+    );
+
+    await travelFileRepository.ensureTravelFileForConfirmedLead(
+      leadId: lead.id,
+      clientId: resolvedClientId,
+      clientNameSnapshot: lead.clientNameSnapshot ?? '',
+      destination: lead.destination ?? '',
+      travelType: lead.travelType.firestoreValue,
+      tripScope: lead.tripScope.firestoreValue,
+      leadStage: lead.leadStage.firestoreValue,
+      startDate: lead.travelDates?.startDate,
+      endDate: lead.travelDates?.endDate,
+      adultCount: lead.adultCount,
+      childCount: lead.childCount,
+      infantCount: lead.infantCount,
+      totalPax: lead.passengerCount?.totalPax ??
+          _travelersFromLeadCounts(
+            adults: lead.adultCount,
+            children: lead.childCount,
+            infants: lead.infantCount,
+          ),
+      notes: lead.notes,
+    );
   }
 
   @override

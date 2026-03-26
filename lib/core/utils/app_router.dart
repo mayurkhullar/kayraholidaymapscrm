@@ -7,6 +7,8 @@ import '../../features/leads/presentation/lead_detail_screen.dart';
 import '../../features/leads/presentation/leads_screen.dart';
 import '../../features/travelers/presentation/traveler_detail_screen.dart';
 import '../../features/travelers/presentation/travelers_screen.dart';
+import '../../features/travel_files/presentation/travel_file_detail_screen.dart';
+import '../../features/travel_files/presentation/travel_files_screen.dart';
 import '../widgets/app_shell.dart';
 
 class AppRouter {
@@ -63,10 +65,11 @@ class AppRouter {
           child: const TravelersScreen(),
         );
       case travelFilesRoute:
-        return _placeholderRoute(
+        return _shellRoute(
           settings,
-          title: 'Travel Files',
+          pageTitle: 'Travel Files',
           currentRoute: travelFilesRoute,
+          child: const TravelFilesScreen(),
         );
       case reportsRoute:
         return _placeholderRoute(
@@ -110,6 +113,16 @@ class AppRouter {
             child: TravelerDetailScreen(travelerId: travelerId),
           );
         }
+        final travelFileId = _extractPathParameter(routeName, baseRoute: travelFilesRoute);
+        if (travelFileId != null) {
+          return _shellRoute(
+            settings,
+            pageTitle: 'Travel File Details',
+            currentRoute: travelFilesRoute,
+            child: TravelFileDetailScreen(travelFileId: travelFileId),
+          );
+        }
+
 
         return MaterialPageRoute<void>(
           builder: (_) => const LoginScreen(),
@@ -124,6 +137,9 @@ class AppRouter {
 
   static String travelerDetailRoute(String travelerId) =>
       '$travelersRoute/$travelerId';
+
+  static String travelFileDetailRoute(String travelFileId) =>
+      '$travelFilesRoute/$travelFileId';
 
   static String? _extractPathParameter(
     String routeName, {

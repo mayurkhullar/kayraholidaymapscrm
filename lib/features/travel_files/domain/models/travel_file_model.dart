@@ -1,102 +1,74 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:kayraholidaymapscrm/core/constants/app_enums.dart';
-import 'package:kayraholidaymapscrm/shared/models/date_range_model.dart';
-import 'package:kayraholidaymapscrm/shared/models/passenger_count_model.dart';
-
-import 'confirmed_quotation_snapshot_model.dart';
-import 'current_commercial_state_model.dart';
-import 'group_alerts_model.dart';
-import 'group_readiness_model.dart';
-
 class TravelFileModel {
   const TravelFileModel({
     required this.id,
-    this.travelFileCode,
-    this.sourceLeadId,
-    this.sourceLeadCode,
-    this.clientId,
-    this.companyId,
-    this.ownerId,
-    this.teamId,
-    this.travelType = TravelType.fit,
-    this.tripScope = TripScope.international,
-    this.title,
-    this.destination,
-    this.travelDates,
-    this.status,
-    this.passengerCount,
-    this.isGroupDashboardEnabled = false,
-    this.confirmedQuotationSnapshot,
-    this.currentCommercialState,
-    this.groupReadiness,
-    this.groupAlerts,
-    this.createdBy,
-    this.createdAt,
-    this.updatedBy,
-    this.updatedAt,
+    required this.travelFileCode,
+    required this.leadId,
+    required this.clientId,
+    required this.clientNameSnapshot,
+    required this.destination,
+    required this.travelType,
+    this.tripScope,
+    required this.leadStage,
+    this.status = 'Open',
+    this.startDate,
+    this.endDate,
+    this.adultCount = 0,
+    this.childCount = 0,
+    this.infantCount = 0,
+    this.totalPax = 0,
+    this.notes,
+    required this.createdAt,
+    required this.updatedAt,
     this.isArchived = false,
-    this.archivedBy,
-    this.archivedAt,
   });
 
   final String id;
-  final String? travelFileCode;
-  final String? sourceLeadId;
-  final String? sourceLeadCode;
-  final String? clientId;
-  final String? companyId;
-  final String? ownerId;
-  final String? teamId;
-  final TravelType travelType;
-  final TripScope tripScope;
-  final String? title;
-  final String? destination;
-  final DateRangeModel? travelDates;
-  final String? status;
-  final PassengerCountModel? passengerCount;
-  final bool isGroupDashboardEnabled;
-  final ConfirmedQuotationSnapshotModel? confirmedQuotationSnapshot;
-  final CurrentCommercialStateModel? currentCommercialState;
-  final GroupReadinessModel? groupReadiness;
-  final GroupAlertsModel? groupAlerts;
-  final String? createdBy;
-  final DateTime? createdAt;
-  final String? updatedBy;
-  final DateTime? updatedAt;
+  final String travelFileCode;
+  final String leadId;
+  final String clientId;
+  final String clientNameSnapshot;
+  final String destination;
+  final String travelType;
+  final String? tripScope;
+  final String leadStage;
+  final String status;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int adultCount;
+  final int childCount;
+  final int infantCount;
+  final int totalPax;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   final bool isArchived;
-  final String? archivedBy;
-  final DateTime? archivedAt;
 
   factory TravelFileModel.fromMap(Map<String, dynamic> map) {
     return TravelFileModel(
       id: (map['id'] as String?) ?? '',
-      travelFileCode: map['travelFileCode'] as String?,
-      sourceLeadId: map['sourceLeadId'] as String?,
-      sourceLeadCode: map['sourceLeadCode'] as String?,
-      clientId: map['clientId'] as String?,
-      companyId: map['companyId'] as String?,
-      ownerId: map['ownerId'] as String?,
-      teamId: map['teamId'] as String?,
-      travelType: _travelTypeFromDynamic(map['travelType']),
-      tripScope: _tripScopeFromDynamic(map['tripScope']),
-      title: map['title'] as String?,
-      destination: map['destination'] as String?,
-      travelDates: _dateRangeFromDynamic(map['travelDates']),
-      status: map['status'] as String?,
-      passengerCount: _passengerCountFromDynamic(map['passengerCount']),
-      isGroupDashboardEnabled: (map['isGroupDashboardEnabled'] as bool?) ?? false,
-      confirmedQuotationSnapshot: _confirmedQuotationSnapshotFromDynamic(map['confirmedQuotationSnapshot']),
-      currentCommercialState: _currentCommercialStateFromDynamic(map['currentCommercialState']),
-      groupReadiness: _groupReadinessFromDynamic(map['groupReadiness']),
-      groupAlerts: _groupAlertsFromDynamic(map['groupAlerts']),
-      createdBy: map['createdBy'] as String?,
-      createdAt: _dateTimeFromDynamic(map['createdAt']),
-      updatedBy: map['updatedBy'] as String?,
-      updatedAt: _dateTimeFromDynamic(map['updatedAt']),
+      travelFileCode: (map['travelFileCode'] as String?) ?? '',
+      leadId: (map['leadId'] as String?) ?? '',
+      clientId: (map['clientId'] as String?) ?? '',
+      clientNameSnapshot: (map['clientNameSnapshot'] as String?) ?? '',
+      destination: (map['destination'] as String?) ?? '',
+      travelType: (map['travelType'] as String?) ?? '',
+      tripScope: _optionalString(map['tripScope']),
+      leadStage: (map['leadStage'] as String?) ?? '',
+      status: (map['status'] as String?) ?? 'Open',
+      startDate: _dateTimeFromDynamic(map['startDate']),
+      endDate: _dateTimeFromDynamic(map['endDate']),
+      adultCount: _intFromDynamic(map['adultCount']),
+      childCount: _intFromDynamic(map['childCount']),
+      infantCount: _intFromDynamic(map['infantCount']),
+      totalPax: _intFromDynamic(map['totalPax']),
+      notes: _optionalString(map['notes']),
+      createdAt: _dateTimeFromDynamic(map['createdAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt: _dateTimeFromDynamic(map['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       isArchived: (map['isArchived'] as bool?) ?? false,
-      archivedBy: map['archivedBy'] as String?,
-      archivedAt: _dateTimeFromDynamic(map['archivedAt']),
     );
   }
 
@@ -104,45 +76,77 @@ class TravelFileModel {
     return <String, dynamic>{
       'id': id,
       'travelFileCode': travelFileCode,
-      'sourceLeadId': sourceLeadId,
-      'sourceLeadCode': sourceLeadCode,
+      'leadId': leadId,
       'clientId': clientId,
-      'companyId': companyId,
-      'ownerId': ownerId,
-      'teamId': teamId,
-      'travelType': travelType.firestoreValue,
-      'tripScope': tripScope.firestoreValue,
-      'title': title,
+      'clientNameSnapshot': clientNameSnapshot,
       'destination': destination,
-      'travelDates': travelDates?.toMap(),
+      'travelType': travelType,
+      'tripScope': tripScope,
+      'leadStage': leadStage,
       'status': status,
-      'passengerCount': passengerCount?.toMap(),
-      'isGroupDashboardEnabled': isGroupDashboardEnabled,
-      'confirmedQuotationSnapshot': confirmedQuotationSnapshot?.toMap(),
-      'currentCommercialState': currentCommercialState?.toMap(),
-      'groupReadiness': groupReadiness?.toMap(),
-      'groupAlerts': groupAlerts?.toMap(),
-      'createdBy': createdBy,
-      'createdAt': createdAt,
-      'updatedBy': updatedBy,
-      'updatedAt': updatedAt,
+      'startDate': startDate == null ? null : Timestamp.fromDate(startDate!),
+      'endDate': endDate == null ? null : Timestamp.fromDate(endDate!),
+      'adultCount': adultCount,
+      'childCount': childCount,
+      'infantCount': infantCount,
+      'totalPax': totalPax,
+      'notes': notes,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
       'isArchived': isArchived,
-      'archivedBy': archivedBy,
-      'archivedAt': archivedAt,
     };
   }
 
-  TravelFileModel copyWith({String? id,String? travelFileCode,String? sourceLeadId,String? sourceLeadCode,String? clientId,String? companyId,String? ownerId,String? teamId,TravelType? travelType,TripScope? tripScope,String? title,String? destination,DateRangeModel? travelDates,String? status,PassengerCountModel? passengerCount,bool? isGroupDashboardEnabled,ConfirmedQuotationSnapshotModel? confirmedQuotationSnapshot,CurrentCommercialStateModel? currentCommercialState,GroupReadinessModel? groupReadiness,GroupAlertsModel? groupAlerts,String? createdBy,DateTime? createdAt,String? updatedBy,DateTime? updatedAt,bool? isArchived,String? archivedBy,DateTime? archivedAt,}) {
-    return TravelFileModel(id: id ?? this.id,travelFileCode: travelFileCode ?? this.travelFileCode,sourceLeadId: sourceLeadId ?? this.sourceLeadId,sourceLeadCode: sourceLeadCode ?? this.sourceLeadCode,clientId: clientId ?? this.clientId,companyId: companyId ?? this.companyId,ownerId: ownerId ?? this.ownerId,teamId: teamId ?? this.teamId,travelType: travelType ?? this.travelType,tripScope: tripScope ?? this.tripScope,title: title ?? this.title,destination: destination ?? this.destination,travelDates: travelDates ?? this.travelDates,status: status ?? this.status,passengerCount: passengerCount ?? this.passengerCount,isGroupDashboardEnabled: isGroupDashboardEnabled ?? this.isGroupDashboardEnabled,confirmedQuotationSnapshot: confirmedQuotationSnapshot ?? this.confirmedQuotationSnapshot,currentCommercialState: currentCommercialState ?? this.currentCommercialState,groupReadiness: groupReadiness ?? this.groupReadiness,groupAlerts: groupAlerts ?? this.groupAlerts,createdBy: createdBy ?? this.createdBy,createdAt: createdAt ?? this.createdAt,updatedBy: updatedBy ?? this.updatedBy,updatedAt: updatedAt ?? this.updatedAt,isArchived: isArchived ?? this.isArchived,archivedBy: archivedBy ?? this.archivedBy,archivedAt: archivedAt ?? this.archivedAt,);
+  TravelFileModel copyWith({
+    String? id,
+    String? travelFileCode,
+    String? leadId,
+    String? clientId,
+    String? clientNameSnapshot,
+    String? destination,
+    String? travelType,
+    String? tripScope,
+    bool clearTripScope = false,
+    String? leadStage,
+    String? status,
+    DateTime? startDate,
+    bool clearStartDate = false,
+    DateTime? endDate,
+    bool clearEndDate = false,
+    int? adultCount,
+    int? childCount,
+    int? infantCount,
+    int? totalPax,
+    String? notes,
+    bool clearNotes = false,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isArchived,
+  }) {
+    return TravelFileModel(
+      id: id ?? this.id,
+      travelFileCode: travelFileCode ?? this.travelFileCode,
+      leadId: leadId ?? this.leadId,
+      clientId: clientId ?? this.clientId,
+      clientNameSnapshot: clientNameSnapshot ?? this.clientNameSnapshot,
+      destination: destination ?? this.destination,
+      travelType: travelType ?? this.travelType,
+      tripScope: clearTripScope ? null : (tripScope ?? this.tripScope),
+      leadStage: leadStage ?? this.leadStage,
+      status: status ?? this.status,
+      startDate: clearStartDate ? null : (startDate ?? this.startDate),
+      endDate: clearEndDate ? null : (endDate ?? this.endDate),
+      adultCount: adultCount ?? this.adultCount,
+      childCount: childCount ?? this.childCount,
+      infantCount: infantCount ?? this.infantCount,
+      totalPax: totalPax ?? this.totalPax,
+      notes: clearNotes ? null : (notes ?? this.notes),
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isArchived: isArchived ?? this.isArchived,
+    );
   }
 }
-
-DateRangeModel? _dateRangeFromDynamic(dynamic value) { final map = _mapFromDynamic(value); return map == null ? null : DateRangeModel.fromMap(map); }
-PassengerCountModel? _passengerCountFromDynamic(dynamic value) { final map = _mapFromDynamic(value); return map == null ? null : PassengerCountModel.fromMap(map); }
-ConfirmedQuotationSnapshotModel? _confirmedQuotationSnapshotFromDynamic(dynamic value) { final map = _mapFromDynamic(value); return map == null ? null : ConfirmedQuotationSnapshotModel.fromMap(map); }
-CurrentCommercialStateModel? _currentCommercialStateFromDynamic(dynamic value) { final map = _mapFromDynamic(value); return map == null ? null : CurrentCommercialStateModel.fromMap(map); }
-GroupReadinessModel? _groupReadinessFromDynamic(dynamic value) { final map = _mapFromDynamic(value); return map == null ? null : GroupReadinessModel.fromMap(map); }
-GroupAlertsModel? _groupAlertsFromDynamic(dynamic value) { final map = _mapFromDynamic(value); return map == null ? null : GroupAlertsModel.fromMap(map); }
 
 DateTime? _dateTimeFromDynamic(dynamic value) {
   if (value == null) {
@@ -164,45 +168,27 @@ DateTime? _dateTimeFromDynamic(dynamic value) {
   return null;
 }
 
-Map<String, dynamic>? _mapFromDynamic(dynamic value) {
-  if (value is Map<String, dynamic>) {
+int _intFromDynamic(dynamic value) {
+  if (value is int) {
     return value;
   }
 
-  if (value is Map) {
-    return value.map((key, dynamic nestedValue) => MapEntry('$key', nestedValue));
+  if (value is num) {
+    return value.toInt();
+  }
+
+  if (value is String) {
+    return int.tryParse(value.trim()) ?? 0;
+  }
+
+  return 0;
+}
+
+String? _optionalString(dynamic value) {
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   return null;
-}
-TravelType _travelTypeFromDynamic(dynamic value) {
-  if (value is TravelType) {
-    return value;
-  }
-
-  if (value is String && value.trim().isNotEmpty) {
-    try {
-      return TravelTypeX.fromString(value);
-    } on ArgumentError {
-      return TravelType.fit;
-    }
-  }
-
-  return TravelType.fit;
-}
-
-TripScope _tripScopeFromDynamic(dynamic value) {
-  if (value is TripScope) {
-    return value;
-  }
-
-  if (value is String && value.trim().isNotEmpty) {
-    try {
-      return TripScopeX.fromString(value);
-    } on ArgumentError {
-      return TripScope.international;
-    }
-  }
-
-  return TripScope.international;
 }
