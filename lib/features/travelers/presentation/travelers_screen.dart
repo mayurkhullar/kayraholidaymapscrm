@@ -860,7 +860,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, AppSpacing.sm, 20, AppSpacing.xl),
+        padding: const EdgeInsets.fromLTRB(20, AppSpacing.xs, 20, AppSpacing.md),
         child: Theme(
           data: theme.copyWith(
             inputDecorationTheme: theme.inputDecorationTheme.copyWith(
@@ -1037,7 +1037,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                   maxLines: 4,
                   decoration: const InputDecoration(labelText: 'Notes'),
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.md),
                 Align(
                   alignment: Alignment.centerRight,
                   child: FilledButton(
@@ -1082,7 +1082,7 @@ class _PanelSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        top: isFirst ? 0 : AppSpacing.lg,
+        top: isFirst ? 0 : AppSpacing.md,
         bottom: AppSpacing.xs,
       ),
       child: Text(
