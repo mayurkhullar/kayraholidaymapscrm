@@ -35,19 +35,16 @@ class _TravelersScreenState extends State<TravelersScreen> {
         firestore: FirebaseFirestore.instance,
       ),
     );
-    _searchController = TextEditingController()..addListener(_onSearchChanged);
     _dataFuture = _loadData();
   }
 
   @override
   void dispose() {
     _searchController
-      ..removeListener(_onSearchChanged)
       ..dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() => setState(() {});
 
   Future<_TravelersViewData> _loadData() async {
     final firestore = FirebaseFirestore.instance;
@@ -68,7 +65,6 @@ class _TravelersScreenState extends State<TravelersScreen> {
     final clients = clientsSnapshot.docs
         .map((doc) => ClientModel.fromMap(doc.data(), doc.id))
         .toList(growable: false);
-
     final leads = leadsSnapshot.docs
         .map(
           (doc) => LeadModel.fromMap(<String, dynamic>{
@@ -115,7 +111,6 @@ class _TravelersScreenState extends State<TravelersScreen> {
           (traveler.phone?.toLowerCase().contains(query) ?? false) ||
           (traveler.email?.toLowerCase().contains(query) ?? false) ||
           traveler.travelerCode.toLowerCase().contains(query);
-
       final matchesClient =
           _selectedClientId == null || traveler.clientId == _selectedClientId;
       final matchesType = _selectedTravelerType == null ||
@@ -159,29 +154,6 @@ class _TravelersScreenState extends State<TravelersScreen> {
         }
 
         final data = snapshot.data;
-        if (data == null || data.travelers.isEmpty) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.icon(
-                  onPressed: data == null ? null : () => _openCreateTravelerPanel(data),
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('New Traveler'),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              const Expanded(
-                child: EmptyStateView(
-                  title: 'No travelers yet',
-                  message:
-                      'Travelers linked to clients and bookings will appear here',
-                  icon: Icons.luggage_outlined,
-                ),
-              ),
-            ],
-          );
         }
 
         final filteredRows = _applyFilters(data);
@@ -189,7 +161,6 @@ class _TravelersScreenState extends State<TravelersScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _TravelerToolbar(
               searchController: _searchController,
               selectedClientId: _selectedClientId,
               selectedTravelerType: _selectedTravelerType,
@@ -202,7 +173,6 @@ class _TravelersScreenState extends State<TravelersScreen> {
             ),
             const SizedBox(height: AppSpacing.sm),
             Expanded(
-              child: filteredRows.isEmpty
                   ? const EmptyStateView(
                       title: 'No matching travelers',
                       message:
@@ -218,8 +188,6 @@ class _TravelersScreenState extends State<TravelersScreen> {
   }
 }
 
-class _TravelerToolbar extends StatelessWidget {
-  const _TravelerToolbar({
     required this.searchController,
     required this.selectedClientId,
     required this.selectedTravelerType,
@@ -253,16 +221,13 @@ class _TravelerToolbar extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
-          runSpacing: AppSpacing.sm,
           spacing: AppSpacing.sm,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             SizedBox(
-              width: 320,
               child: TextField(
                 controller: searchController,
                 decoration: const InputDecoration(
-                  hintText: 'Search by name, phone, email, or traveler code',
                   prefixIcon: Icon(Icons.search_rounded),
                 ),
               ),
@@ -278,14 +243,10 @@ class _TravelerToolbar extends StatelessWidget {
                     value: null,
                     child: Text('All Clients'),
                   ),
-                  ...clients
-                      .map(
                         (client) => DropdownMenuItem<String?>(
                           value: client.id,
                           child: Text(client.name),
                         ),
-                      )
-                      .toList(growable: false),
                 ],
                 onChanged: onClientChanged,
               ),
@@ -330,17 +291,14 @@ class _TravelersTable extends StatefulWidget {
 }
 
 class _TravelersTableState extends State<_TravelersTable> {
-  late final ScrollController _horizontalController;
 
   @override
   void initState() {
     super.initState();
-    _horizontalController = ScrollController();
   }
 
   @override
   void dispose() {
-    _horizontalController.dispose();
     super.dispose();
   }
 
@@ -365,25 +323,20 @@ class _TravelersTableState extends State<_TravelersTable> {
           ),
           clipBehavior: Clip.antiAlias,
           child: Scrollbar(
-            controller: _horizontalController,
             thumbVisibility: tableWidth > viewportWidth,
             trackVisibility: tableWidth > viewportWidth,
             child: SingleChildScrollView(
-              controller: _horizontalController,
               scrollDirection: Axis.horizontal,
               child: SizedBox(
                 width: tableWidth,
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color:
                             colorScheme.surfaceContainerHighest.withValues(alpha: 0.82),
                         border: Border(
                           bottom: BorderSide(
-                            color:
-                                colorScheme.outlineVariant.withValues(alpha: 0.7),
                           ),
                         ),
                       ),
@@ -399,20 +352,10 @@ class _TravelersTableState extends State<_TravelersTable> {
                         ],
                       ),
                     ),
-                    Expanded(
-                      child: ListView.separated(
-                        itemCount: widget.rows.length,
-                        separatorBuilder: (context, index) => Divider(
                           height: 1,
                           thickness: 1,
                           color: colorScheme.outlineVariant.withValues(alpha: 0.35),
                         ),
-                        itemBuilder: (context, index) {
-                          final item = widget.rows[index];
-                          return _TravelerRow(item: item, index: index);
-                        },
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -435,15 +378,6 @@ class _HeaderCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.md),
-      child: SizedBox(
-        width: width,
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-      ),
     );
   }
 }
@@ -463,7 +397,6 @@ class _TravelerRowState extends State<_TravelerRow> {
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.item;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final baseColor = widget.index.isEven
@@ -482,12 +415,8 @@ class _TravelerRowState extends State<_TravelerRow> {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => Navigator.of(context).pushNamed(
-              AppRouter.travelerDetailRoute(
-                Uri.encodeComponent(item.traveler.id),
               ),
-            ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
                   _BodyCell(width: 160, value: item.traveler.travelerCode),
@@ -579,9 +508,7 @@ class CreateTravelerPanel extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (context) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: CreateTravelerPanel(
           clients: clients,
@@ -628,12 +555,6 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
 
     setState(() => _isSaving = true);
 
-    final fullName = _fullNameController.text.trim();
-    final age = int.tryParse(_ageController.text.trim());
-    final phone = _optional(_phoneController.text);
-    final email = _optional(_emailController.text);
-    final notes = _optional(_notesController.text);
-
     try {
       await widget.travelerRepository.createTraveler(
         TravelerModel(
@@ -641,23 +562,16 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
           travelerCode: '',
           clientId: _clientId!,
           leadId: _leadId,
-          fullName: fullName,
           travelerType: _travelerType,
           gender: _gender,
-          age: age,
-          phone: phone,
-          email: email,
-          notes: notes,
           createdAt: DateTime.fromMillisecondsSinceEpoch(0),
           updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
           isActive: true,
         ),
       );
 
-      if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (_) {
-      if (!mounted) return;
       setState(() => _isSaving = false);
     }
   }
@@ -676,12 +590,10 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
             children: [
               Text('New Traveler', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
@@ -717,7 +629,6 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Linked Booking / Lead'),
                 items: [
-                  const DropdownMenuItem<String?>(value: null, child: Text('None')),
                   ..._leadOptions.map(
                     (lead) => DropdownMenuItem<String?>(
                       value: lead.id,
@@ -751,7 +662,6 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                     : (value) => setState(() => _travelerType = value ?? 'Adult'),
               ),
               const SizedBox(height: AppSpacing.sm),
-              DropdownButtonFormField<String?>(
                 value: _gender,
                 decoration: const InputDecoration(labelText: 'Gender'),
                 items: const [
@@ -760,17 +670,13 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                   DropdownMenuItem(value: 'Female', child: Text('Female')),
                   DropdownMenuItem(value: 'Other', child: Text('Other')),
                 ],
-                onChanged: _isSaving ? null : (value) => setState(() => _gender = value),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextFormField(
                 controller: _ageController,
                 enabled: !_isSaving,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Age'),
                 validator: (value) {
                   final normalized = value?.trim() ?? '';
-                  if (normalized.isEmpty) return null;
                   final parsed = int.tryParse(normalized);
                   if (parsed == null || parsed < 0) {
                     return 'Enter a valid age';
@@ -779,13 +685,10 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 },
               ),
               const SizedBox(height: AppSpacing.sm),
-              TextFormField(
                 controller: _phoneController,
                 enabled: !_isSaving,
                 decoration: const InputDecoration(labelText: 'Phone'),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              TextFormField(
                 controller: _emailController,
                 enabled: !_isSaving,
                 decoration: const InputDecoration(labelText: 'Email'),
@@ -798,7 +701,6 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 maxLines: 4,
                 decoration: const InputDecoration(labelText: 'Notes'),
               ),
-              const SizedBox(height: AppSpacing.md),
               Align(
                 alignment: Alignment.centerRight,
                 child: FilledButton(
