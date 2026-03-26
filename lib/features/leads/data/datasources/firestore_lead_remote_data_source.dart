@@ -70,6 +70,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
     final queryStopwatch = Stopwatch()..start();
     final querySnapshot = await _leadsCollection
         .where('isArchived', isEqualTo: false)
+        .orderBy('updatedAt', descending: true)
         .limit(20)
         .get();
     queryStopwatch.stop();

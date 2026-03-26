@@ -17,6 +17,7 @@ class LeadsScreen extends StatefulWidget {
   static final Stream<List<LeadModel>> _leadsStream = FirebaseFirestore.instance
       .collection('leads')
       .where('isArchived', isEqualTo: false)
+      .orderBy('updatedAt', descending: true)
       .limit(20)
       .snapshots()
       .map(

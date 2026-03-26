@@ -18,6 +18,7 @@ class FirestoreTravelFileRemoteDataSource implements TravelFileRemoteDataSource 
   Future<List<TravelFileModel>> fetchTravelFiles() async {
     final querySnapshot = await _travelFilesCollection
         .where('isArchived', isEqualTo: false)
+        .orderBy('updatedAt', descending: true)
         .limit(300)
         .get();
 
