@@ -210,45 +210,53 @@ class _TravelersScreenState extends State<TravelersScreen> {
 
         final filteredRows = _applyFilters(data);
 
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Theme.of(
-                context,
-              ).colorScheme.outlineVariant.withValues(alpha: 0.68),
-            ),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _TravelerToolbar(
-                searchController: _searchController,
-                selectedClientId: _selectedClientId,
-                selectedTravelerType: _selectedTravelerType,
-                clients: data.clients,
-                onClientChanged:
-                    (value) => setState(() => _selectedClientId = value),
-                onTravelerTypeChanged:
-                    (value) => setState(() => _selectedTravelerType = value),
-                onClearFilters: _clearFilters,
-                onCreateTraveler: () => _openCreateTravelerPanel(data),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              height: constraints.maxHeight,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: 0.68),
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _TravelerToolbar(
+                      searchController: _searchController,
+                      selectedClientId: _selectedClientId,
+                      selectedTravelerType: _selectedTravelerType,
+                      clients: data.clients,
+                      onClientChanged:
+                          (value) => setState(() => _selectedClientId = value),
+                      onTravelerTypeChanged:
+                          (value) =>
+                              setState(() => _selectedTravelerType = value),
+                      onClearFilters: _clearFilters,
+                      onCreateTraveler: () => _openCreateTravelerPanel(data),
+                    ),
+                    Expanded(
+                      child:
+                          filteredRows.isEmpty
+                              ? const EmptyStateView(
+                                title: 'No matching travelers',
+                                message:
+                                    'Try adjusting your search, client, or traveler type filters.',
+                                icon: Icons.filter_alt_off_rounded,
+                              )
+                              : _TravelersTable(rows: filteredRows),
+                    ),
+                  ],
+                ),
               ),
-              Expanded(
-                child:
-                    filteredRows.isEmpty
-                        ? const EmptyStateView(
-                          title: 'No matching travelers',
-                          message:
-                              'Try adjusting your search, client, or traveler type filters.',
-                          icon: Icons.filter_alt_off_rounded,
-                        )
-                        : _TravelersTable(rows: filteredRows),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -311,7 +319,7 @@ class _TravelerToolbar extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 10, AppSpacing.md, 8),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, 8, AppSpacing.md, 6),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
         border: Border(
@@ -331,7 +339,7 @@ class _TravelerToolbar extends StatelessWidget {
           return Theme(
             data: controlTheme,
             child: Wrap(
-              runSpacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
               spacing: AppSpacing.sm,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
@@ -472,66 +480,84 @@ class _TravelersTableState extends State<_TravelersTable> {
           controller: _horizontalController,
           thumbVisibility: tableWidth > viewportWidth,
           trackVisibility: tableWidth > viewportWidth,
-          child: SingleChildScrollView(
-            controller: _horizontalController,
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: tableWidth,
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 9,
+          child: SizedBox(
+            width: tableWidth,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.58,
                     ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.52,
-                      ),
-                      border: Border(
-                        bottom: BorderSide(
-                          color: colorScheme.outlineVariant.withValues(
-                            alpha: 0.7,
-                          ),
-                        ),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.75),
                       ),
                     ),
-                    child: const Row(
-                      children: [
-                        _HeaderCell(label: 'Traveler Code', width: 160),
-                        _HeaderCell(label: 'Full Name', width: 220),
-                        _HeaderCell(label: 'Traveler Type', width: 140),
-                        _HeaderCell(label: 'Client', width: 220),
-                        _HeaderCell(label: 'Linked Booking', width: 160),
-                        _HeaderCell(label: 'Phone', width: 150),
-                        _HeaderCell(
-                          label: 'Updated Date',
-                          width: 140,
-                          isLast: true,
-                        ),
-                      ],
+                  ),
+                  child: const Row(
+                    children: [
+                      _HeaderCell(label: 'Traveler Code', width: 160),
+                      _HeaderCell(label: 'Full Name', width: 220),
+                      _HeaderCell(label: 'Traveler Type', width: 140),
+                      _HeaderCell(label: 'Client', width: 220),
+                      _HeaderCell(label: 'Linked Booking', width: 160),
+                      _HeaderCell(label: 'Phone', width: 150),
+                      _HeaderCell(
+                        label: 'Updated Date',
+                        width: 140,
+                        isLast: true,
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _horizontalController,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: tableWidth,
+                      child: LayoutBuilder(
+                        builder: (context, bodyConstraints) {
+                          const rowHeight = 44.0;
+                          final minRowsToFill = math.max(
+                            1,
+                            (bodyConstraints.maxHeight / rowHeight).ceil(),
+                          );
+                          final visualRowCount = math.max(
+                            widget.rows.length,
+                            minRowsToFill,
+                          );
+
+                          return ListView.separated(
+                            padding: EdgeInsets.zero,
+                            itemCount: visualRowCount,
+                            separatorBuilder:
+                                (context, index) => Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: colorScheme.outlineVariant.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                ),
+                            itemBuilder: (context, index) {
+                              if (index < widget.rows.length) {
+                                final item = widget.rows[index];
+                                return _TravelerRow(item: item, index: index);
+                              }
+                              return _TravelerPlaceholderRow(index: index);
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  Expanded(
-                    child: ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemCount: widget.rows.length,
-                      separatorBuilder:
-                          (context, index) => Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.35,
-                            ),
-                          ),
-                      itemBuilder: (context, index) {
-                        final item = widget.rows[index];
-                        return _TravelerRow(item: item, index: index);
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -561,7 +587,7 @@ class _HeaderCell extends StatelessWidget {
           label,
           style: Theme.of(
             context,
-          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -609,7 +635,7 @@ class _TravelerRowState extends State<_TravelerRow> {
                   ),
                 ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Row(
                 children: [
                   _BodyCell(width: 160, value: item.traveler.travelerCode),
@@ -630,6 +656,23 @@ class _TravelerRowState extends State<_TravelerRow> {
         ),
       ),
     );
+  }
+}
+
+class _TravelerPlaceholderRow extends StatelessWidget {
+  const _TravelerPlaceholderRow({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final baseColor =
+        index.isEven
+            ? colorScheme.surface
+            : colorScheme.surfaceContainerHighest.withValues(alpha: 0.18);
+
+    return Container(height: 44, color: baseColor);
   }
 }
 
