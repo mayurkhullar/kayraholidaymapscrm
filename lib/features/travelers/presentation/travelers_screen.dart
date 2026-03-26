@@ -110,9 +110,10 @@ class _TravelersScreenState extends State<TravelersScreen> {
 
     final rows = data.travelers
         .map((traveler) {
+          final client = clientById[traveler.clientId];
           return _TravelerListItem(
             traveler: traveler,
-            clientName: clientById[traveler.clientId]?.name ?? '—',
+            clientName: _clientPrimaryLabel(client),
             leadCode:
                 (traveler.leadId == null || traveler.leadId!.isEmpty)
                     ? null
@@ -929,7 +930,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 ] else if (!_hasClients) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'No clients available. Convert a lead to a client first.',
+                    'No clients available...',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -1066,14 +1067,30 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
 }
 
 String _clientLabel(ClientModel client) {
-  final name = client.name.trim();
-  final code = client.clientCode.trim();
+  final primary = _clientPrimaryLabel(client);
   final phone = client.phone.trim();
-  final primary = name.isNotEmpty ? name : (code.isNotEmpty ? code : 'Unnamed');
   if (phone.isEmpty) {
     return primary;
   }
   return '$primary — $phone';
+}
+
+String _clientPrimaryLabel(ClientModel? client) {
+  if (client == null) {
+    return '—';
+  }
+
+  final name = client.name.trim();
+  if (name.isNotEmpty) {
+    return name;
+  }
+
+  final code = client.clientCode.trim();
+  if (code.isNotEmpty) {
+    return code;
+  }
+
+  return 'Unnamed';
 }
 
 class _PanelSectionLabel extends StatelessWidget {
