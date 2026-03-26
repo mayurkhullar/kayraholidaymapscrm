@@ -3,8 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_enums.dart';
 import '../../../../core/constants/firestore_collections.dart';
 import '../../../clients/domain/models/client_model.dart';
-import '../../../travel_files/data/datasources/firestore_travel_file_remote_data_source.dart';
-import '../../../travel_files/data/repositories/travel_file_repository_impl.dart';
 import '../../../../shared/models/passenger_count_model.dart';
 import '../../domain/models/lead_model.dart';
 import '../../domain/models/lead_note_model.dart';
@@ -22,6 +20,49 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
   CollectionReference<Map<String, dynamic>> _leadNotesCollection(
     String leadId,
   ) => _leadsCollection.doc(leadId).collection('notes');
+
+  Future<void> _createTravelFileIfNotExists(
+    Map<String, dynamic> leadData,
+    String leadId,
+  ) async {
+    final firestore = FirebaseFirestore.instance;
+
+    final existing = await firestore
+        .collection('travelFiles')
+        .where('leadId', isEqualTo: leadId)
+        .limit(1)
+        .get();
+
+    if (existing.docs.isNotEmpty) {
+      print('Travel file already exists for lead: $leadId');
+      return;
+    }
+
+    final docRef = firestore.collection('travelFiles').doc();
+    final pax = leadData['passengerCount'] ?? <String, dynamic>{};
+    await docRef.set(<String, dynamic>{
+      'id': docRef.id,
+      'travelFileCode': 'TF-${DateTime.now().millisecondsSinceEpoch}',
+      'leadId': leadId,
+      'clientId': leadData['clientId'],
+      'clientNameSnapshot': leadData['clientNameSnapshot'],
+      'destination': leadData['destination'],
+      'travelType': leadData['travelType'],
+      'tripScope': leadData['tripScope'],
+      'leadStage': leadData['leadStage'],
+      'status': 'Open',
+      'adultCount': pax['adults'] ?? 0,
+      'childCount': pax['children'] ?? 0,
+      'infantCount': pax['infants'] ?? 0,
+      'totalPax': pax['totalPax'] ?? 0,
+      'notes': leadData['notes'],
+      'isArchived': false,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    print('Travel file created for lead: $leadId');
+  }
 
   @override
   Future<List<LeadModel>> fetchLeads() async {
@@ -163,8 +204,7 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
     final leadReference = _leadsCollection.doc(lead.id);
     final clientsCollection = _firestore.collection(FirestoreCollections.clients);
 
-    String resolvedClientId = (lead.clientId ?? '').trim();
-    var shouldEnsureTravelFile = false;
+    Map<String, dynamic>? updatedLeadData;
 
     await _firestore.runTransaction((transaction) async {
       final leadSnapshot = await transaction.get(leadReference);
@@ -288,46 +328,40 @@ class FirestoreLeadRemoteDataSource implements LeadRemoteDataSource {
         updatedAt: DateTime.now(),
       );
 
-      resolvedClientId =
-          (leadToUpdate.clientId ?? '').trim().isNotEmpty ? (leadToUpdate.clientId ?? '').trim() : existingClientId;
-      shouldEnsureTravelFile =
-          leadToUpdate.leadStage == LeadStage.confirmed && leadToUpdate.isConverted && resolvedClientId.isNotEmpty;
+      final leadData = leadToUpdate.toMap();
+      leadData['clientId'] =
+          (leadToUpdate.clientId ?? '').trim().isNotEmpty
+              ? (leadToUpdate.clientId ?? '').trim()
+              : existingClientId;
+      leadData['clientNameSnapshot'] =
+          lead.clientNameSnapshot ??
+          existingLead['clientNameSnapshot'] ??
+          existingLead['clientName'];
+      leadData['destination'] = lead.destination ?? existingLead['destination'];
+      leadData['travelType'] =
+          lead.travelType.firestoreValue.isNotEmpty
+              ? lead.travelType.firestoreValue
+              : existingLead['travelType'];
+      leadData['tripScope'] =
+          lead.tripScope.firestoreValue.isNotEmpty
+              ? lead.tripScope.firestoreValue
+              : existingLead['tripScope'];
+      leadData['leadStage'] = leadToUpdate.leadStage.firestoreValue;
+      leadData['notes'] = lead.notes ?? existingLead['notes'];
+      leadData['passengerCount'] = leadData['passengerCount'] ?? <String, dynamic>{};
+      updatedLeadData = leadData;
 
-      transaction.update(leadReference, leadToUpdate.toMap());
+      transaction.update(leadReference, leadData);
     });
 
-    if (!shouldEnsureTravelFile) {
+    final leadData = updatedLeadData;
+    if (leadData == null) {
       return;
     }
 
-    final travelFileRepository = TravelFileRepositoryImpl(
-      remoteDataSource: FirestoreTravelFileRemoteDataSource(
-        firestore: _firestore,
-      ),
-    );
-
-    await travelFileRepository.ensureTravelFileForConfirmedLead(
-      leadId: lead.id,
-      clientId: resolvedClientId,
-      clientNameSnapshot: lead.clientNameSnapshot ?? '',
-      destination: lead.destination ?? '',
-      travelType: lead.travelType.firestoreValue,
-      tripScope: lead.tripScope.firestoreValue,
-      leadStage: lead.leadStage.firestoreValue,
-      startDate: lead.travelDates?.startDate,
-      endDate: lead.travelDates?.endDate,
-      adultCount: lead.adultCount,
-      childCount: lead.childCount,
-      infantCount: lead.infantCount,
-      totalPax: lead.passengerCount?.totalPax ??
-          _travelersFromLeadCounts(
-            adults: lead.adultCount,
-            children: lead.childCount,
-            infants: lead.infantCount,
-          ) ??
-          0,
-      notes: lead.notes,
-    );
+    if (leadData['leadStage'] == 'CONFIRMED') {
+      await _createTravelFileIfNotExists(leadData, lead.id);
+    }
   }
 
   @override
