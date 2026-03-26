@@ -182,12 +182,13 @@ class _TravelersScreenState extends State<TravelersScreen> {
                   label: const Text('New Traveler'),
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              const Expanded(
+              const SizedBox(height: AppSpacing.sm),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: EmptyStateView(
                   title: 'No travelers yet',
                   message:
-                      'Travelers linked to clients and bookings will appear here',
+                      "Travelers linked to clients and bookings will appear here.\nClick 'New Traveler' to add your first traveler",
                   icon: Icons.luggage_outlined,
                 ),
               ),
@@ -254,7 +255,40 @@ class _TravelerToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final inputDecorationTheme = theme.inputDecorationTheme;
+    final controlTheme = theme.copyWith(
+      inputDecorationTheme: inputDecorationTheme.copyWith(
+        filled: true,
+        fillColor: colorScheme.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: 10,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.2),
+        ),
+        labelStyle: theme.textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Align(
           alignment: Alignment.centerRight,
@@ -265,66 +299,132 @@ class _TravelerToolbar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          runSpacing: AppSpacing.sm,
-          spacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            SizedBox(
-              width: 320,
-              child: TextField(
-                controller: searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Search by name, phone, email, or traveler code',
-                  prefixIcon: Icon(Icons.search_rounded),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 760;
+            final compactFieldWidth =
+                constraints.maxWidth - (AppSpacing.md * 2);
+            final searchWidth = isCompact ? compactFieldWidth : 320.0;
+            final clientWidth = isCompact ? compactFieldWidth : 220.0;
+            final typeWidth = isCompact ? compactFieldWidth : 180.0;
+
+            return Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: colorScheme.outlineVariant),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 8,
+              ),
+              child: Theme(
+                data: controlTheme,
+                child: Wrap(
+                  runSpacing: AppSpacing.sm,
+                  spacing: AppSpacing.sm,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: searchWidth.clamp(0.0, 320.0).toDouble(),
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText:
+                              'Search travelers by name, phone, email, or code',
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            size: 18,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: clientWidth.clamp(0.0, 220.0).toDouble(),
+                      child: DropdownButtonFormField<String?>(
+                        value: selectedClientId,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Client',
+                          isDense: true,
+                        ),
+                        items: [
+                          const DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text('All Clients'),
+                          ),
+                          ...clients
+                              .map(
+                                (client) => DropdownMenuItem<String?>(
+                                  value: client.id,
+                                  child: Text(client.name),
+                                ),
+                              )
+                              .toList(growable: false),
+                        ],
+                        onChanged: onClientChanged,
+                      ),
+                    ),
+                    SizedBox(
+                      width: typeWidth.clamp(0.0, 180.0).toDouble(),
+                      child: DropdownButtonFormField<String?>(
+                        value: selectedTravelerType,
+                        decoration: const InputDecoration(
+                          labelText: 'Traveler Type',
+                          isDense: true,
+                        ),
+                        items: const [
+                          DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text('All Types'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Adult',
+                            child: Text('Adult'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Child',
+                            child: Text('Child'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Infant',
+                            child: Text('Infant'),
+                          ),
+                        ],
+                        onChanged: onTravelerTypeChanged,
+                      ),
+                    ),
+                    SizedBox(
+                      width: isCompact ? compactFieldWidth : null,
+                      child: OutlinedButton.icon(
+                        onPressed: onClearFilters,
+                        icon: const Icon(Icons.restart_alt_rounded, size: 16),
+                        label: const Text('Clear Filters'),
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          minimumSize: Size(
+                            isCompact ? compactFieldWidth : 0,
+                            40,
+                          ),
+                          backgroundColor: colorScheme.surface,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            SizedBox(
-              width: 220,
-              child: DropdownButtonFormField<String?>(
-                value: selectedClientId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Client'),
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('All Clients'),
-                  ),
-                  ...clients
-                      .map(
-                        (client) => DropdownMenuItem<String?>(
-                          value: client.id,
-                          child: Text(client.name),
-                        ),
-                      )
-                      .toList(growable: false),
-                ],
-                onChanged: onClientChanged,
-              ),
-            ),
-            SizedBox(
-              width: 180,
-              child: DropdownButtonFormField<String?>(
-                value: selectedTravelerType,
-                decoration: const InputDecoration(labelText: 'Traveler Type'),
-                items: const [
-                  DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('All Types'),
-                  ),
-                  DropdownMenuItem(value: 'Adult', child: Text('Adult')),
-                  DropdownMenuItem(value: 'Child', child: Text('Child')),
-                  DropdownMenuItem(value: 'Infant', child: Text('Infant')),
-                ],
-                onChanged: onTravelerTypeChanged,
-              ),
-            ),
-            OutlinedButton(
-              onPressed: onClearFilters,
-              child: const Text('Clear Filters'),
-            ),
-          ],
+            );
+          },
         ),
       ],
     );
@@ -379,6 +479,13 @@ class _TravelersTableState extends State<_TravelersTable> {
             border: Border.all(
               color: colorScheme.outlineVariant.withValues(alpha: 0.68),
             ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x050F172A),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
           clipBehavior: Clip.antiAlias,
           child: Scrollbar(
@@ -620,10 +727,16 @@ class CreateTravelerPanel extends StatefulWidget {
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            child: CreateTravelerPanel(
-              clients: clients,
-              leads: leads,
-              travelerRepository: travelerRepository,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: CreateTravelerPanel(
+                  clients: clients,
+                  leads: leads,
+                  travelerRepository: travelerRepository,
+                ),
+              ),
             ),
           ),
     );
@@ -713,7 +826,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         child: Form(
           key: _formKey,
           child: Column(
@@ -725,6 +838,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.md),
+              _PanelSectionLabel(label: 'Client & Booking'),
               DropdownButtonFormField<String?>(
                 value: _clientId,
                 isExpanded: true,
@@ -757,7 +871,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                           });
                         },
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String?>(
                 value: _leadId,
                 isExpanded: true,
@@ -781,7 +895,8 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                         ? null
                         : (value) => setState(() => _leadId = value),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.lg),
+              _PanelSectionLabel(label: 'Traveler Info'),
               TextFormField(
                 controller: _fullNameController,
                 enabled: !_isSaving,
@@ -792,7 +907,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                             ? 'Full name is required'
                             : null,
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
                 value: _travelerType,
                 decoration: const InputDecoration(labelText: 'Traveler Type'),
@@ -812,7 +927,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                         : (value) =>
                             setState(() => _travelerType = value ?? 'Adult'),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String?>(
                 value: _gender,
                 decoration: const InputDecoration(labelText: 'Gender'),
@@ -827,7 +942,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                         ? null
                         : (value) => setState(() => _gender = value),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               TextFormField(
                 controller: _ageController,
                 enabled: !_isSaving,
@@ -843,19 +958,21 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.lg),
+              _PanelSectionLabel(label: 'Contact Info'),
               TextFormField(
                 controller: _phoneController,
                 enabled: !_isSaving,
                 decoration: const InputDecoration(labelText: 'Phone'),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               TextFormField(
                 controller: _emailController,
                 enabled: !_isSaving,
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.lg),
+              _PanelSectionLabel(label: 'Notes'),
               TextFormField(
                 controller: _notesController,
                 enabled: !_isSaving,
@@ -863,7 +980,7 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
                 maxLines: 4,
                 decoration: const InputDecoration(labelText: 'Notes'),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.lg),
               Align(
                 alignment: Alignment.centerRight,
                 child: FilledButton(
@@ -881,6 +998,25 @@ class _CreateTravelerPanelState extends State<CreateTravelerPanel> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PanelSectionLabel extends StatelessWidget {
+  const _PanelSectionLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }
