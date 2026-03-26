@@ -10,13 +10,14 @@ class TwoAxisTableViewport extends StatefulWidget {
   const TwoAxisTableViewport({
     required this.minContentWidth,
     required this.header,
-    required this.body,
+    required this.bodyBuilder,
     super.key,
   });
 
   final double minContentWidth;
   final Widget header;
-  final Widget body;
+  final Widget Function(BuildContext context, ScrollController controller)
+  bodyBuilder;
 
   @override
   State<TwoAxisTableViewport> createState() => _TwoAxisTableViewportState();
@@ -81,10 +82,7 @@ class _TwoAxisTableViewportState extends State<TwoAxisTableViewport> {
                         notificationPredicate:
                             (notification) =>
                                 notification.metrics.axis == Axis.vertical,
-                        child: PrimaryScrollController(
-                          controller: _verticalController,
-                          child: widget.body,
-                        ),
+                        child: widget.bodyBuilder(context, _verticalController),
                       ),
                     ),
                   ],

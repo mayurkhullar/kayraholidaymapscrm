@@ -538,11 +538,11 @@ class _TravelersTableState extends State<_TravelersTable> {
               }),
             ),
           ),
-          body: ClipRect(
+          bodyBuilder: (context, verticalController) => ClipRect(
             child: ColoredBox(
               color: colorScheme.surface,
               child: ListView.separated(
-                primary: true,
+                controller: verticalController,
                 padding: EdgeInsets.zero,
                 itemCount: widget.rows.length,
                 separatorBuilder: (context, index) => Divider(

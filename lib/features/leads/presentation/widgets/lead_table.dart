@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/two_axis_table_viewport.dart';
 import '../../domain/models/lead_model.dart';
 import 'lead_table_row_item.dart';
 
@@ -64,21 +65,8 @@ class LeadTable extends StatefulWidget {
 }
 
 class _LeadTableState extends State<LeadTable> {
-  late final ScrollController _horizontalScrollController;
   _LeadSortColumn? _sortColumn;
   bool _isAscending = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _horizontalScrollController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _horizontalScrollController.dispose();
-    super.dispose();
-  }
 
   void _handleSort(_LeadSortColumn sortColumn) {
     setState(() {
@@ -145,12 +133,7 @@ class _LeadTableState extends State<LeadTable> {
     final sortedLeads = _sortedLeads(widget.leads);
 
     return LayoutBuilder(
-      builder: (context, constraints) {
-        final viewportWidth = constraints.maxWidth.isFinite
-            ? constraints.maxWidth
-            : LeadTable._tableContentWidth;
-        final tableWidth = math.max(viewportWidth, LeadTable._tableContentWidth);
-
+      builder: (context, _) {
         return Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -168,91 +151,79 @@ class _LeadTableState extends State<LeadTable> {
             ],
           ),
           clipBehavior: Clip.antiAlias,
-          child: Scrollbar(
-            controller: _horizontalScrollController,
-            thumbVisibility: tableWidth > viewportWidth,
-            trackVisibility: tableWidth > viewportWidth,
-            child: SingleChildScrollView(
-              controller: _horizontalScrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const ClampingScrollPhysics(),
-              child: SizedBox(
-                width: tableWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.82,
-                        ),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.7,
-                            ),
-                          ),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          for (var index = 0; index < LeadTable._columns.length; index++)
-                            _LeadTableHeaderCell(
-                              label: LeadTable._columns[index].label,
-                              width: LeadTable._columns[index].width,
-                              isLast: index == LeadTable._columns.length - 1,
-                              isActive:
-                                  LeadTable._columns[index].sortKey == _sortColumn,
-                              isAscending: _isAscending,
-                              onTap: LeadTable._columns[index].sortKey == null
-                                  ? null
-                                  : () => _handleSort(
-                                        LeadTable._columns[index].sortKey!,
-                                      ),
-                            ),
-                        ],
-                      ),
+          child: TwoAxisTableViewport(
+            minContentWidth: LeadTable._tableContentWidth,
+            header: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.82,
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: 0.7,
                     ),
-                    if (sortedLeads.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: Text(
-                          'No leads available.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    else
-                      Column(
-                        children: [
-                          for (var index = 0; index < sortedLeads.length; index++) ...[
-                            LeadTableRowItem(
-                              lead: sortedLeads[index],
-                              index: index,
-                              onTap: widget.onLeadTap == null
-                                  ? null
-                                  : () => widget.onLeadTap!(sortedLeads[index]),
-                            ),
-                            if (index < sortedLeads.length - 1)
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.35,
-                                ),
-                              ),
-                          ],
-                        ],
-                      ),
-                  ],
+                  ),
                 ),
               ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
+              child: Row(
+                children: [
+                  for (var index = 0; index < LeadTable._columns.length; index++)
+                    _LeadTableHeaderCell(
+                      label: LeadTable._columns[index].label,
+                      width: LeadTable._columns[index].width,
+                      isLast: index == LeadTable._columns.length - 1,
+                      isActive: LeadTable._columns[index].sortKey == _sortColumn,
+                      isAscending: _isAscending,
+                      onTap: LeadTable._columns[index].sortKey == null
+                          ? null
+                          : () => _handleSort(
+                                LeadTable._columns[index].sortKey!,
+                              ),
+                    ),
+                ],
+              ),
             ),
+            bodyBuilder: (context, verticalController) {
+              if (sortedLeads.isEmpty) {
+                return ListView(
+                  controller: verticalController,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  children: [
+                    Text(
+                      'No leads available.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              return ListView.separated(
+                controller: verticalController,
+                padding: EdgeInsets.zero,
+                itemCount: sortedLeads.length,
+                separatorBuilder: (context, index) => Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: colorScheme.outlineVariant.withValues(
+                    alpha: 0.35,
+                  ),
+                ),
+                itemBuilder: (context, index) => LeadTableRowItem(
+                  lead: sortedLeads[index],
+                  index: index,
+                  onTap: widget.onLeadTap == null
+                      ? null
+                      : () => widget.onLeadTap!(sortedLeads[index]),
+                ),
+              );
+            },
           ),
         );
       },

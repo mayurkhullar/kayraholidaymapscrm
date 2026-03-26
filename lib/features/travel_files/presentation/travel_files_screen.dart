@@ -325,7 +325,8 @@ class _TravelFilesTable extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView.separated(
+      bodyBuilder: (context, verticalController) => ListView.separated(
+        controller: verticalController,
         itemCount: rows.length,
         separatorBuilder: (_, __) => Divider(
           height: 1,
