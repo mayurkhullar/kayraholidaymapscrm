@@ -181,74 +181,80 @@ class _TravelersScreenState extends State<TravelersScreen> {
 
         final data = snapshot.data;
         if (data == null || data.travelers.isEmpty) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.icon(
-                  onPressed:
-                      data == null
-                          ? null
-                          : () => _openCreateTravelerPanel(data),
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('New Traveler'),
+          return SizedBox.expand(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: FilledButton.icon(
+                    onPressed:
+                        data == null
+                            ? null
+                            : () => _openCreateTravelerPanel(data),
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('New Traveler'),
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                child: EmptyStateView(
-                  title: 'No travelers yet',
-                  message:
-                      "Travelers linked to clients and bookings will appear here.\nClick 'New Traveler' to add your first traveler",
-                  icon: Icons.luggage_outlined,
+                const SizedBox(height: AppSpacing.sm),
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                    child: EmptyStateView(
+                      title: 'No travelers yet',
+                      message:
+                          "Travelers linked to clients and bookings will appear here.\nClick 'New Traveler' to add your first traveler",
+                      icon: Icons.luggage_outlined,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         }
 
         final filteredRows = _applyFilters(data);
 
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Theme.of(
-                context,
-              ).colorScheme.outlineVariant.withValues(alpha: 0.68),
+        return SizedBox.expand(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withValues(alpha: 0.68),
+              ),
             ),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _TravelerToolbar(
-                searchController: _searchController,
-                selectedClientId: _selectedClientId,
-                selectedTravelerType: _selectedTravelerType,
-                clients: data.clients,
-                onClientChanged:
-                    (value) => setState(() => _selectedClientId = value),
-                onTravelerTypeChanged:
-                    (value) => setState(() => _selectedTravelerType = value),
-                onClearFilters: _clearFilters,
-                onCreateTraveler: () => _openCreateTravelerPanel(data),
-              ),
-              Expanded(
-                child:
-                    filteredRows.isEmpty
-                        ? const EmptyStateView(
-                          title: 'No matching travelers',
-                          message:
-                              'Try adjusting your search, client, or traveler type filters.',
-                          icon: Icons.filter_alt_off_rounded,
-                        )
-                        : _TravelersTable(rows: filteredRows),
-              ),
-            ],
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _TravelerToolbar(
+                  searchController: _searchController,
+                  selectedClientId: _selectedClientId,
+                  selectedTravelerType: _selectedTravelerType,
+                  clients: data.clients,
+                  onClientChanged:
+                      (value) => setState(() => _selectedClientId = value),
+                  onTravelerTypeChanged:
+                      (value) => setState(() => _selectedTravelerType = value),
+                  onClearFilters: _clearFilters,
+                  onCreateTraveler: () => _openCreateTravelerPanel(data),
+                ),
+                Expanded(
+                  child:
+                      filteredRows.isEmpty
+                          ? const EmptyStateView(
+                            title: 'No matching travelers',
+                            message:
+                                'Try adjusting your search, client, or traveler type filters.',
+                            icon: Icons.filter_alt_off_rounded,
+                          )
+                          : _TravelersTable(rows: filteredRows),
+                ),
+              ],
+            ),
           ),
         );
       },
